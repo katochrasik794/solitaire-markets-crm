@@ -1,0 +1,88 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import UserLayout from './user/components/UserLayout'
+import AdminLayout from './admin/components/AdminLayout'
+
+// User Pages
+import Dashboard from './user/pages/Dashboard'
+import Deposits from './user/pages/Deposits'
+import DebitCard from './user/pages/withdrawals/DebitCard'
+import Skrill from './user/pages/withdrawals/Skrill'
+import Neteller from './user/pages/withdrawals/Neteller'
+import Crypto from './user/pages/withdrawals/Crypto'
+import Transfers from './user/pages/Transfers'
+import Reports from './user/pages/Reports'
+import SignalCentre from './user/pages/analysis/SignalCentre'
+import AssetsOverview from './user/pages/analysis/AssetsOverview'
+import MarketNews from './user/pages/analysis/MarketNews'
+import MarketCalendar from './user/pages/analysis/MarketCalendar'
+import ResearchTerminal from './user/pages/analysis/ResearchTerminal'
+import Platforms from './user/pages/Platforms'
+import ReferAFriend from './user/pages/ReferAFriend'
+import Legal from './user/pages/Legal'
+
+// Deposit Pages
+import GooglePay from './user/pages/deposits/GooglePay'
+import ApplePay from './user/pages/deposits/ApplePay'
+import DebitCardDeposit from './user/pages/deposits/DebitCard'
+import USDTTRC20 from './user/pages/deposits/USDTTRC20'
+import Bitcoin from './user/pages/deposits/Bitcoin'
+import USDTERC20 from './user/pages/deposits/USDTERC20'
+import USDTBEP20 from './user/pages/deposits/USDTBEP20'
+import Ethereum from './user/pages/deposits/Ethereum'
+import BankTransfer from './user/pages/deposits/BankTransfer'
+import OtherCrypto from './user/pages/deposits/OtherCrypto'
+
+// Admin Pages
+import AdminHome from './admin/pages/AdminHome'
+import AdminUsers from './admin/pages/AdminUsers'
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/user/dashboard" replace />} />
+        
+        {/* User Routes */}
+        <Route path="/user" element={<UserLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="deposits" element={<Deposits />} />
+          <Route path="deposits/google-pay" element={<GooglePay />} />
+          <Route path="deposits/apple-pay" element={<ApplePay />} />
+          <Route path="deposits/debit-card" element={<DebitCardDeposit />} />
+          <Route path="deposits/usdt-trc20" element={<USDTTRC20 />} />
+          <Route path="deposits/bitcoin" element={<Bitcoin />} />
+          <Route path="deposits/usdt-erc20" element={<USDTERC20 />} />
+          <Route path="deposits/usdt-bep20" element={<USDTBEP20 />} />
+          <Route path="deposits/ethereum" element={<Ethereum />} />
+          <Route path="deposits/bank-transfer" element={<BankTransfer />} />
+          <Route path="deposits/other-crypto" element={<OtherCrypto />} />
+          <Route path="withdrawals" element={<Navigate to="/user/withdrawals/debit-card" replace />} />
+          <Route path="withdrawals/debit-card" element={<DebitCard />} />
+          <Route path="withdrawals/skrill" element={<Skrill />} />
+          <Route path="withdrawals/neteller" element={<Neteller />} />
+          <Route path="withdrawals/crypto" element={<Crypto />} />
+          <Route path="transfers" element={<Transfers />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="analysis/signal-centre" element={<SignalCentre />} />
+          <Route path="analysis/assets-overview" element={<AssetsOverview />} />
+          <Route path="analysis/market-news" element={<MarketNews />} />
+          <Route path="analysis/market-calendar" element={<MarketCalendar />} />
+          <Route path="analysis/research-terminal" element={<ResearchTerminal />} />
+          <Route path="platforms" element={<Platforms />} />
+          <Route path="refer-a-friend" element={<ReferAFriend />} />
+          <Route path="legal" element={<Legal />} />
+        </Route>
+
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminHome />} />
+          <Route path="users" element={<AdminUsers />} />
+        </Route>
+      </Routes>
+    </Router>
+  )
+}
+
+export default App
+
