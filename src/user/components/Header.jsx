@@ -4,10 +4,8 @@ import { Link } from 'react-router-dom'
 function Header({ onMenuClick }) {
   const [languageOpen, setLanguageOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
   const languageRef = useRef(null)
   const profileRef = useRef(null)
-  const menuRef = useRef(null)
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -17,9 +15,6 @@ function Header({ onMenuClick }) {
       }
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false)
-      }
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(false)
       }
     }
 
@@ -41,9 +36,9 @@ function Header({ onMenuClick }) {
   ]
 
   return (
-    <div className="bg-white">
+    <div className="bg-white sticky top-0 z-50">
       {/* Header Bar */}
-      <div className="flex justify-between items-center px-6 py-3 relative">
+      <div className="flex justify-between items-center px-6 py-7 relative">
         {/* Left side - Hamburger menu (Mobile only) */}
         <div className="flex items-center gap-4 lg:hidden">
           <button
@@ -154,83 +149,33 @@ function Header({ onMenuClick }) {
             )}
           </div>
 
-          {/* 3-dots Menu Button */}
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="text-gray-700 hover:text-gray-900"
-              style={{ fontFamily: 'Roboto, sans-serif' }}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-              </svg>
-            </button>
-            
-            {menuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                <div className="py-2">
-                  <Link
-                    to="/user/documents"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    My Documents
-                  </Link>
-                  <Link
-                    to="/user/settings"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    My Settings
-                  </Link>
-                  <Link
-                    to="/user/support"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Solitaire Support
-                  </Link>
-                  <div className="border-t border-gray-200 my-1"></div>
-                  <button
-                    className="block w-full text-left px-4 py-2 text-[#00A896] hover:bg-gray-50"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+
         </div>
       </div>
 
       {/* Deposit Banner - Light yellow badge */}
-      <div className="bg-[#FDF8E7]">
-        <div className="px-4 sm:px-5 md:px-6 py-2.5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-4">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
+      <div className="bg-[#FDF8E7] h-[70px] sticky top-[var(--header-height)] border-t border-gray-200 z-40 mt-2">
+        <div className="px-4 sm:px-5 md:px-6 py-2.5 flex flex-col lg:flex-row items-center justify-between gap-3 lg:gap-4 h-full">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Orange circular info icon */}
-            <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
               <span className="text-white text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif' }}>i</span>
             </div>
             <p className="text-gray-800 text-sm sm:text-base leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>
               You can deposit up to USD 2,000. Complete full verification to make deposits without limitations.
             </p>
           </div>
-          <div className="flex  items-start justify-center align-center lg:items-end gap-2 flex-shrink-0 w-full lg:w-auto">
+          <div className="flex items-center justify-center gap-2 flex-shrink-0 w-full lg:w-auto">
             <Link
               to="/user/deposits"
-              className="bg-[#F5C842] hover:bg-[#E0B238] text-gray-900 px-4 py-1.5 rounded transition-colors whitespace-nowrap text-center lg:text-center w-full lg:w-auto"
+              className="bg-yellow-50 0 hover:bg-[#E0B238] text-black px-4 py-3 rounded transition-colors whitespace-nowrap text-center w-full lg:w-auto"
               style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
             >
               DEPOSIT NOW
             </Link>
             <Link
               to="/user/verification"
-              className="text-gray-800 underline hover:text-gray-900 whitespace-nowrap text-center lg:text-center w-full lg:w-auto"
+              className="text-gray-800 underline hover:text-gray-900 whitespace-nowrap text-center w-full lg:w-auto"
               style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
             >
               Complete verification
