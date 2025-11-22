@@ -210,27 +210,27 @@ function Header({ onMenuClick }) {
 
       {/* Deposit Banner - Light yellow badge */}
       <div className="bg-[#FDF8E7]">
-        <div className="px-6 py-2.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1">
+        <div className="px-4 sm:px-5 md:px-6 py-2.5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-4">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
             {/* Orange circular info icon */}
-            <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
               <span className="text-white text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif' }}>i</span>
             </div>
-            <p className="text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
+            <p className="text-gray-800 text-sm sm:text-base leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>
               You can deposit up to USD 2,000. Complete full verification to make deposits without limitations.
             </p>
           </div>
-          <div className="flex items-center gap-4 flex-shrink-0">
+          <div className="flex  items-start justify-center align-center lg:items-end gap-2 flex-shrink-0 w-full lg:w-auto">
             <Link
               to="/user/deposits"
-              className="bg-[#F5C842] hover:bg-[#E0B238] text-gray-900 px-4 py-1.5 rounded transition-colors whitespace-nowrap"
+              className="bg-[#F5C842] hover:bg-[#E0B238] text-gray-900 px-4 py-1.5 rounded transition-colors whitespace-nowrap text-center lg:text-center w-full lg:w-auto"
               style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
             >
               DEPOSIT NOW
             </Link>
             <Link
               to="/user/verification"
-              className="text-gray-800 underline hover:text-gray-900 whitespace-nowrap"
+              className="text-gray-800 underline hover:text-gray-900 whitespace-nowrap text-center lg:text-center w-full lg:w-auto"
               style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
             >
               Complete verification
