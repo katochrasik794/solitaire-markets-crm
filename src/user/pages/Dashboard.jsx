@@ -12,7 +12,7 @@ function Dashboard() {
       <div className="p-3 sm:p-4 md:p-5 lg:p-12 space-y-4 sm:space-y-5 md:space-y-6 max-w-full">
         {/* Promotional Banners */}
         {showReferBanner && (
-          <div className="bg-gray-800 text-white rounded-lg p-6 sm:p-7 md:p-8 relative">
+          <div className="max-w-[1100px] mx-auto bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 text-white rounded-lg p-6 sm:p-7 md:p-8 relative shadow-lg">
             <button
               onClick={() => setShowReferBanner(false)}
               className="absolute top-0 right-0 text-white hover:bg-gray-700 hover:bg-opacity-50 rounded-full p-2 z-20 transition-all"
@@ -32,7 +32,7 @@ function Dashboard() {
               </div>
               <Link
                 to="/user/refer-a-friend"
-                className="bg-[#00A896] hover:bg-[#008f7a] text-white px-6 py-2 rounded transition-colors whitespace-nowrap text-sm sm:text-base w-32 text-center"
+                className="mr-8 bg-[#00A896] hover:bg-[#008f7a] text-white px-6 py-2 rounded transition-colors whitespace-nowrap text-sm sm:text-center w-32 text-center"
                 style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}
               >
                 Refer a Friend
@@ -42,7 +42,7 @@ function Dashboard() {
         )}
 
         {showCopyTradingBanner && (
-          <div className="bg-gray-800 text-white rounded-lg p-6 sm:p-7 md:p-8 relative">
+          <div className="max-w-[1100px] mx-auto bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 text-white rounded-lg p-6 sm:p-7 md:p-8 relative shadow-lg">
             <button
               onClick={() => setShowCopyTradingBanner(false)}
               className="absolute top-0 right-0 text-white hover:bg-gray-700 hover:bg-opacity-50 rounded-full p-2 z-20 transition-all"
@@ -62,7 +62,7 @@ function Dashboard() {
               </div>
               <Link
                 to="/user/platforms"
-                className="bg-[#00A896] hover:bg-[#008f7a] text-white px-6 py-2 rounded transition-colors whitespace-nowrap text-sm sm:text-base w-32 text-center"
+                className="mr-8 bg-[#00A896] hover:bg-[#008f7a] text-white px-6 py-2 rounded transition-colors whitespace-nowrap text-sm sm:text-base w-32 text-center"
                 style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}
               >
                 Start now

@@ -36,154 +36,154 @@ function Header({ onMenuClick }) {
   ]
 
   return (
-    <div className="bg-white sticky top-0 z-50">
-      {/* Header Bar */}
-      <div className="flex justify-between items-center px-6 py-7 relative">
-        {/* Left side - Hamburger menu (Mobile only) */}
-        <div className="flex items-center gap-4 lg:hidden">
-          <button
-            onClick={onMenuClick}
-            className="text-gray-700 hover:text-gray-900"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-        
-        {/* Logo (Mobile - centered, Desktop - hidden) */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden">
-          <Link to="/user/dashboard">
-            <img src="/logo.svg" alt="Solitaire Logo" className="h-10 w-auto" style={{ background: 'transparent' }} />
-          </Link>
-        </div>
-
-        {/* Right side - Language, Profile, and 3-dots menu */}
-        <div className="flex items-center gap-4 ml-auto">
-          {/* Language Selector - Hidden on mobile */}
-          <div className="relative hidden lg:flex items-center" ref={languageRef}>
+    <>
+      {/* Header Bar - Fixed */}
+      <div className="bg-white fixed top-0 left-0 right-0 z-50">
+        <div className="flex justify-between items-center px-6 py-7 relative">
+          {/* Left side - Hamburger menu (Mobile only) */}
+          <div className="flex items-center gap-4 lg:hidden">
             <button
-              onClick={() => setLanguageOpen(!languageOpen)}
-              className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-              style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+              onClick={onMenuClick}
+              className="text-gray-700 hover:text-gray-900"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>English</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            
-            {languageOpen && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                <div className="py-2">
-                  {languages.map((lang, index) => (
-                    <button
-                      key={index}
-                      className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
-                        lang === 'Española' ? 'text-[#00A896]' : 'text-gray-700'
-                      }`}
+          </div>
+          
+          {/* Logo (Mobile - centered, Desktop - hidden) */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden">
+            <Link to="/user/dashboard">
+              <img src="/logo.svg" alt="Solitaire Logo" className="h-10 w-auto" style={{ background: 'transparent' }} />
+            </Link>
+          </div>
+
+          {/* Right side - Language, Profile, and 3-dots menu */}
+          <div className="flex items-center gap-4 ml-auto">
+            {/* Language Selector - Hidden on mobile */}
+            <div className="relative hidden lg:flex items-center" ref={languageRef}>
+              <button
+                onClick={() => setLanguageOpen(!languageOpen)}
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+                style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>English</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {languageOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="py-2">
+                    {languages.map((lang, index) => (
+                      <button
+                        key={index}
+                        className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
+                          lang === 'Española' ? 'text-[#00A896]' : 'text-gray-700'
+                        }`}
+                        style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                        onClick={() => setLanguageOpen(false)}
+                      >
+                        {lang}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* User Profile - Hidden on mobile */}
+            <div className="relative hidden lg:block" ref={profileRef}>
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+                style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+              >
+                <span>Welcome User</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {profileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="py-2">
+                    <Link
+                      to="/user/documents"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
                       style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={() => setLanguageOpen(false)}
+                      onClick={() => setProfileOpen(false)}
                     >
-                      {lang}
+                      My Documents
+                    </Link>
+                    <Link
+                      to="/user/settings"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      My Settings
+                    </Link>
+                    <Link
+                      to="/user/support"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      Solitaire Support
+                    </Link>
+                    <div className="border-t border-gray-200 my-1"></div>
+                    <button
+                      className="block w-full text-left px-4 py-2 text-[#00A896] hover:bg-gray-50"
+                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      Logout
                     </button>
-                  ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-
-          {/* User Profile - Hidden on mobile */}
-          <div className="relative hidden lg:block" ref={profileRef}>
-            <button
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-              style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-            >
-              <span>Welcome User</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            
-            {profileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                <div className="py-2">
-                  <Link
-                    to="/user/documents"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    My Documents
-                  </Link>
-                  <Link
-                    to="/user/settings"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    My Settings
-                  </Link>
-                  <Link
-                    to="/user/support"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    Solitaire Support
-                  </Link>
-                  <div className="border-t border-gray-200 my-1"></div>
-                  <button
-                    className="block w-full text-left px-4 py-2 text-[#00A896] hover:bg-gray-50"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-
         </div>
       </div>
 
-      {/* Deposit Banner - Light yellow badge */}
-      <div className="bg-[#FDF8E7] h-[70px] sticky top-[var(--header-height)] border-t border-gray-200 z-40 mt-2">
-        <div className="px-4 sm:px-5 md:px-6 py-2.5 flex flex-col lg:flex-row items-center justify-between gap-3 lg:gap-4 h-full">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Orange circular info icon */}
-            <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif' }}>i</span>
+      {/* Deposit Banner - Light yellow badge (Scrollable) */}
+      <div className="bg-[#FDF8E7] min-h-[70px] border-t border-gray-200 z-40 mt-[77px]">
+        <div className="px-3 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-3 lg:py-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 lg:gap-4">
+          <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
+            {/* Orange circular info icon - Responsive size */}
+            <div className="w-4 h-4 sm:w-5 sm:h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-white text-[10px] sm:text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif' }}>i</span>
             </div>
-            <p className="text-gray-800 text-sm sm:text-base leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>
+            <p className="text-gray-800 text-xs sm:text-sm md:text-base leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>
               You can deposit up to USD 2,000. Complete full verification to make deposits without limitations.
             </p>
           </div>
-          <div className="flex items-center justify-center gap-2 flex-shrink-0 w-full lg:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 w-full sm:w-auto">
             <Link
               to="/user/deposits"
-              className="bg-yellow-50 0 hover:bg-[#E0B238] text-black px-4 py-3 rounded transition-colors whitespace-nowrap text-center w-full lg:w-auto"
-              style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+              className="bg-yellow-50 hover:bg-[#E0B238] text-black px-3 sm:px-4 py-2 sm:py-3 rounded transition-colors whitespace-nowrap text-center text-xs sm:text-sm font-medium w-full sm:w-auto"
+              style={{ fontFamily: 'Roboto, sans-serif' }}
             >
               DEPOSIT NOW
             </Link>
             <Link
               to="/user/verification"
-              className="text-gray-800 underline hover:text-gray-900 whitespace-nowrap text-center w-full lg:w-auto"
-              style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+              className="text-gray-800 underline hover:text-gray-900 whitespace-nowrap text-center text-xs sm:text-sm w-full sm:w-auto"
+              style={{ fontFamily: 'Roboto, sans-serif' }}
             >
               Complete verification
             </Link>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
