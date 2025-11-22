@@ -59,7 +59,7 @@ function Header({ onMenuClick }) {
         {/* Logo (Mobile - centered, Desktop - hidden) */}
         <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden">
           <Link to="/user/dashboard">
-            <img src="/logoequiti.png" alt="Equiti Logo" className="h-10 w-auto" style={{ background: 'transparent' }} />
+            <img src="/logo.svg" alt="Solitaire Logo" className="h-10 w-auto" style={{ background: 'transparent' }} />
           </Link>
         </div>
 
@@ -108,7 +108,7 @@ function Header({ onMenuClick }) {
               className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
               style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
             >
-              <span>Rasik Katoch</span>
+              <span>Welcome User</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
@@ -139,7 +139,7 @@ function Header({ onMenuClick }) {
                     style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
                     onClick={() => setProfileOpen(false)}
                   >
-                    Equiti Support
+                    Solitaire Support
                   </Link>
                   <div className="border-t border-gray-200 my-1"></div>
                   <button
@@ -191,7 +191,7 @@ function Header({ onMenuClick }) {
                     style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
                     onClick={() => setMenuOpen(false)}
                   >
-                    Equiti Support
+                    Solitaire Support
                   </Link>
                   <div className="border-t border-gray-200 my-1"></div>
                   <button

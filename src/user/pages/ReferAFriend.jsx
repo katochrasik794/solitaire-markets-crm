@@ -4,7 +4,7 @@ function ReferAFriend() {
   const [selectedTimeFilter, setSelectedTimeFilter] = useState('all')
   const [copied, setCopied] = useState(false)
 
-  const referralLink = 'https://portal.my-equiti.com/sc/register...'
+  const referralLink = 'https://portal.my-Solitaire.com/sc/register...'
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink)
@@ -250,7 +250,7 @@ function ReferAFriend() {
                 Collect Badges And Earn More
               </h2>
               <p className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
-                Unlock all these badges to earn your place with us as Equiti Influencer,{' '}
+                Unlock all these badges to earn your place with us as Solitaire Influencer,{' '}
                 <a href="#" className="text-[#00A896] hover:underline">Learn More</a>
               </p>
             </div>

@@ -45,7 +45,7 @@ function Sidebar({ isOpen, onClose }) {
     >
       {/* Logo with Close Button */}
       <div className="bg-transparent pt-4 pb-6 pl-8 pr-6 flex-shrink-0 flex items-center justify-between">
-        <span className="text-[#00A896] text-2xl font-normal tracking-tight" style={{ fontFamily: 'Roboto, sans-serif' }}>equiti</span>
+        <img src="/logo.svg" alt="Solitaire Logo" className="h-11 w-auto" style={{ background: 'transparent' }} />
         {/* Close button for mobile */}
         <button
           onClick={onClose}

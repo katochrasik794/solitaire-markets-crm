@@ -176,7 +176,7 @@ function Platforms() {
               </div>
             </div>
 
-            {/* Equiti Copy */}
+            {/* Solitaire Copy */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 relative">
               <div className="absolute top-4 left-4 z-10">
                 <span className="px-2 py-1 bg-green-600 text-white text-xs font-semibold rounded" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
@@ -184,14 +184,14 @@ function Platforms() {
                 </span>
               </div>
               <div className="h-48 bg-gray-100 flex items-center justify-center relative">
-                <span className="text-gray-400 text-sm">Equiti Copy</span>
+                <span className="text-gray-400 text-sm">Solitaire Copy</span>
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
-                  Equiti Copy
+                  Solitaire Copy
                 </h3>
                 <p className="text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>
-                  Equiti Copy is an advanced and fast trading platform that allows you to simplify your trading by copying trades and portfolios from other traders instantly.
+                  Solitaire Copy is an advanced and fast trading platform that allows you to simplify your trading by copying trades and portfolios from other traders instantly.
                 </p>
                 <ul className="space-y-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
                   <li className="flex items-start">

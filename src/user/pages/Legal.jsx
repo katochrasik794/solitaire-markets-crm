@@ -48,7 +48,7 @@ function Legal() {
               Trading involves a high degree of risk
             </h2>
             <p className="text-gray-700" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>
-              Equiti Brokerage (Seychelles) Limited is a registered trading name in Seychelles (License Number SD064) which is authorized and regulated by the Financial Services Authority with its company address at First Floor, Marina House, Eden Island, Republic of Seychelles.
+              Solitaire Brokerage (Seychelles) Limited is a registered trading name in Seychelles (License Number SD064) which is authorized and regulated by the Financial Services Authority with its company address at First Floor, Marina House, Eden Island, Republic of Seychelles.
             </p>
           </div>
         </div>

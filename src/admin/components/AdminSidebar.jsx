@@ -9,7 +9,7 @@ function AdminSidebar() {
     <div className="w-64 bg-white h-screen fixed left-0 top-0 shadow-lg">
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-purple-600">Equiti Admin</h1>
+        <h1 className="text-2xl font-bold text-purple-600">Solitaire Admin</h1>
       </div>
 
       {/* Navigation */}
