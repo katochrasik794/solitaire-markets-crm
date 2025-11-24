@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 function Deposits() {
   return (
-    <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
+    <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden ">
       <div className="max-w-2xl w-full">
         {/* Page Title */}
         <h1 className="mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>

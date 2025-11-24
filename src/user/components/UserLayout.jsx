@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import Header from './Header'
+import { AiOutlineInfoCircle } from "react-icons/ai";
 
 function UserLayout() {
   // Open sidebar by default on small screens, closed on desktop
@@ -49,6 +50,56 @@ function UserLayout() {
       >
         <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="overflow-x-hidden min-h-screen pt-[77px] sm:pt-[77px]">
+          {/* Deposit Banner */}
+          <div className="w-full bg-[#FFF9E6] border-t border-[#f3e7b5] px-4 md:px-6 py-4">
+            {/* MOBILE LAYOUT */}
+            <div className="flex flex-col gap-3 md:hidden">
+              {/* Icon + Text */}
+              <div className="flex items-start gap-3">
+                <AiOutlineInfoCircle className="w-5 h-5 text-black mt-1" />
+
+                <p className="text-sm text-black leading-snug">
+                  You can deposit up to USD 2,000. Complete full verification to
+                  make deposits without limitations.
+                </p>
+              </div>
+
+              {/* Deposit Button */}
+              <button className="w-full bg-[#FFB933] hover:bg-[#f0c21d] text-black text-sm py-3 rounded-md font-semibold transition">
+                DEPOSIT NOW
+              </button>
+
+              {/* Verification Link */}
+              <button className="text-black underline text-sm mx-auto hover:text-gray-700 transition">
+                Complete verification
+              </button>
+            </div>
+
+            {/* DESKTOP LAYOUT */}
+            <div className="hidden md:flex items-center justify-between">
+              {/* Left Section */}
+              <div className="flex items-start md:items-center gap-3 text-black leading-snug">
+                <AiOutlineInfoCircle className="w-6 h-6 text-black" />
+
+                <p className="text-sm md:text-base m-0">
+                  You can deposit up to USD 2,000. Complete full verification to
+                  make deposits without limitations.
+                </p>
+              </div>
+
+              {/* Right Section */}
+              <div className="flex items-center gap-4">
+                <button className="bg-[#FFB933] hover:bg-[#f0c21d] text-black text-sm md:text-base px-6 py-2 rounded-md font-medium transition">
+                  DEPOSIT NOW
+                </button>
+
+                <button className="text-black underline text-sm md:text-base hover:text-gray-700 transition">
+                  Complete verification
+                </button>
+              </div>
+            </div>
+          </div>
+
           <Outlet />
         </main>
       </div>

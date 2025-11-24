@@ -16,63 +16,6 @@ function Dashboard() {
 
   return (
     <div className="bg-gray-100 min-h-screen overflow-x-hidden">
-      {/* Deposit Banner */}
-<div className="w-full bg-[#FFF9E6] border-t border-[#f3e7b5] px-4 md:px-6 py-4">
-
-  {/* MOBILE LAYOUT */}
-  <div className="flex flex-col gap-3 md:hidden">
-
-    {/* Icon + Text */}
-    <div className="flex items-start gap-3">
-      <AiOutlineInfoCircle className="w-5 h-5 text-black mt-1" />
-
-      <p className="text-sm text-black leading-snug">
-        You can deposit up to USD 2,000. Complete full verification to make
-        deposits without limitations.
-      </p>
-    </div>
-
-    {/* Deposit Button */}
-    <button className="w-full bg-[#FFB933] hover:bg-[#f0c21d] text-black text-sm py-3 rounded-md font-semibold transition">
-      DEPOSIT NOW
-    </button>
-
-    {/* Verification Link */}
-    <button className="text-black underline text-sm mx-auto hover:text-gray-700 transition">
-      Complete verification
-    </button>
-  </div>
-
-
-  {/* DESKTOP LAYOUT */}
-  <div className="hidden md:flex items-center justify-between">
-
-    {/* Left Section */}
-    <div className="flex items-start md:items-center gap-3 text-black leading-snug">
-      <AiOutlineInfoCircle className="w-6 h-6 text-black" />
-
-      <p className="text-sm md:text-base m-0">
-        You can deposit up to USD 2,000. Complete full verification to make
-        deposits without limitations.
-      </p>
-    </div>
-
-    {/* Right Section */}
-    <div className="flex items-center gap-4">
-
-      <button className="bg-[#FFB933] hover:bg-[#f0c21d] text-black text-sm md:text-base px-6 py-2 rounded-md font-medium transition">
-        DEPOSIT NOW
-      </button>
-
-      <button className="text-black underline text-sm md:text-base hover:text-gray-700 transition">
-        Complete verification
-      </button>
-    </div>
-  </div>
-
-</div>
-
-
       <div className="px-4 sm:px-14 pb-4 sm:pb-6 space-y-4 sm:space-y-6 max-w-full">
         {/* Promotional Banners */}
         {showReferBanner && (
@@ -180,12 +123,13 @@ function Dashboard() {
         )}
 
         {/* Account Summary */}
-<h2 className="text-sm md:text-md font-medium text-gray-800 mb-3">
-  Account Summary
-</h2>
+        <h2 className="text-sm md:text-md font-medium text-gray-800 mb-3">
+          Account Summary
+        </h2>
 
-{/* Card */}
-<div className="
+        {/* Card */}
+        <div
+          className="
     bg-white border border-gray-200 rounded-lg w-full 
     p-4 md:p-8 
     flex flex-col md:flex-row 
@@ -193,93 +137,101 @@ function Dashboard() {
     justify-between 
     gap-6 
     space-y-6 md:space-y-0
-">
+"
+        >
+          {/* ITEM WRAPPER (mobile layout fix) */}
+          <div className="w-full flex justify-between md:block">
+            <div className="flex flex-col items-start">
+              <div className="text-gray-700 font-medium text-xs mb-2">
+                Total Balance
+              </div>
+              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+            </div>
 
-  {/* ITEM WRAPPER (mobile layout fix) */}
-  <div className="w-full flex justify-between md:block">
-    <div className="flex flex-col items-start">
-      <div className="text-gray-700 font-medium text-xs mb-2">Total Balance</div>
-      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-    </div>
+            {/* Icon (mobile on right, desktop stays same) */}
+            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
+              <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
+            </div>
+          </div>
 
-    {/* Icon (mobile on right, desktop stays same) */}
-    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
-      <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
-    </div>
-  </div>
+          {/* Desktop icon */}
+          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
+            <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
+          </div>
 
-  {/* Desktop icon */}
-  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
-    <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
-  </div>
+          {/* Divider */}
+          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
 
-  {/* Divider */}
-  <div className="hidden md:block w-px h-14 bg-gray-200"></div>
+          {/* ITEM 2 */}
+          <div className="w-full flex justify-between md:block">
+            <div className="flex flex-col items-start">
+              <div className="text-gray-700 font-medium text-xs mb-2">
+                Total Credit
+              </div>
+              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+            </div>
+            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
+              <LuWallet className="text-gray-600 text-xl" />
+            </div>
+          </div>
+          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
+            <LuWallet className="text-gray-600 text-xl md:text-2xl" />
+          </div>
 
-  {/* ITEM 2 */}
-  <div className="w-full flex justify-between md:block">
-    <div className="flex flex-col items-start">
-      <div className="text-gray-700 font-medium text-xs mb-2">Total Credit</div>
-      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-    </div>
-    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
-      <LuWallet className="text-gray-600 text-xl" />
-    </div>
-  </div>
-  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
-    <LuWallet className="text-gray-600 text-xl" />
-  </div>
+          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
 
-  <div className="hidden md:block w-px h-14 bg-gray-200"></div>
+          {/* ITEM 3 */}
+          <div className="w-full flex justify-between md:block">
+            <div className="flex flex-col items-start">
+              <div className="text-gray-700 font-medium text-xs mb-2">
+                Total Equity
+              </div>
+              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+            </div>
+            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
+              <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl md:text-2xl" />
+            </div>
+          </div>
+          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
+            <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl md:text-2xl" />
+          </div>
 
-  {/* ITEM 3 */}
-  <div className="w-full flex justify-between md:block">
-    <div className="flex flex-col items-start">
-      <div className="text-gray-700 font-medium text-xs mb-2">Total Equity</div>
-      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-    </div>
-    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
-      <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
-    </div>
-  </div>
-  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
-    <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
-  </div>
+          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
 
-  <div className="hidden md:block w-px h-14 bg-gray-200"></div>
+          {/* ITEM 4 */}
+          <div className="w-full flex justify-between md:block">
+            <div className="flex flex-col items-start">
+              <div className="text-gray-700 font-medium text-xs mb-2">
+                Total Deposits
+              </div>
+              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+            </div>
+            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#dff8f4] md:hidden">
+              <RiArrowUpCircleLine className="text-teal-600 text-xl" />
+            </div>
+          </div>
+          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-[#dff8f4]">
+            <RiArrowUpCircleLine className="text-teal-600 text-xl md:text-2xl" />
+          </div>
 
-  {/* ITEM 4 */}
-  <div className="w-full flex justify-between md:block">
-    <div className="flex flex-col items-start">
-      <div className="text-gray-700 font-medium text-xs mb-2">Total Deposits</div>
-      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-    </div>
-    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#dff8f4] md:hidden">
-      <RiArrowUpCircleLine className="text-teal-600 text-xl" />
-    </div>
-  </div>
-  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-[#dff8f4]">
-    <RiArrowUpCircleLine className="text-teal-600 text-xl" />
-  </div>
+          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
 
-  <div className="hidden md:block w-px h-14 bg-gray-200"></div>
-
-  {/* ITEM 5 */}
-  <div className="w-full flex justify-between md:block">
-    <div className="flex flex-col items-start">
-      <div className="text-gray-700 font-medium text-xs mb-2">Total Withdrawals</div>
-      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-    </div>
-    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#ffecec] md:hidden">
-      <RiArrowDownCircleLine className="text-red-500 text-xl" />
-    </div>
-  </div>
-  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-[#ffecec]">
-    <RiArrowDownCircleLine className="text-red-500 text-xl" />
-  </div>
-
-</div>
-
+          {/* ITEM 5 */}
+          <div className="w-full flex justify-between md:block">
+            <div className="flex flex-col items-start">
+              <div className="text-gray-700 font-medium text-xs mb-2">
+                Total Withdrawals
+              </div>
+              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+            </div>
+            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#ffecec] md:hidden">
+              <RiArrowDownCircleLine className="text-red-500 text-xl" />
+            </div>
+          </div>
+          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-[#ffecec]">
+            <RiArrowDownCircleLine className="text-red-500 text-xl md:text-2xl" />
+          </div>
+        </div>
 
         {/* Recent Activity */}
         <div className="flex items-center justify-between mb-0">
@@ -942,126 +894,126 @@ function Dashboard() {
           </button>
         </div>
 
-{/* Wallet Card */}
-<div className="bg-white border border-gray-200 rounded-lg w-full p-4 sm:p-6">
+        {/* Wallet Card */}
+        <div className="bg-white border border-gray-200 rounded-lg w-full p-4 sm:p-6">
+          {/* ================= MOBILE LAYOUT ================= */}
+          <div className="block sm:hidden">
+            {/* Currency + ID */}
+            <div className="flex items-center gap-3 mb-2">
+              <span className="px-3 py-1 text-xs font-semibold bg-[#e5f5ea] text-green-700 rounded-md">
+                USD
+              </span>
+              <span className="text-teal-600 font-semibold text-sm">
+                W-2337894-001
+              </span>
+            </div>
 
-  {/* ================= MOBILE LAYOUT ================= */}
-  <div className="block sm:hidden">
+            {/* Balance */}
+            <div className="text-gray-600 text-sm mb-3">
+              Balance <span className="font-bold text-gray-900">0.000</span>
+            </div>
 
-    {/* Currency + ID */}
-    <div className="flex items-center gap-3 mb-2">
-      <span className="px-3 py-1 text-xs font-semibold bg-[#e5f5ea] text-green-700 rounded-md">
-        USD
-      </span>
-      <span className="text-teal-600 font-semibold text-sm">
-        W-2337894-001
-      </span>
-    </div>
-
-    {/* Balance */}
-    <div className="text-gray-600 text-sm mb-3">
-      Balance{" "}
-      <span className="font-bold text-gray-900">0.000</span>
-    </div>
-
-    {/* Buttons (stacked like screenshot) */}
-    <div className="flex flex-col gap-3">
-
-      <button className="
+            {/* Buttons (stacked like screenshot) */}
+            <div className="flex flex-col gap-3">
+              <button
+                className="
         flex items-center gap-2 
         w-full px-4 py-3 
         text-sm font-medium
         rounded-md border 
         bg-white hover:bg-gray-50 transition
-      ">
-        <RiLoginBoxLine className="text-teal-600 w-5 h-5" />
-        <span className="text-gray-900">Deposit</span>
-      </button>
+      "
+              >
+                <RiLoginBoxLine className="text-teal-600 w-5 h-5" />
+                <span className="text-gray-900">Deposit</span>
+              </button>
 
-      <button className="
+              <button
+                className="
         flex items-center gap-2 
         w-full px-4 py-3 
         text-sm font-medium
         rounded-md border 
         bg-white hover:bg-gray-50 transition
-      ">
-        <RiArrowLeftRightLine className="text-gray-600 w-5 h-5" />
-        <span className="text-gray-700">Transfer</span>
-      </button>
+      "
+              >
+                <RiArrowLeftRightLine className="text-gray-600 w-5 h-5" />
+                <span className="text-gray-700">Transfer</span>
+              </button>
 
-      <button className="
+              <button
+                className="
         flex items-center gap-2 
         w-full px-4 py-3 
         text-sm font-medium
         rounded-md border 
         bg-white hover:bg-gray-50 transition
-      ">
-        <RiLogoutBoxLine className="text-gray-600 w-5 h-5" />
-        <span className="text-gray-700">Withdraw</span>
-      </button>
+      "
+              >
+                <RiLogoutBoxLine className="text-gray-600 w-5 h-5" />
+                <span className="text-gray-700">Withdraw</span>
+              </button>
+            </div>
+          </div>
 
-    </div>
-  </div>
+          {/* ================= DESKTOP LAYOUT ================= */}
+          <div className="hidden sm:flex items-center justify-between gap-6">
+            {/* Left: Currency + Wallet ID */}
+            <div className="flex items-center gap-3 min-w-max">
+              <span className="px-3 py-1 text-xs font-semibold bg-[#e5f5ea] text-green-600 rounded-md">
+                USD
+              </span>
+              <span className="text-teal-600 font-semibold text-sm md:text-base">
+                W-2337894-001
+              </span>
+            </div>
 
-  {/* ================= DESKTOP LAYOUT ================= */}
-  <div className="hidden sm:flex items-center justify-between gap-6">
+            {/* Center: Balance */}
+            <div className="text-gray-600 text-sm flex-1 text-center">
+              Balance <span className="font-bold text-gray-900">0.000</span>
+            </div>
 
-    {/* Left: Currency + Wallet ID */}
-    <div className="flex items-center gap-3 min-w-max">
-      <span className="px-3 py-1 text-xs font-semibold bg-[#e5f5ea] text-green-600 rounded-md">
-        USD
-      </span>
-      <span className="text-teal-600 font-semibold text-sm md:text-base">
-        W-2337894-001
-      </span>
-    </div>
-
-    {/* Center: Balance */}
-    <div className="text-gray-600 text-sm flex-1 text-center">
-      Balance{" "}
-      <span className="font-bold text-gray-900">0.000</span>
-    </div>
-
-    {/* Right: Buttons (matches screenshot EXACTLY) */}
-    <div className="flex items-center gap-3 min-w-max">
-
-      {/* Deposit (highlighted) */}
-      <button className="
+            {/* Right: Buttons (matches screenshot EXACTLY) */}
+            <div className="flex items-center gap-3 min-w-max">
+              {/* Deposit (highlighted) */}
+              <button
+                className="
         flex items-center gap-2 
         border rounded-md px-4 py-2 
         text-sm font-medium 
         hover:bg-gray-50 transition
-      ">
-        <RiLoginBoxLine className="text-teal-600" />
-        <span className="text-gray-900">Deposit</span>
-      </button>
+      "
+              >
+                <RiLoginBoxLine className="text-teal-600" />
+                <span className="text-gray-900">Deposit</span>
+              </button>
 
-      {/* Transfer */}
-      <button className="
+              {/* Transfer */}
+              <button
+                className="
         flex items-center gap-2 
         border rounded-md px-4 py-2 
         text-sm hover:bg-gray-50 transition
-      ">
-        <RiArrowLeftRightLine className="text-gray-600" />
-        <span className="text-gray-600">Transfer</span>
-      </button>
+      "
+              >
+                <RiArrowLeftRightLine className="text-gray-600" />
+                <span className="text-gray-600">Transfer</span>
+              </button>
 
-      {/* Withdraw */}
-      <button className="
+              {/* Withdraw */}
+              <button
+                className="
         flex items-center gap-2 
         border rounded-md px-4 py-2 
         text-sm hover:bg-gray-50 transition
-      ">
-        <RiLogoutBoxLine className="text-gray-600" />
-        <span className="text-gray-600">Withdraw</span>
-      </button>
-
-    </div>
-  </div>
-</div>
-
-
-
+      "
+              >
+                <RiLogoutBoxLine className="text-gray-600" />
+                <span className="text-gray-600">Withdraw</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
