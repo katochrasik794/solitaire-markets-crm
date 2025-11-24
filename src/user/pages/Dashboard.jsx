@@ -17,29 +17,61 @@ function Dashboard() {
   return (
     <div className="bg-gray-100 min-h-screen overflow-x-hidden">
       {/* Deposit Banner */}
-      <div className="w-full h-20 bg-[#FFF9E6] border-t border-[#f3e7b5] px-4 md:px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        {/* Left Section */}
-        <div className="flex items-start md:items-center gap-2 text-sm md:text-base text-[#000] leading-snug">
-          <span className="text-lg md:text-xl">
-            <AiOutlineInfoCircle className="w-6 h-6 text-black" />
-          </span>
-          <p className="m-0">
-            You can deposit up to USD 2,000. Complete full verification to make
-            deposits without limitations.
-          </p>
-        </div>
+<div className="w-full bg-[#FFF9E6] border-t border-[#f3e7b5] px-4 md:px-6 py-4">
 
-        {/* Right Section */}
-        <div className="flex items-center gap-4 md:gap-6">
-          <button className="bg-[#FFB933] hover:bg-[#f0c21d] text-black text-sm md:text-base px-4 py-2 rounded-md font-medium transition">
-            DEPOSIT NOW
-          </button>
+  {/* MOBILE LAYOUT */}
+  <div className="flex flex-col gap-3 md:hidden">
 
-          <button className="text-black underline text-sm md:text-base hover:text-gray-700 transition">
-            Complete verification
-          </button>
-        </div>
-      </div>
+    {/* Icon + Text */}
+    <div className="flex items-start gap-3">
+      <AiOutlineInfoCircle className="w-5 h-5 text-black mt-1" />
+
+      <p className="text-sm text-black leading-snug">
+        You can deposit up to USD 2,000. Complete full verification to make
+        deposits without limitations.
+      </p>
+    </div>
+
+    {/* Deposit Button */}
+    <button className="w-full bg-[#FFB933] hover:bg-[#f0c21d] text-black text-sm py-3 rounded-md font-semibold transition">
+      DEPOSIT NOW
+    </button>
+
+    {/* Verification Link */}
+    <button className="text-black underline text-sm mx-auto hover:text-gray-700 transition">
+      Complete verification
+    </button>
+  </div>
+
+
+  {/* DESKTOP LAYOUT */}
+  <div className="hidden md:flex items-center justify-between">
+
+    {/* Left Section */}
+    <div className="flex items-start md:items-center gap-3 text-black leading-snug">
+      <AiOutlineInfoCircle className="w-6 h-6 text-black" />
+
+      <p className="text-sm md:text-base m-0">
+        You can deposit up to USD 2,000. Complete full verification to make
+        deposits without limitations.
+      </p>
+    </div>
+
+    {/* Right Section */}
+    <div className="flex items-center gap-4">
+
+      <button className="bg-[#FFB933] hover:bg-[#f0c21d] text-black text-sm md:text-base px-6 py-2 rounded-md font-medium transition">
+        DEPOSIT NOW
+      </button>
+
+      <button className="text-black underline text-sm md:text-base hover:text-gray-700 transition">
+        Complete verification
+      </button>
+    </div>
+  </div>
+
+</div>
+
 
       <div className="px-4 sm:px-14 pb-4 sm:pb-6 space-y-4 sm:space-y-6 max-w-full">
         {/* Promotional Banners */}
@@ -148,90 +180,106 @@ function Dashboard() {
         )}
 
         {/* Account Summary */}
-        {/* Title */}
-        <h2 className="text-sm md:text-md font-sm text-gray-800 mb-3">
-          Account Summary
-        </h2>
+<h2 className="text-sm md:text-md font-medium text-gray-800 mb-3">
+  Account Summary
+</h2>
 
-        {/* Card */}
-        <div className="bg-white border border-gray-200 rounded-lg w-full p-4 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* ITEM 1 */}
-          <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-            <div className="text-gray-700 font-medium text-xs mb-2">
-              Total Balance
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-            </div>
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
-            <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
-          </div>
+{/* Card */}
+<div className="
+    bg-white border border-gray-200 rounded-lg w-full 
+    p-4 md:p-8 
+    flex flex-col md:flex-row 
+    items-stretch md:items-center 
+    justify-between 
+    gap-6 
+    space-y-6 md:space-y-0
+">
 
-          {/* Divider */}
-          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
+  {/* ITEM WRAPPER (mobile layout fix) */}
+  <div className="w-full flex justify-between md:block">
+    <div className="flex flex-col items-start">
+      <div className="text-gray-700 font-medium text-xs mb-2">Total Balance</div>
+      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+    </div>
 
-          {/* ITEM 2 */}
-          <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-            <div className="text-gray-700 font-medium text-xs mb-2">
-              Total Credit
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-            </div>
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
-            <LuWallet className="text-gray-600 text-xl" />
-          </div>
+    {/* Icon (mobile on right, desktop stays same) */}
+    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
+      <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
+    </div>
+  </div>
 
-          {/* Divider */}
-          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
+  {/* Desktop icon */}
+  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
+    <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
+  </div>
 
-          {/* ITEM 3 */}
-          <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-            <div className="text-gray-700 font-medium text-xs mb-2">
-              Total Equity
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-            </div>
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
-            <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
-          </div>
+  {/* Divider */}
+  <div className="hidden md:block w-px h-14 bg-gray-200"></div>
 
-          {/* Divider */}
-          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
+  {/* ITEM 2 */}
+  <div className="w-full flex justify-between md:block">
+    <div className="flex flex-col items-start">
+      <div className="text-gray-700 font-medium text-xs mb-2">Total Credit</div>
+      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+    </div>
+    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
+      <LuWallet className="text-gray-600 text-xl" />
+    </div>
+  </div>
+  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
+    <LuWallet className="text-gray-600 text-xl" />
+  </div>
 
-          {/* ITEM 4 */}
-          <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-            <div className="text-gray-700 font-medium text-xs mb-2">
-              Total Deposits
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-            </div>
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#dff8f4]">
-            <RiArrowUpCircleLine className="text-teal-600 text-xl" />
-          </div>
+  <div className="hidden md:block w-px h-14 bg-gray-200"></div>
 
-          {/* Divider */}
-          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
+  {/* ITEM 3 */}
+  <div className="w-full flex justify-between md:block">
+    <div className="flex flex-col items-start">
+      <div className="text-gray-700 font-medium text-xs mb-2">Total Equity</div>
+      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+    </div>
+    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
+      <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
+    </div>
+  </div>
+  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
+    <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
+  </div>
 
-          {/* ITEM 5 */}
-          <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-            <div className="text-gray-700 font-medium text-xs mb-2">
-              Total Withdrawals
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-            </div>
-          </div>
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#ffecec]">
-            <RiArrowDownCircleLine className="text-red-500 text-xl" />
-          </div>
-        </div>
+  <div className="hidden md:block w-px h-14 bg-gray-200"></div>
+
+  {/* ITEM 4 */}
+  <div className="w-full flex justify-between md:block">
+    <div className="flex flex-col items-start">
+      <div className="text-gray-700 font-medium text-xs mb-2">Total Deposits</div>
+      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+    </div>
+    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#dff8f4] md:hidden">
+      <RiArrowUpCircleLine className="text-teal-600 text-xl" />
+    </div>
+  </div>
+  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-[#dff8f4]">
+    <RiArrowUpCircleLine className="text-teal-600 text-xl" />
+  </div>
+
+  <div className="hidden md:block w-px h-14 bg-gray-200"></div>
+
+  {/* ITEM 5 */}
+  <div className="w-full flex justify-between md:block">
+    <div className="flex flex-col items-start">
+      <div className="text-gray-700 font-medium text-xs mb-2">Total Withdrawals</div>
+      <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+    </div>
+    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#ffecec] md:hidden">
+      <RiArrowDownCircleLine className="text-red-500 text-xl" />
+    </div>
+  </div>
+  <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-[#ffecec]">
+    <RiArrowDownCircleLine className="text-red-500 text-xl" />
+  </div>
+
+</div>
+
 
         {/* Recent Activity */}
         <div className="flex items-center justify-between mb-0">
@@ -285,8 +333,8 @@ function Dashboard() {
                       className="px-4 py-4 text-left uppercase"
                       style={{
                         fontFamily: "Roboto, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: "400",
+                        fontSize: "12px",
+                        fontWeight: "500",
                         color: "#4B5156",
                       }}
                     >
@@ -296,8 +344,8 @@ function Dashboard() {
                       className="px-4 py-4 text-right uppercase"
                       style={{
                         fontFamily: "Roboto, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: "400",
+                        fontSize: "12px",
+                        fontWeight: "500",
                         color: "#4B5156",
                       }}
                     >
@@ -307,8 +355,8 @@ function Dashboard() {
                       className="px-4 py-4 text-right uppercase"
                       style={{
                         fontFamily: "Roboto, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: "400",
+                        fontSize: "12px",
+                        fontWeight: "500",
                         color: "#4B5156",
                       }}
                     >
@@ -318,8 +366,8 @@ function Dashboard() {
                       className="px-4 py-4 text-right uppercase"
                       style={{
                         fontFamily: "Roboto, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: "400",
+                        fontSize: "12px",
+                        fontWeight: "500",
                         color: "#4B5156",
                       }}
                     >
@@ -329,8 +377,8 @@ function Dashboard() {
                       className="px-4 py-4 text-right uppercase"
                       style={{
                         fontFamily: "Roboto, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: "400",
+                        fontSize: "12px",
+                        fontWeight: "500",
                         color: "#4B5156",
                       }}
                     >
@@ -340,8 +388,8 @@ function Dashboard() {
                       className="px-4 py-4 text-right uppercase"
                       style={{
                         fontFamily: "Roboto, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: "400",
+                        fontSize: "12px",
+                        fontWeight: "500",
                         color: "#4B5156",
                       }}
                     >
@@ -352,8 +400,8 @@ function Dashboard() {
                       className="px-4 py-4 text-left uppercase"
                       style={{
                         fontFamily: "Roboto, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: "400",
+                        fontSize: "12px",
+                        fontWeight: "500",
                         color: "#4B5156",
                       }}
                     >
@@ -363,8 +411,8 @@ function Dashboard() {
                       className="px-4 py-4 text-center uppercase"
                       style={{
                         fontFamily: "Roboto, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: "400",
+                        fontSize: "12px",
+                        fontWeight: "500",
                         color: "#4B5156",
                       }}
                     >
@@ -374,8 +422,8 @@ function Dashboard() {
                       className="px-4 py-4 text-center uppercase"
                       style={{
                         fontFamily: "Roboto, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: "400",
+                        fontSize: "12px",
+                        fontWeight: "500",
                         color: "#4B5156",
                       }}
                     >
@@ -388,11 +436,11 @@ function Dashboard() {
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-3.5 flex-nowrap">
                         <span
-                          className="px-2 py-1 bg-green-500 text-white rounded text-xs whitespace-nowrap"
+                          className="px-2 py-1 bg-[#e5f5ea] text-green-600  rounded text-xs whitespace-nowrap"
                           style={{
                             fontFamily: "Roboto, sans-serif",
-                            fontSize: "11px",
-                            fontWeight: "400",
+                            fontSize: "12px",
+                            fontWeight: "500",
                           }}
                         >
                           USD
@@ -636,11 +684,11 @@ function Dashboard() {
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-3.5 flex-nowrap">
                         <span
-                          className="px-2 py-1 bg-green-500 text-white rounded text-xs whitespace-nowrap"
+                          className="px-2 py-1 bg-[#e5f5ea] text-green-600  rounded text-xs whitespace-nowrap"
                           style={{
                             fontFamily: "Roboto, sans-serif",
-                            fontSize: "11px",
-                            fontWeight: "400",
+                            fontSize: "12px",
+                            fontWeight: "500",
                           }}
                         >
                           USD
@@ -894,74 +942,126 @@ function Dashboard() {
           </button>
         </div>
 
-        {/* Wallet Card */}
-        <div className="bg-white border border-gray-200 rounded-lg w-full p-4 sm:p-6">
-          {/* Mobile Layout */}
-          <div className="block sm:hidden">
-            {/* Left Section - Mobile */}
-            <div className="flex flex-col gap-3 mb-4">
-              <div className="flex items-center gap-3">
-                <span className="px-3 py-1 text-xs font-semibold bg-[#e5f5ea] text-green-700 rounded-md">
-                  USD
-                </span>
-                <span className="text-teal-600 font-semibold text-sm">
-                  W-2337894-001
-                </span>
-              </div>
-              <div className="text-gray-500 text-sm">
-                Balance <span className="font-bold text-gray-800">0.000</span>
-              </div>
-            </div>
+{/* Wallet Card */}
+<div className="bg-white border border-gray-200 rounded-lg w-full p-4 sm:p-6">
 
-            {/* Buttons - Mobile */}
-            <div className="grid grid-cols-3 gap-2">
-              <button className="flex flex-col items-center gap-1 border rounded-md px-3 py-2 text-xs hover:bg-gray-50 transition">
-                <RiLoginBoxLine className="text-teal-600 w-4 h-4" />
-                <span>Deposit</span>
-              </button>
-              <button className="flex flex-col items-center gap-1 border rounded-md px-3 py-2 text-xs hover:bg-gray-50 transition">
-                <RiArrowLeftRightLine className="text-gray-600 w-4 h-4" />
-                <span>Transfer</span>
-              </button>
-              <button className="flex flex-col items-center gap-1 border rounded-md px-3 py-2 text-xs hover:bg-gray-50 transition">
-                <RiLogoutBoxLine className="text-gray-600 w-4 h-4" />
-                <span>Withdraw</span>
-              </button>
-            </div>
-          </div>
+  {/* ================= MOBILE LAYOUT ================= */}
+  <div className="block sm:hidden">
 
-          {/* Desktop Layout */}
-          <div className="hidden sm:flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* Left Section - Desktop */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-              <span className="px-3 py-1 text-xs font-semibold bg-[#e5f5ea] text-green-700 rounded-md">
-                USD
-              </span>
-              <span className="text-teal-600 font-semibold text-sm md:text-base">
-                W-2337894-001
-              </span>
-              <span className="text-gray-500 text-sm md:ml-4">
-                Balance <span className="font-bold text-gray-800">0.000</span>
-              </span>
-            </div>
+    {/* Currency + ID */}
+    <div className="flex items-center gap-3 mb-2">
+      <span className="px-3 py-1 text-xs font-semibold bg-[#e5f5ea] text-green-700 rounded-md">
+        USD
+      </span>
+      <span className="text-teal-600 font-semibold text-sm">
+        W-2337894-001
+      </span>
+    </div>
 
-            {/* Buttons - Desktop */}
-            <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 border rounded-md px-4 py-2 text-sm hover:bg-gray-50 transition">
-                <RiLoginBoxLine className="text-teal-600" />
-                Deposit
-              </button>
-              <button className="flex items-center gap-2 border rounded-md px-4 py-2 text-sm hover:bg-gray-50 transition">
-                <RiArrowLeftRightLine className="text-gray-600" />
-                Transfer
-              </button>
-              <button className="flex items-center gap-2 border rounded-md px-4 py-2 text-sm hover:bg-gray-50 transition">
-                <RiLogoutBoxLine className="text-gray-600" />
-                Withdraw
-              </button>
-            </div>
-          </div>
-        </div>
+    {/* Balance */}
+    <div className="text-gray-600 text-sm mb-3">
+      Balance{" "}
+      <span className="font-bold text-gray-900">0.000</span>
+    </div>
+
+    {/* Buttons (stacked like screenshot) */}
+    <div className="flex flex-col gap-3">
+
+      <button className="
+        flex items-center gap-2 
+        w-full px-4 py-3 
+        text-sm font-medium
+        rounded-md border 
+        bg-white hover:bg-gray-50 transition
+      ">
+        <RiLoginBoxLine className="text-teal-600 w-5 h-5" />
+        <span className="text-gray-900">Deposit</span>
+      </button>
+
+      <button className="
+        flex items-center gap-2 
+        w-full px-4 py-3 
+        text-sm font-medium
+        rounded-md border 
+        bg-white hover:bg-gray-50 transition
+      ">
+        <RiArrowLeftRightLine className="text-gray-600 w-5 h-5" />
+        <span className="text-gray-700">Transfer</span>
+      </button>
+
+      <button className="
+        flex items-center gap-2 
+        w-full px-4 py-3 
+        text-sm font-medium
+        rounded-md border 
+        bg-white hover:bg-gray-50 transition
+      ">
+        <RiLogoutBoxLine className="text-gray-600 w-5 h-5" />
+        <span className="text-gray-700">Withdraw</span>
+      </button>
+
+    </div>
+  </div>
+
+  {/* ================= DESKTOP LAYOUT ================= */}
+  <div className="hidden sm:flex items-center justify-between gap-6">
+
+    {/* Left: Currency + Wallet ID */}
+    <div className="flex items-center gap-3 min-w-max">
+      <span className="px-3 py-1 text-xs font-semibold bg-[#e5f5ea] text-green-600 rounded-md">
+        USD
+      </span>
+      <span className="text-teal-600 font-semibold text-sm md:text-base">
+        W-2337894-001
+      </span>
+    </div>
+
+    {/* Center: Balance */}
+    <div className="text-gray-600 text-sm flex-1 text-center">
+      Balance{" "}
+      <span className="font-bold text-gray-900">0.000</span>
+    </div>
+
+    {/* Right: Buttons (matches screenshot EXACTLY) */}
+    <div className="flex items-center gap-3 min-w-max">
+
+      {/* Deposit (highlighted) */}
+      <button className="
+        flex items-center gap-2 
+        border rounded-md px-4 py-2 
+        text-sm font-medium 
+        hover:bg-gray-50 transition
+      ">
+        <RiLoginBoxLine className="text-teal-600" />
+        <span className="text-gray-900">Deposit</span>
+      </button>
+
+      {/* Transfer */}
+      <button className="
+        flex items-center gap-2 
+        border rounded-md px-4 py-2 
+        text-sm hover:bg-gray-50 transition
+      ">
+        <RiArrowLeftRightLine className="text-gray-600" />
+        <span className="text-gray-600">Transfer</span>
+      </button>
+
+      {/* Withdraw */}
+      <button className="
+        flex items-center gap-2 
+        border rounded-md px-4 py-2 
+        text-sm hover:bg-gray-50 transition
+      ">
+        <RiLogoutBoxLine className="text-gray-600" />
+        <span className="text-gray-600">Withdraw</span>
+      </button>
+
+    </div>
+  </div>
+</div>
+
+
+
       </div>
     </div>
   );
