@@ -6,14 +6,13 @@ function Transfers() {
   const [amount, setAmount] = useState('')
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4 sm:p-6">
-      <div className="max-w-2xl mx-auto w-full overflow-x-hidden">
-        <h1 className="mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
+    <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
+      <div className="w-full max-w-[80%] mx-auto">
+        <h1 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
           Move Funds
         </h1>
-
         {/* Form Container */}
-        <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
           <form className="space-y-6">
             {/* From Account */}
             <div>

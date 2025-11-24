@@ -1,15 +1,15 @@
 function DebitCard() {
   return (
-    <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
-      <div className="max-w-2xl">
+    <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
+      <div className="w-full max-w-[80%] mx-auto">
         <h1 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
           Withdraw Using Your Debit or Credit Card
         </h1>
 
         {/* Card Logos and Information */}
-        <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+        <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200 text-center">
           {/* Card Logos */}
-          <div className="flex items-center gap-8 mb-6">
+          <div className="flex items-center justify-center gap-8 mb-6">
             {/* VISA */}
             <div className="flex flex-col items-center">
               <div className="w-20 h-12 bg-blue-600 rounded flex items-center justify-center mb-2">

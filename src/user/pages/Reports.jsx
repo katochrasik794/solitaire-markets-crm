@@ -15,9 +15,9 @@ function Reports() {
   ]
 
   return (
-    <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
-      <div className="max-w-4xl mx-auto w-full">
-        <h1 className="mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
+    <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
+      <div className="w-full max-w-[80%] mx-auto">
+        <h1 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
           Reports
         </h1>
 

@@ -7,7 +7,7 @@ function Neteller() {
         </h1>
 
         {/* Neteller Information Panel */}
-        <div className="bg-white rounded-lg p-8 border border-gray-200">
+        <div className="bg-white rounded-lg p-8 border border-gray-200 text-center">
           {/* Neteller Logo with gray background */}
           <div className="bg-gray-200 rounded-lg p-4 mb-6 flex items-center justify-center">
             <img src="/netellerw.png" alt="Neteller" className="h-8 w-auto" />

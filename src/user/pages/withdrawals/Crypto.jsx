@@ -7,16 +7,16 @@ function Crypto() {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
-      <div className="max-w-2xl">
+    <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
+      <div className="w-full max-w-[80%] mx-auto">
         <h1 className="mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
           Withdraw through Crypto
         </h1>
 
         {/* Main Form Container - White outer div */}
-        <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="bg-white rounded-lg p-6 border border-gray-200 text-center">
           {/* Inner gray div - centered content */}
-          <div className="bg-gray-200 rounded-lg p-6">
+          <div className="bg-gray-200 rounded-lg p-6 text-center">
             <form className="space-y-6">
               {/* Withdraw from Account Section */}
               <div>
