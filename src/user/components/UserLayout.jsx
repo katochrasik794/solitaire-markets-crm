@@ -39,7 +39,7 @@ function UserLayout() {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <div 
-        className="flex-1 overflow-x-hidden w-full lg:ml-[295px] relative z-10"
+        className="flex-1 overflow-x-hidden w-full lg:ml-[324px] relative z-10 transition-all duration-300"
         onClick={() => {
           // Close sidebar when clicking on main content area on mobile
           if (typeof window !== 'undefined' && window.innerWidth < 1024 && sidebarOpen) {
@@ -48,7 +48,7 @@ function UserLayout() {
         }}
       >
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main className="overflow-x-hidden min-h-screen">
+        <main className="overflow-x-hidden min-h-screen pt-[77px] sm:pt-[77px]">
           <Outlet />
         </main>
       </div>

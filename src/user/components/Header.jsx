@@ -153,36 +153,36 @@ function Header({ onMenuClick }) {
         </div>
       </div>
 
-      {/* Deposit Banner - Light yellow badge (Scrollable) */}
-      <div className="bg-[#FDF8E7] min-h-[70px] border-t border-gray-200 z-40 mt-[77px]">
-        <div className="px-3 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-3 lg:py-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 lg:gap-4">
-          <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
-            {/* Orange circular info icon - Responsive size */}
-            <div className="w-4 h-4 sm:w-5 sm:h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span className="text-white text-[10px] sm:text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif' }}>i</span>
+      {/* Deposit Banner - Light yellow badge */}
+      {/* <div className="bg-[#FDF8E7]">
+        <div className="px-6 py-2.5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1">
+           
+            <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif' }}>i</span>
             </div>
-            <p className="text-gray-800 text-xs sm:text-sm md:text-base leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>
+            <p className="text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
               You can deposit up to USD 2,000. Complete full verification to make deposits without limitations.
             </p>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 w-full sm:w-auto">
+          <div className="flex items-center gap-4 flex-shrink-0">
             <Link
               to="/user/deposits"
-              className="bg-yellow-50 hover:bg-[#E0B238] text-black px-3 sm:px-4 py-2 sm:py-3 rounded transition-colors whitespace-nowrap text-center text-xs sm:text-sm font-medium w-full sm:w-auto"
-              style={{ fontFamily: 'Roboto, sans-serif' }}
+              className="bg-[#F5C842] hover:bg-[#E0B238] text-gray-900 px-4 py-1.5 rounded transition-colors whitespace-nowrap"
+              style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
             >
               DEPOSIT NOW
             </Link>
             <Link
               to="/user/verification"
-              className="text-gray-800 underline hover:text-gray-900 whitespace-nowrap text-center text-xs sm:text-sm w-full sm:w-auto"
-              style={{ fontFamily: 'Roboto, sans-serif' }}
+              className="text-gray-800 underline hover:text-gray-900 whitespace-nowrap"
+              style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
             >
               Complete verification
             </Link>
           </div>
         </div>
-      </div>
+      </div> */}
     </>
   )
 }

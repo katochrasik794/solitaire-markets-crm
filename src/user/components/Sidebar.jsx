@@ -40,7 +40,7 @@ function Sidebar({ isOpen, onClose }) {
     <div 
       className={`bg-white h-screen fixed left-0 top-0 shadow-lg flex flex-col z-50 transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 lg:!w-[295px]`}
+      } lg:translate-x-0 lg:!w-[324px]`}
       style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', width: '100%', maxWidth: '100%' }}
     >
       {/* Logo with Close Button */}
