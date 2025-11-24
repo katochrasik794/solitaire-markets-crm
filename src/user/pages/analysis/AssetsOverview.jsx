@@ -187,7 +187,7 @@ function AssetsOverview() {
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto w-full">
+      <div className="w-full max-w-[95%] mx-auto">
         <h1 className="mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
           Assets Overview
         </h1>
@@ -231,87 +231,90 @@ function AssetsOverview() {
             </button>
           </div>
 
-          {/* Table Headers */}
-          <div className="grid grid-cols-8 gap-6 pb-3 border-b border-gray-200 mb-4 px-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600', color: '#000000' }}>
-            <div 
-              onClick={() => handleSort('asset')}
-              className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
-            >
-              Asset
-              <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'asset' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'asset' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
-              </svg>
-            </div>
-            <div 
-              onClick={() => handleSort('price')}
-              className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
-            >
-              Price
-              <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'price' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'price' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
-              </svg>
-            </div>
-            <div 
-              onClick={() => handleSort('opportunity')}
-              className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
-            >
-              Opportunity
-              <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'opportunity' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'opportunity' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
-              </svg>
-            </div>
-            <div 
-              onClick={() => handleSort('priceTrend')}
-              className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
-            >
-              Price Trend
-              <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'priceTrend' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'priceTrend' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
-              </svg>
-            </div>
-            <div 
-              onClick={() => handleSort('newsSentiment')}
-              className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
-            >
-              News Sentiment
-              <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'newsSentiment' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'newsSentiment' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
-              </svg>
-            </div>
-            <div 
-              onClick={() => handleSort('volatility')}
-              className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
-            >
-              Volatility
-              <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'volatility' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'volatility' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
-              </svg>
-            </div>
-            <div 
-              onClick={() => handleSort('newsVolume')}
-              className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
-            >
-              News Volume
-              <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'newsVolume' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'newsVolume' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
-              </svg>
-            </div>
-            <div 
-              onClick={() => handleSort('change1D')}
-              className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
-            >
-              Change (1D)
-              <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'change1D' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'change1D' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
-              </svg>
-            </div>
-          </div>
+          {/* Table Container with Horizontal Scroll */}
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="min-w-[800px]">
+              {/* Table Headers */}
+              <div className="grid grid-cols-8 gap-6 pb-3 border-b border-gray-200 mb-4 px-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600', color: '#000000' }}>
+                <div
+                  onClick={() => handleSort('asset')}
+                  className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
+                >
+                  Asset
+                  <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'asset' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'asset' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
+                  </svg>
+                </div>
+                <div
+                  onClick={() => handleSort('price')}
+                  className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
+                >
+                  Price
+                  <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'price' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'price' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
+                  </svg>
+                </div>
+                <div
+                  onClick={() => handleSort('opportunity')}
+                  className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
+                >
+                  Opportunity
+                  <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'opportunity' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'opportunity' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
+                  </svg>
+                </div>
+                <div
+                  onClick={() => handleSort('priceTrend')}
+                  className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
+                >
+                  Price Trend
+                  <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'priceTrend' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'priceTrend' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
+                  </svg>
+                </div>
+                <div
+                  onClick={() => handleSort('newsSentiment')}
+                  className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
+                >
+                  News Sentiment
+                  <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'newsSentiment' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'newsSentiment' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
+                  </svg>
+                </div>
+                <div
+                  onClick={() => handleSort('volatility')}
+                  className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
+                >
+                  Volatility
+                  <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'volatility' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'volatility' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
+                  </svg>
+                </div>
+                <div
+                  onClick={() => handleSort('newsVolume')}
+                  className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
+                >
+                  News Volume
+                  <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'newsVolume' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'newsVolume' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
+                  </svg>
+                </div>
+                <div
+                  onClick={() => handleSort('change1D')}
+                  className="flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors"
+                >
+                  Change (1D)
+                  <svg className={`w-3 h-3 transition-transform ${sortConfig.key === 'change1D' ? 'opacity-100' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortConfig.key === 'change1D' && sortConfig.direction === 'desc' ? "M19 9l-7 7-7-7" : "M5 15l7-7 7 7"} />
+                  </svg>
+                </div>
+              </div>
 
-          {/* Asset Rows */}
-          <div className="space-y-3">
-            {sortedAssets.map((asset) => (
-              <div key={asset.id} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
-                <div className="grid grid-cols-8 gap-6 items-center px-2">
+              {/* Asset Rows */}
+              <div className="space-y-3">
+                {sortedAssets.map((asset) => (
+                  <div key={asset.id} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                    <div className="grid grid-cols-8 gap-6 items-center px-2">
                   {/* Asset */}
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center text-xs font-semibold flex-shrink-0" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '9px', color: '#000000', fontWeight: '600' }}>
@@ -408,6 +411,8 @@ function AssetsOverview() {
                 </div>
               </div>
             ))}
+          </div>
+            </div>
           </div>
         </div>
       </div>

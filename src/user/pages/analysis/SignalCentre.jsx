@@ -167,33 +167,69 @@ function SignalCentre() {
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto w-full">
+      <div className="w-full max-w-[95%] mx-auto">
         <h1 className="mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
           Signal Centre
         </h1>
 
         {/* Installation Links Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {/* MT4 Card */}
-          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h3 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '400' }}>
-              MT4 Signal Centre Installation Link
-            </h3>
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', fontWeight: '600' }}>
-              Download
-            </button>
-          </div>
+        <div className="w-full bg-[#F6F7F9] py-10 px-4">
+  <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
 
-          {/* MT5 Card */}
-          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h3 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '400' }}>
-              MT5 Signal Centre Installation Link
-            </h3>
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', fontWeight: '600' }}>
-              Download
-            </button>
-          </div>
-        </div>
+    {/* MT4 CARD */}
+    <div className="bg-white border border-gray-200 rounded-lg py-10 px-6 flex flex-col items-center text-center shadow-sm">
+      <h3
+        className="mb-6"
+        style={{
+          fontFamily: "Roboto, sans-serif",
+          fontSize: "20px",
+          color: "#000000",
+          fontWeight: "400",
+        }}
+      >
+        MT4 Signal Centre Installation Link
+      </h3>
+
+      <button
+        className="bg-white border border-gray-300 text-blue-600 hover:bg-gray-100 font-semibold py-2 px-10 rounded-lg transition"
+        style={{
+          fontFamily: "Roboto, sans-serif",
+          fontSize: "14px",
+          fontWeight: "600",
+        }}
+      >
+        Download
+      </button>
+    </div>
+
+    {/* MT5 CARD */}
+    <div className="bg-white border border-gray-200 rounded-lg py-10 px-6 flex flex-col items-center text-center shadow-sm">
+      <h3
+        className="mb-6"
+        style={{
+          fontFamily: "Roboto, sans-serif",
+          fontSize: "20px",
+          color: "#000000",
+          fontWeight: "400",
+        }}
+      >
+        MT5 Signal Centre Installation Link
+      </h3>
+
+      <button
+        className="bg-white border border-gray-300 text-blue-600 hover:bg-gray-100 font-semibold py-2 px-10 rounded-lg transition"
+        style={{
+          fontFamily: "Roboto, sans-serif",
+          fontSize: "14px",
+          fontWeight: "600",
+        }}
+      >
+        Download
+      </button>
+    </div>
+  </div>
+</div>
+
 
         {/* AI-Driven Trade Ideas Section */}
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">

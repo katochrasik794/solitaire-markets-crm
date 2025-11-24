@@ -76,7 +76,7 @@ function ResearchTerminal() {
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto w-full">
+      <div className="w-full max-w-[95%] mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">

@@ -31,50 +31,7 @@ function DebitCard() {
   </h1>
 </div>
 
-        {/* Card Logos and Information */}
-        <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200 shadow-sm">
-          {/* Card Logos */}
-          <div className="flex items-center gap-8 mb-6">
-            {/* VISA */}
-            <div className="flex flex-col items-center">
-              <div className="w-20 h-12 bg-blue-600 rounded flex items-center justify-center mb-2">
-                <span className="text-white font-bold text-xl" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>VISA</span>
-              </div>
-            </div>
-
-            {/* Mastercard */}
-            <div className="flex flex-col items-center">
-              <div className="w-20 h-12 flex items-center justify-center mb-2 relative">
-                <div className="relative" style={{ width: '50px', height: '30px' }}>
-                  <div className="absolute w-7 h-7 bg-red-500 rounded-full" style={{ left: '0px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}></div>
-                  <div className="absolute w-7 h-7 bg-orange-500 rounded-full" style={{ left: '7px', top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}></div>
-                </div>
-              </div>
-              <span className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>mastercard</span>
-            </div>
-
-            {/* Maestro */}
-            <div className="flex flex-col items-center">
-              <div className="w-20 h-12 flex items-center justify-center mb-2 relative">
-                <div className="relative" style={{ width: '50px', height: '30px' }}>
-                  <div className="absolute w-7 h-7 bg-red-500 rounded-full" style={{ left: '0px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}></div>
-                  <div className="absolute w-7 h-7 bg-blue-500 rounded-full" style={{ left: '7px', top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}></div>
-                </div>
-              </div>
-              <span className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>maestro</span>
-            </div>
-          </div>
-
-          {/* Information Text */}
-          <div className="space-y-4">
-            <p style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#4B5156', fontWeight: '400', lineHeight: '1.5' }}>
-              Solitaire follows a strict return to source policy, in all instances where applicable, all monies paid out by Solitaire will be paid back to the source from where they originated from.
-            </p>
-            <p style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#4B5156', fontWeight: '400', lineHeight: '1.5' }}>
-              To make a withdrawal to a card, a deposit must first be made from a card and the details must be saved on this platform.
-            </p>
-          </div>
-        </div>
+        
 
         {/* OFFER BANNER (LEFT ALIGNED) */}
         <div className="bg-[#00A896] text-white rounded-lg px-5 py-4 mb-6 flex items-center shadow-sm">
