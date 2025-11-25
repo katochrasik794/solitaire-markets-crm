@@ -129,6 +129,25 @@ function MarketCalendar() {
     { date: '2025-11-23', day: 'SUN', dayNum: '23.11' }
   ]
 
+  const assetsWithTradeIdea = [
+  { name: "EURAUD", flag: "🇦🇺" },
+  { name: "EURJPY", flag: "🇯🇵" },
+  { name: "EURSEK", flag: "🇸🇪" },
+];
+
+const allAssets = [
+ { name: "EURUSD", flag: "🇺🇸" },
+ { name: "EURCAD", flag: "🇨🇦" },
+ { name: "EURCHF", flag: "🇨🇭" },
+ { name: "EURGBP", flag: "🇬🇧" },
+ { name: "EURNOK", flag: "🇳🇴" },
+ { name: "EURNZD", flag: "🇳🇿" },
+ { name: "EURPLN", flag: "🇵🇱" },
+ { name: "EURSGD", flag: "🇸🇬" },
+ { name: "DE40", flag: "🇩🇪" },
+ { name: "EU50", flag: "🇪🇺" },
+];
+
   const getBadgeColor = (color) => {
     if (color === 'green') return 'bg-green-500 border-green-500'
     if (color === 'red') return 'bg-red-500 border-red-500'
@@ -191,8 +210,8 @@ function MarketCalendar() {
               CORPORATE
             </button>
           </div>
+ 
         </div>
-
         {/* Main Title */}
         <h2 className="mb-6 text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '28px', color: '#000000', fontWeight: '700' }}>
           {calendarType === 'ECONOMIC' ? 'Economic Calendar' : 'Corporate Calendar'}
@@ -200,20 +219,20 @@ function MarketCalendar() {
 
         {/* Calendar Grid View */}
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-6">
-          <div className="grid grid-cols-7 gap-4">
+          <div className="flex gap-4 overflow-x-auto pb-4">
             {days.map((day) => (
-              <div key={day.date} className="flex flex-col">
+              <div key={day.date} className="flex flex-col min-w-[220px]">
                 {/* Day Header */}
                 <div className={`text-center mb-3 pb-2 ${day.isToday ? 'bg-blue-50 rounded' : ''}`}>
                   <div className="flex items-center justify-center gap-1 mb-1">
-                    <span className="text-sm font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', color: '#000000', fontWeight: '600' }}>
+                    <span className="text-sm font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
                       {day.day}
                     </span>
                     {day.isToday && (
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     )}
                   </div>
-                  <span className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                  <span className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
                     {day.dayNum}
                   </span>
                 </div>
@@ -224,23 +243,19 @@ function MarketCalendar() {
                     events[day.date].map((event) => (
                       <div
                         key={event.id}
-                        className={`bg-white border-2 ${getBorderColor(event.color)} rounded-lg p-2 relative cursor-pointer hover:shadow-md transition-shadow`}
+                        className={`bg-white border-2 ${getBorderColor(event.color)} rounded-lg p-4 relative cursor-pointer hover:shadow-md transition-shadow min-h-[120px] flex flex-col items-center justify-center text-center`}
                         onClick={() => setSelectedDate(day.date)}
                       >
-                        <div className="flex items-start justify-between mb-1">
-                          <div className="flex items-center gap-1">
-                            <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '9px', fontWeight: '700' }}>
-                              {event.countryCode}
-                            </div>
-                            <span className="text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', color: '#000000', fontWeight: '600' }}>
-                              {event.name}
-                            </span>
-                          </div>
-                          <div className={`absolute top-1 right-1 w-6 h-6 ${getBadgeColor(event.color)} text-white rounded-full flex items-center justify-center text-xs font-bold`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '9px', fontWeight: '700' }}>
-                            {event.badge}
-                          </div>
+                        <div className={`absolute top-1 right-1 w-7 h-7 ${getBadgeColor(event.color)} text-white rounded-full flex items-center justify-center text-xs font-bold`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '700' }}>
+                          {event.badge}
                         </div>
-                        <div className="text-xs text-gray-600 mt-1" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
+                        <div className="text-sm font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', color: '#000000', fontWeight: '600' }}>
+                          {event.countryCode}
+                        </div>
+                        <div className="text-sm font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', color: '#000000', fontWeight: '600' }}>
+                          {event.name}
+                        </div>
+                        <div className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
                           {event.time}
                         </div>
                       </div>
@@ -268,27 +283,27 @@ function MarketCalendar() {
               {detailedEvents.map((event) => (
                 <div
                   key={event.id}
-                  className={`min-w-[280px] bg-white border-2 ${
+                  className={`min-w-[400px] bg-white border-2 ${
                     event.impactOutline ? 'border-green-500' : 'border-gray-300'
-                  } rounded-lg p-4`}
+                  } rounded-lg p-6`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
                       event.impactOutline
                         ? 'border border-green-500 text-green-700 bg-white'
                         : 'bg-gray-200 text-gray-700'
-                    }`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
+                    }`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
                       {event.impact} Impact
                     </span>
-                    <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '9px', fontWeight: '700' }}>
+                    <div className="w-7 h-7 bg-blue-100 rounded flex items-center justify-center text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '700' }}>
                       {event.country}
                     </div>
                   </div>
-                  <h4 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', color: '#000000', fontWeight: '600' }}>
+                  <h4 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
                     {event.name}
                   </h4>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                    <span className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
                       {event.time}
                     </span>
                     {event.timeUntil && (
@@ -302,20 +317,20 @@ function MarketCalendar() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs">
-                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Actual</span>
-                      <span className={`font-semibold ${event.actualColor === 'red' ? 'text-red-600' : event.actualColor === 'green' ? 'text-green-600' : 'text-gray-700'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
+                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>Actual</span>
+                      <span className={`font-semibold ${event.actualColor === 'red' ? 'text-red-600' : event.actualColor === 'green' ? 'text-green-600' : 'text-gray-700'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
                         {event.actual}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Previous</span>
-                      <span className="font-semibold text-gray-700" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
+                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>Previous</span>
+                      <span className="font-semibold text-gray-700" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
                         {event.previous}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Forecast</span>
-                      <span className="font-semibold text-gray-700" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
+                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>Forecast</span>
+                      <span className="font-semibold text-gray-700" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
                         {event.forecast}
                       </span>
                     </div>
@@ -325,6 +340,60 @@ function MarketCalendar() {
             </div>
           </div>
         )}
+
+        {/* Event Details Section */}
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-6">
+          {/* Title Section */}
+          <h1 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">
+            Gross Domestic Product (QoQ)
+          </h1>
+
+          <p className="text-gray-600 text-xs md:text-sm max-w-4xl">
+            The Gross Domestic Product released by the Statistisches Bundesamt
+            Deutschland is a measure of the total value of all goods and
+            services produced by Germany. A high reading or a better than expected
+            number has a positive effect on the EUR, while a falling trend is seen
+            as negative (or bearish).
+          </p>
+
+          {/* Assets Section */}
+          <div className="mt-6">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">
+              What Assets does this event affect?
+            </h2>
+
+            <p className="font-medium text-gray-800 mb-2 flex items-center gap-2">
+              <span className="text-base">⚡</span> Assets with a Trade Idea
+            </p>
+
+            {/* Trade Idea assets */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+              {assetsWithTradeIdea.map((asset, i) => (
+                <button
+                  key={i}
+                  className="flex items-center gap-2 bg-blue-100 text-blue-700 py-2 px-4 rounded-full font-medium text-xs hover:scale-[1.03] transition"
+                >
+                  <span className="text-base">{asset.flag}</span>
+                  {asset.name}
+                </button>
+              ))}
+            </div>
+
+            {/* All assets list */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {allAssets.map((asset, i) => (
+                <button
+                  key={i}
+                  className="flex items-center gap-2 bg-gray-200 text-gray-800 py-2 px-4 rounded-full font-medium text-xs hover:scale-[1.03] transition"
+                >
+                  <span className="text-base">{asset.flag}</span>
+                  {asset.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* Filter Modal - Same as other pages */}
