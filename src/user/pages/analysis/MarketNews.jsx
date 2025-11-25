@@ -159,7 +159,7 @@ function MarketNews() {
       date: '21/11/2025 21:35',
       category: 'MARKET INSIGHT',
       image: 'EURJPY',
-      imageUrl: '/eurjpy.jpg',
+      imageUrl: '/mt4.png',
       title: 'EUR/JPY declines amid broader market sentiment',
       description: 'EUR/JPY declines amid broader market sentiment. USD/JPY\'s drop influences EUR/JPY\'s trajectory, reflecting similar downward trends. The EUR/JPY currency pair has declined by 0.8% since the previous close. This movement coincides with a 0.54%',
       tag: 'EURJPY'
@@ -404,7 +404,7 @@ function MarketNews() {
                     </div>
                     <div className="flex gap-4">
                       <div className="w-[30%]">
-                        <img src={item.imageUrl} alt={item.image} className="w-full h-32 object-cover rounded" />
+                        <img src={item.imageUrl} alt={item.image} className="w-full h-36 object-fit rounded" />
                       </div>
                       <div className="w-[70%]">
                         <h4 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600' }}>

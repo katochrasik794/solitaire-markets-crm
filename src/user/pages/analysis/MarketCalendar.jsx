@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import TradingViewWidget from './TradingViewWidget';
 
 ChartJS.register(
   CategoryScale,
@@ -20,6 +21,279 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+function MarketChartSection() {
+  return (
+    <div className="w-full bg-gray-100 p-5 md:p-8 rounded-xl mt-6">
+      {/* Top Row */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+
+        {/* Left Side */}
+        <div className="flex items-start gap-4">
+
+          {/* Flags */}
+          <div className="flex flex-col items-center">
+            <img
+              src="/flag-icon.svg"
+              alt="flags"
+              className="w-14 h-14 object-cover rounded-md"
+            />
+          </div>
+
+          {/* Pair Info */}
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm bg-gray-200 px-3 py-1 rounded-md">
+                USD/MXN
+              </span>
+              <span className="bg-green-600 text-white text-sm font-semibold px-3 py-1 rounded-full">
+                BUY LIMIT
+              </span>
+            </div>
+
+            <h2 className="text-3xl font-bold mt-2">USDMXN</h2>
+
+            {/* Entry/Target/Stop */}
+            <div className="flex flex-wrap gap-10 mt-4 text-center">
+              <div>
+                <p className="text-green-600 text-xl font-semibold">18.45000</p>
+                <p className="text-gray-600 text-sm">Entry</p>
+              </div>
+
+              <div>
+                <p className="text-green-600 text-xl font-semibold">18.60000</p>
+                <p className="text-gray-600 text-sm">Target</p>
+              </div>
+
+              <div>
+                <p className="text-red-500 text-xl font-semibold">18.37500</p>
+                <p className="text-gray-600 text-sm">Stop</p>
+              </div>
+
+              <div>
+                <p className="text-gray-900 text-xl font-semibold">Intraday</p>
+                <p className="text-gray-600 text-sm">Duration</p>
+              </div>
+
+              <div className="text-center">
+                <div className="flex justify-center gap-1">
+                  <div className="w-1.5 h-5 bg-gray-500 rounded"></div>
+                  <div className="w-1.5 h-5 bg-gray-500 rounded"></div>
+                  <div className="w-1.5 h-7 bg-gray-800 rounded"></div>
+                  <div className="w-1.5 h-4 bg-gray-400 rounded"></div>
+                </div>
+                <p className="text-gray-600 text-sm mt-1">Confidence</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side */}
+        <div className="text-right">
+          <p className="text-4xl font-bold">18.47099</p>
+          <p className="text-green-600 font-semibold">
+            ▲ 0.00686 (+0.04%)
+          </p>
+        </div>
+      </div>
+
+      {/* Chart Title */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">Market Chart (4H)</h3>
+
+      {/* Toolbar */}
+      <div className="flex items-center gap-6 text-gray-700 font-medium text-sm border-b pb-2">
+        <button className="text-black font-semibold">4h</button>
+        <button>💹</button>
+        <button>📈</button>
+        <button>Indicators</button>
+        <button>↩</button>
+        <button>↪</button>
+      </div>
+
+      {/* TradingView Chart */}
+      <div className="w-full h-[450px] mt-4 rounded-lg overflow-hidden">
+        <TradingViewWidget />
+      </div>
+    </div>
+  );
+}
+
+function TradeIdeaPerformance() {
+  const [activeTab, setActiveTab] = useState("recent");
+
+  const labels = [
+    "Oct 2025",
+    "Oct 2025",
+    "Nov 2025",
+    "Nov 2025",
+    "Nov 2025",
+    "Nov 2025",
+    "Nov 2025",
+  ];
+
+  const pricePoints = [1000, 998, 1005, 1012, 1003, 999, 1008, 995];
+  const markerColors = ["red", "green", "green", "red", "red", "red", "green", "red"];
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Equity",
+        data: pricePoints,
+        borderColor: "#1f2937",
+        borderWidth: 2,
+        tension: 0.4,
+        pointRadius: 0,
+      },
+      {
+        labels: "Trades",
+        data: pricePoints,
+        pointBackgroundColor: markerColors,
+        pointBorderColor: markerColors,
+        pointRadius: 7,
+        pointHoverRadius: 8,
+        borderWidth: 0,
+        showLine: false,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: "#000",
+        titleColor: "#fff",
+        bodyColor: "#fff",
+      },
+    },
+
+    scales: {
+      y: {
+        grid: { display: true, color: "rgba(0,0,0,0.1)" },
+        ticks: { font: { size: 10 } },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 10 } },
+      },
+    },
+  };
+
+  return (
+    <div className="w-full bg-gray-100 p-5 md:p-8 rounded-xl mt-8">
+      {/* Title */}
+      <h2 className="text-2xl md:text-3xl font-semibold text-gray-900">
+        Trade Idea Performance
+      </h2>
+
+      {/* Tabs */}
+      <div className="flex gap-3 mt-5">
+        <button
+          onClick={() => setActiveTab("recent")}
+          className={`px-4 py-2 rounded-md font-semibold text-sm ${
+            activeTab === "recent"
+              ? "bg-gray-900 text-white"
+              : "bg-white text-gray-700 border"
+          }`}
+        >
+          MOST RECENT
+        </button>
+
+        <button
+          onClick={() => setActiveTab("monthly")}
+          className={`px-4 py-2 rounded-md font-semibold text-sm ${
+            activeTab === "monthly"
+              ? "bg-gray-900 text-white"
+              : "bg-white text-gray-700 border"
+          }`}
+        >
+          MONTHLY
+        </button>
+      </div>
+
+      {/* Chart */}
+      <div className="w-full h-[280px] sm:h-[350px] md:h-[420px] mt-6">
+        <Line data={data} options={options} />
+      </div>
+
+      {/* Legend under chart */}
+      <div className="flex flex-wrap gap-6 text-sm mt-4">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 bg-green-600 rounded-full"></span> Winning Trade
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 bg-red-600 rounded-full"></span> Losing Trade
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 bg-teal-600 rounded-full"></span> Live Trade
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-6 h-1 bg-gray-800"></span> Equity
+        </div>
+      </div>
+
+      {/* Disclaimer */}
+      <p className="text-xs text-gray-600 mt-4 leading-relaxed max-w-3xl">
+        The equity curve is based on the last 10 trade ideas using a nominal 1000 starting
+        balance, risking 1% per trade. This is for illustration only and may not suit all
+        investors. Past performance does not guarantee future results. Ensure you understand
+        the risks and seek independent advice if needed. Your capital is at risk.
+      </p>
+
+      {/* Stats Section */}
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold text-teal-600">Total Trades: 217</h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
+
+          {/* Win Rate */}
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-gray-600">Win Rate</span>
+            <span className="text-xl font-semibold">51.61</span>
+          </div>
+
+          {/* Avg Duration */}
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-gray-600">Average duration of trades</span>
+            <span className="text-xl font-semibold">12.79</span>
+          </div>
+
+          {/* Avg Outcome */}
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-gray-600">Average outcome per trade</span>
+            <span className="text-xl font-semibold">0.45%</span>
+          </div>
+
+          {/* Best Trade */}
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-gray-600">Best trade</span>
+            <span className="text-xl font-semibold">+8.23%</span>
+          </div>
+
+          {/* Worst Trade */}
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-gray-600">Worst trade</span>
+            <span className="text-xl font-semibold">-4.56%</span>
+          </div>
+
+          {/* Max Drawdown */}
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-gray-600">Max drawdown</span>
+            <span className="text-xl font-semibold">-12.34%</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function NewsSentiment() {
   const labels = [
@@ -472,56 +746,46 @@ const newsInsights = [
 
         {/* Event Details Section */}
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-6">
-          {/* Title Section */}
-          <h1 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">
-            Gross Domestic Product (QoQ)
-          </h1>
+          <h2 className="text-2xl md:text-3xl font-semibold text-gray-900">
+            Retail Sales (MoM)
+          </h2>
 
-          <p className="text-gray-600 text-xs md:text-sm max-w-4xl">
-            The Gross Domestic Product released by the Statistisches Bundesamt
-            Deutschland is a measure of the total value of all goods and
-            services produced by Germany. A high reading or a better than expected
-            number has a positive effect on the EUR, while a falling trend is seen
-            as negative (or bearish).
+          {/* Description */}
+          <p className="text-gray-700 text-sm md:text-base mt-3 leading-relaxed max-w-4xl">
+            The Retail Sales released by <span className="underline cursor-pointer">INEGI</span>
+            measures the total receipts of retail stores. Monthly percent changes reflect
+            the rate of changes of such sales. Changes in retail sales are widely followed
+            as an indicator of consumer spending. Generally speaking, a high reading is
+            seen as positive or bullish for the Mexican peso, while a low reading is seen
+            as negative or bearish.
           </p>
 
+          {/* Divider */}
+          <div className="border-t border-gray-300 my-6"></div>
+
           {/* Assets Section */}
-          <div className="mt-6">
-            <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">
-              What Assets does this event affect?
-            </h2>
+          <h3 className="text-xl md:text-2xl font-semibold text-gray-900">
+            What Assets does this event affect?
+          </h3>
 
-            <p className="font-medium text-gray-800 mb-2 flex items-center gap-2">
-              <span className="text-base">⚡</span> Assets with a Trade Idea
-            </p>
+          <p className="font-medium text-gray-800 mt-3 flex items-center gap-2">
+            <span className="text-lg">⚡</span> Assets with a Trade Idea
+          </p>
 
-            {/* Trade Idea assets */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
-              {assetsWithTradeIdea.map((asset, i) => (
-                <button
-                  key={i}
-                  className="flex items-center gap-2 bg-blue-100 text-blue-700 py-2 px-4 rounded-full font-medium text-xs hover:scale-[1.03] transition"
-                >
-                  <span className="text-base">{asset.flag}</span>
-                  {asset.name}
-                </button>
-              ))}
-            </div>
-
-            {/* All assets list */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {allAssets.map((asset, i) => (
-                <button
-                  key={i}
-                  className="flex items-center gap-2 bg-gray-200 text-gray-800 py-2 px-4 rounded-full font-medium text-xs hover:scale-[1.03] transition"
-                >
-                  <span className="text-base">{asset.flag}</span>
-                  {asset.name}
-                </button>
-              ))}
-            </div>
+          {/* Asset Chip */}
+          <div className="flex flex-wrap gap-3 mt-4">
+            <button className="flex items-center gap-2 bg-green-600 text-white py-2 px-4 rounded-full font-medium text-sm hover:scale-[1.03] transition">
+              <img
+                src="/flags/usdmxn.png"
+                alt="USD/MXN"
+                className="w-6 h-6 rounded-full object-cover"
+              />
+              USDMXN
+            </button>
           </div>
         </div>
+
+        <MarketChartSection />
 
         {/* Trade Idea Section */}
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-6">
@@ -606,6 +870,8 @@ const newsInsights = [
             <div className="hidden lg:block"></div>
           </div>
         </div>
+
+        <TradeIdeaPerformance />
 
         {/* News & Insights */}
         <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-md max-h-[400px] overflow-y-auto mb-6">
