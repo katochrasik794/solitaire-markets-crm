@@ -1,7 +1,7 @@
 function Platforms() {
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
-      <div className="w-full max-w-[95%] mx-auto">
+      <div className="max-w-7xl mx-auto w-full">
         <h1 className="mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
           Trading Platforms
         </h1>

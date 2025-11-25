@@ -16,11 +16,11 @@ function Legal() {
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
-      <div className="w-full max-w-[100%] mx-auto">
+      <div className="max-w-4xl mx-auto w-full">
         {/* Main Content Card */}
         <div className="bg-white rounded-lg shadow-md p-8 border border-gray-200">
           {/* Heading */}
-          <h1 className="text-start text-xl font-medium mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '400' }}>
+          <h1 className="text-center text-3xl font-bold mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '32px', color: '#000000', fontWeight: '700' }}>
             Legal Terms and Policies
           </h1>
 
@@ -44,7 +44,7 @@ function Legal() {
 
           {/* Disclaimer Section */}
           <div>
-            <h2 className="font-bold mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '400' }}>
+            <h2 className="font-bold mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '700' }}>
               Trading involves a high degree of risk
             </h2>
             <p className="text-gray-700" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>

@@ -159,7 +159,6 @@ function MarketNews() {
       date: '21/11/2025 21:35',
       category: 'MARKET INSIGHT',
       image: 'EURJPY',
-      imageUrl: '/eurjpy.jpg',
       title: 'EUR/JPY declines amid broader market sentiment',
       description: 'EUR/JPY declines amid broader market sentiment. USD/JPY\'s drop influences EUR/JPY\'s trajectory, reflecting similar downward trends. The EUR/JPY currency pair has declined by 0.8% since the previous close. This movement coincides with a 0.54%',
       tag: 'EURJPY'
@@ -169,7 +168,6 @@ function MarketNews() {
       date: '21/11/2025 20:04',
       category: 'MACRO PREVIEW',
       image: 'Japan',
-      imageUrl: '/japan.jpg',
       title: 'Japan\'s Manufacturing PMI Flash Shows Slight Improvement',
       description: 'Japan\'s Manufacturing PMI Flash Shows Slight Improvement at 48.8, Yet Signals Continued Contraction Amidst Economic Concerns and Market Volatility',
       tags: ['Economic Indicators', 'Market Sentiment', 'Sector Weakness'],
@@ -325,58 +323,16 @@ function MarketNews() {
             </svg>
           </div>
 
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Most Newsworthy Instruments - Scatter Plot */}
             <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-md">
               <h3 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', color: '#000000', fontWeight: '600' }}>
                 Most Newsworthy Instruments
               </h3>
-              <div className="h-80 bg-gray-50 rounded border border-gray-200 flex items-center justify-center relative">
-                <svg width="100%" height="100%" viewBox="0 0 400 250" className="max-w-full max-h-full">
-                  <defs>
-                    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#f3f4f6', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#e5e7eb', stopOpacity: 1 }} />
-                    </linearGradient>
-                  </defs>
-                  <rect width="400" height="250" fill="url(#bgGradient)" />
-                  {/* Grid lines */}
-                  <line x1="0" y1="50" x2="400" y2="50" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="0" y1="100" x2="400" y2="100" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="0" y1="150" x2="400" y2="150" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="0" y1="200" x2="400" y2="200" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="80" y1="0" x2="80" y2="250" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="160" y1="0" x2="160" y2="250" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="240" y1="0" x2="240" y2="250" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="320" y1="0" x2="320" y2="250" stroke="#d1d5db" strokeWidth="1" />
-                  {/* Scatter points */}
-                  <circle cx="50" cy="30" r="4" fill="#3b82f6" />
-                  <circle cx="120" cy="80" r="4" fill="#ef4444" />
-                  <circle cx="180" cy="120" r="4" fill="#10b981" />
-                  <circle cx="250" cy="60" r="4" fill="#f59e0b" />
-                  <circle cx="320" cy="150" r="4" fill="#8b5cf6" />
-                  <circle cx="80" cy="200" r="4" fill="#ec4899" />
-                  <circle cx="150" cy="40" r="4" fill="#06b6d4" />
-                  <circle cx="220" cy="100" r="4" fill="#84cc16" />
-                  <circle cx="290" cy="180" r="4" fill="#f97316" />
-                  <circle cx="60" cy="90" r="4" fill="#6366f1" />
-                  <circle cx="140" cy="160" r="4" fill="#14b8a6" />
-                  <circle cx="200" cy="50" r="4" fill="#eab308" />
-                  <circle cx="280" cy="130" r="4" fill="#a855f7" />
-                  <circle cx="100" cy="70" r="4" fill="#dc2626" />
-                  <circle cx="170" cy="110" r="4" fill="#059669" />
-                  {/* Axis labels */}
-                  <text x="200" y="240" textAnchor="middle" fontSize="12" fill="#6b7280">Market Sentiment</text>
-                  <text x="10" y="125" textAnchor="middle" fontSize="12" fill="#6b7280" transform="rotate(-90 10 125)">News Volume</text>
-                </svg>
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="MostNewsworthyInstruments__quadrantNames__Vdwos w-full h-full relative">
-                    <div className="absolute top-2 left-2 text-xs text-gray-600">Warning Signs</div>
-                    <div className="absolute top-2 right-2 text-xs text-gray-600">Best Performers</div>
-                    <div className="absolute bottom-2 left-2 text-xs text-gray-600">Worst Performers</div>
-                    <div className="absolute bottom-2 right-2 text-xs text-gray-600">Growth Potential</div>
-                  </div>
-                </div>
+              <div className="h-64 bg-gray-50 rounded border border-gray-200 flex items-center justify-center">
+                <p className="text-gray-400 text-sm" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
+                  Scatter Plot Visualization
+                </p>
               </div>
             </div>
 
@@ -402,36 +358,32 @@ function MarketNews() {
                         {item.category}
                       </span>
                     </div>
-                    <div className="flex gap-4">
-                      <div className="w-[30%]">
-                        <img src={item.imageUrl} alt={item.image} className="w-full h-32 object-cover rounded" />
-                      </div>
-                      <div className="w-[70%]">
-                        <h4 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
-                          {item.title}
-                        </h4>
-                        <p className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.5' }}>
-                          {item.description}
-                        </p>
-                        {item.tags && (
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            {item.tags.map((tag, idx) => (
-                              <span key={idx} className="px-2 py-1 bg-gray-100 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        {item.partialText && (
-                          <p className="text-xs text-gray-500 italic" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                            {item.partialText}...
-                          </p>
-                        )}
-                        <button className="mt-2 px-4 py-2 bg-gray-800 text-white text-xs font-semibold rounded hover:bg-gray-900 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
-                          FIND OUT MORE
-                        </button>
-                      </div>
+                    <div className="w-full h-32 bg-gray-200 rounded mb-2 flex items-center justify-center">
+                      <span className="text-xs text-gray-400">{item.image}</span>
                     </div>
+                    <h4 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
+                      {item.title}
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.5' }}>
+                      {item.description}
+                    </p>
+                    {item.tags && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {item.tags.map((tag, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-gray-100 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {item.partialText && (
+                      <p className="text-xs text-gray-500 italic" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                        {item.partialText}...
+                      </p>
+                    )}
+                    <button className="mt-2 px-4 py-2 bg-gray-800 text-white text-xs font-semibold rounded hover:bg-gray-900 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
+                      FIND OUT MORE
+                    </button>
                   </div>
                 ))}
               </div>
