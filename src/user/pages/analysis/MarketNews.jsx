@@ -1,4 +1,14 @@
 import { useState } from 'react'
+import { Scatter } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
 
 function MarketNews() {
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0)
@@ -193,6 +203,103 @@ function MarketNews() {
     setCurrentAnalysisIndex((prev) => (prev - 1 + analysisCards.length) % analysisCards.length)
   }
 
+  // Scatter plot data for trending instruments
+  const scatterData = {
+    datasets: [
+      {
+        label: 'Best Performers',
+        data: [
+          { x: 8.5, y: 9.2, name: 'AAPL' },
+          { x: 9.1, y: 8.8, name: 'MSFT' },
+          { x: 8.8, y: 9.5, name: 'GOOGL' },
+        ],
+        backgroundColor: '#10b981',
+        pointRadius: 8,
+        pointHoverRadius: 10,
+      },
+      {
+        label: 'Growth Potential',
+        data: [
+          { x: 7.2, y: 6.8, name: 'TSLA' },
+          { x: 6.9, y: 7.5, name: 'NVDA' },
+          { x: 7.8, y: 6.2, name: 'AMD' },
+        ],
+        backgroundColor: '#3b82f6',
+        pointRadius: 8,
+        pointHoverRadius: 10,
+      },
+      {
+        label: 'Warning Signs',
+        data: [
+          { x: 2.1, y: 8.9, name: 'META' },
+          { x: 1.8, y: 9.1, name: 'NFLX' },
+          { x: 2.5, y: 8.7, name: 'AMZN' },
+        ],
+        backgroundColor: '#f59e0b',
+        pointRadius: 8,
+        pointHoverRadius: 10,
+      },
+      {
+        label: 'Worst Performers',
+        data: [
+          { x: 1.2, y: 1.5, name: 'AVGO' },
+          { x: 0.8, y: 2.1, name: 'INTC' },
+          { x: 1.5, y: 1.8, name: 'ORCL' },
+        ],
+        backgroundColor: '#ef4444',
+        pointRadius: 8,
+        pointHoverRadius: 10,
+      },
+    ],
+  }
+
+  const scatterOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.raw.name}: (${context.parsed.x.toFixed(1)}, ${context.parsed.y.toFixed(1)})`
+          }
+        }
+      },
+    },
+    scales: {
+      x: {
+        type: 'linear',
+        position: 'bottom',
+        title: {
+          display: true,
+          text: 'Market Sentiment',
+        },
+        min: 0,
+        max: 10,
+        grid: {
+          color: 'rgba(0,0,0,0.1)',
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'News Volume',
+        },
+        min: 0,
+        max: 10,
+        grid: {
+          color: 'rgba(0,0,0,0.1)',
+        },
+      },
+    },
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
       <div className="w-full max-w-[95%] mx-auto">
@@ -331,52 +438,8 @@ function MarketNews() {
               <h3 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', color: '#000000', fontWeight: '600' }}>
                 Most Newsworthy Instruments
               </h3>
-              <div className="h-80 bg-gray-50 rounded border border-gray-200 flex items-center justify-center relative">
-                <svg width="100%" height="100%" viewBox="0 0 400 250" className="max-w-full max-h-full">
-                  <defs>
-                    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#f3f4f6', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#e5e7eb', stopOpacity: 1 }} />
-                    </linearGradient>
-                  </defs>
-                  <rect width="400" height="250" fill="url(#bgGradient)" />
-                  {/* Grid lines */}
-                  <line x1="0" y1="50" x2="400" y2="50" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="0" y1="100" x2="400" y2="100" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="0" y1="150" x2="400" y2="150" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="0" y1="200" x2="400" y2="200" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="80" y1="0" x2="80" y2="250" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="160" y1="0" x2="160" y2="250" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="240" y1="0" x2="240" y2="250" stroke="#d1d5db" strokeWidth="1" />
-                  <line x1="320" y1="0" x2="320" y2="250" stroke="#d1d5db" strokeWidth="1" />
-                  {/* Scatter points */}
-                  <circle cx="50" cy="30" r="4" fill="#3b82f6" />
-                  <circle cx="120" cy="80" r="4" fill="#ef4444" />
-                  <circle cx="180" cy="120" r="4" fill="#10b981" />
-                  <circle cx="250" cy="60" r="4" fill="#f59e0b" />
-                  <circle cx="320" cy="150" r="4" fill="#8b5cf6" />
-                  <circle cx="80" cy="200" r="4" fill="#ec4899" />
-                  <circle cx="150" cy="40" r="4" fill="#06b6d4" />
-                  <circle cx="220" cy="100" r="4" fill="#84cc16" />
-                  <circle cx="290" cy="180" r="4" fill="#f97316" />
-                  <circle cx="60" cy="90" r="4" fill="#6366f1" />
-                  <circle cx="140" cy="160" r="4" fill="#14b8a6" />
-                  <circle cx="200" cy="50" r="4" fill="#eab308" />
-                  <circle cx="280" cy="130" r="4" fill="#a855f7" />
-                  <circle cx="100" cy="70" r="4" fill="#dc2626" />
-                  <circle cx="170" cy="110" r="4" fill="#059669" />
-                  {/* Axis labels */}
-                  <text x="200" y="240" textAnchor="middle" fontSize="12" fill="#6b7280">Market Sentiment</text>
-                  <text x="10" y="125" textAnchor="middle" fontSize="12" fill="#6b7280" transform="rotate(-90 10 125)">News Volume</text>
-                </svg>
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="MostNewsworthyInstruments__quadrantNames__Vdwos w-full h-full relative">
-                    <div className="absolute top-2 left-2 text-xs text-gray-600">Warning Signs</div>
-                    <div className="absolute top-2 right-2 text-xs text-gray-600">Best Performers</div>
-                    <div className="absolute bottom-2 left-2 text-xs text-gray-600">Worst Performers</div>
-                    <div className="absolute bottom-2 right-2 text-xs text-gray-600">Growth Potential</div>
-                  </div>
-                </div>
+              <div className="h-80">
+                <Scatter data={scatterData} options={scatterOptions} />
               </div>
             </div>
 

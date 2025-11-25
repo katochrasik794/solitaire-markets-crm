@@ -348,106 +348,6 @@ function ResearchTerminal() {
           </div>
         </div>
 
-        {/* Hot News Section */}
-        <div className="mt-8 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
-              Hot News
-            </h2>
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          </div>
-
-          <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
-              {[
-                {
-                  id: 1,
-                  date: '21/11/2025 20:59',
-                  type: 'SUMMARY',
-                  image: 'Energy',
-                  headline: 'Energy Markets React to Breakthrough Peace Deal Between U.S., Russia, and Ukraine',
-                  tags: ['EURUSD']
-                },
-                {
-                  id: 2,
-                  date: '21/11/2025 20:58',
-                  type: 'SNAPSHOTS',
-                  image: 'Dollar',
-                  headline: 'Currency pairs: Latest news',
-                  tags: ['EURUSD']
-                },
-                {
-                  id: 3,
-                  date: '21/11/2025 19:22',
-                  type: 'SUMMARY',
-                  image: 'World',
-                  headline: 'Charting the Future: Vice Chair Jefferson Speaks on AI and Financial Stability',
-                  tags: ['EURUSD', 'USDJPY']
-                },
-                {
-                  id: 4,
-                  date: '21/11/2025 19:22',
-                  type: 'SNAPSHOTS',
-                  image: 'Eye',
-                  headline: 'Currency pairs: Latest news',
-                  tags: ['USDCAD', 'USDJPY', 'EURUSD']
-                },
-                {
-                  id: 5,
-                  date: '21/11/2025 19:07',
-                  type: 'SUMMARY',
-                  image: 'Piggy',
-                  headline: 'Federal Reserve Welcomes Young M at the 2025 National College Fed Challenge Finals',
-                  tags: ['EURUSD', 'USDJPY', 'Gold']
-                }
-              ].map((news) => (
-                <div
-                  key={news.id}
-                  className="min-w-[280px] bg-gray-100 rounded-lg p-4 border border-gray-200 shadow-md"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                      {news.date}
-                    </span>
-                    <span className="px-2 py-0.5 bg-gray-200 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
-                      {news.type}
-                    </span>
-                  </div>
-                  <div className="w-full h-32 bg-gray-200 rounded mb-3 flex items-center justify-center">
-                    <span className="text-xs text-gray-400">{news.image}</span>
-                  </div>
-                  <h3 className="font-semibold mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', color: '#000000', fontWeight: '600', lineHeight: '1.4' }}>
-                    {news.headline}
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {news.tags.map((tag, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-white border border-gray-300 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Navigation Arrows */}
-            <div className="flex justify-center gap-2 mt-4">
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Assets to Watch Section */}
         <div className="mt-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -721,6 +621,451 @@ function ResearchTerminal() {
             </div>
           </div>
         </div>
+
+          {/* Hot News Section */}
+        <div className="mt-8 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
+              Hot News
+            </h2>
+            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+              {[
+                {
+                  id: 1,
+                  date: '21/11/2025 20:59',
+                  type: 'SUMMARY',
+                  image: 'Energy',
+                  headline: 'Energy Markets React to Breakthrough Peace Deal Between U.S., Russia, and Ukraine',
+                  tags: ['EURUSD']
+                },
+                {
+                  id: 2,
+                  date: '21/11/2025 20:58',
+                  type: 'SNAPSHOTS',
+                  image: 'Dollar',
+                  headline: 'Currency pairs: Latest news',
+                  tags: ['EURUSD']
+                },
+                {
+                  id: 3,
+                  date: '21/11/2025 19:22',
+                  type: 'SUMMARY',
+                  image: 'World',
+                  headline: 'Charting the Future: Vice Chair Jefferson Speaks on AI and Financial Stability',
+                  tags: ['EURUSD', 'USDJPY']
+                },
+                {
+                  id: 4,
+                  date: '21/11/2025 19:22',
+                  type: 'SNAPSHOTS',
+                  image: 'Eye',
+                  headline: 'Currency pairs: Latest news',
+                  tags: ['USDCAD', 'USDJPY', 'EURUSD']
+                },
+                {
+                  id: 5,
+                  date: '21/11/2025 19:07',
+                  type: 'SUMMARY',
+                  image: 'Piggy',
+                  headline: 'Federal Reserve Welcomes Young M at the 2025 National College Fed Challenge Finals',
+                  tags: ['EURUSD', 'USDJPY', 'Gold']
+                }
+              ].map((news) => (
+                <div
+                  key={news.id}
+                  className="min-w-[280px] bg-gray-100 rounded-lg p-4 border border-gray-200 shadow-md"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                      {news.date}
+                    </span>
+                    <span className="px-2 py-0.5 bg-gray-200 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
+                      {news.type}
+                    </span>
+                  </div>
+                  <div className="w-full h-32 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                    <span className="text-xs text-gray-400">{news.image}</span>
+                  </div>
+                  <h3 className="font-semibold mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', color: '#000000', fontWeight: '600', lineHeight: '1.4' }}>
+                    {news.headline}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {news.tags.map((tag, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-white border border-gray-300 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex justify-center gap-2 mt-4">
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* AnalysisIQ Section */}
+        <div className="mt-8 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
+              AnalysisIQ
+            </h2>
+            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+              {[
+                {
+                  id: 1,
+                  title: 'EUR/USD Trend Analysis',
+                  insight: 'Strong bullish momentum detected with 78% confidence. Key resistance at 1.0850.',
+                  prediction: 'Expected to reach 1.0920 within 48 hours',
+                  accuracy: 85,
+                  timestamp: '21/11/2025 14:30',
+                  type: 'TREND'
+                },
+                {
+                  id: 2,
+                  title: 'Gold Price Prediction',
+                  insight: 'Technical indicators suggest consolidation phase. Support holding at $1950.',
+                  prediction: 'Potential breakout above $1980 if Fed signals dovish',
+                  accuracy: 72,
+                  timestamp: '21/11/2025 13:45',
+                  type: 'PREDICTION'
+                },
+                {
+                  id: 3,
+                  title: 'Crypto Market Sentiment',
+                  insight: 'Bitcoin showing accumulation patterns. RSI indicates oversold conditions.',
+                  prediction: 'Bullish reversal expected if BTC holds $45,000',
+                  accuracy: 91,
+                  timestamp: '21/11/2025 12:15',
+                  type: 'SENTIMENT'
+                },
+                {
+                  id: 4,
+                  title: 'Oil Market Analysis',
+                  insight: 'Supply disruptions in Middle East causing upward pressure on prices.',
+                  prediction: 'WTI crude could test $85/barrel if tensions escalate',
+                  accuracy: 79,
+                  timestamp: '21/11/2025 11:20',
+                  type: 'ANALYSIS'
+                }
+              ].map((analysis) => (
+                <div
+                  key={analysis.id}
+                  className="min-w-[280px] bg-gray-100 rounded-lg p-4 border border-gray-200 shadow-md"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                      {analysis.timestamp}
+                    </span>
+                    <span className="px-2 py-0.5 bg-blue-200 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
+                      {analysis.type}
+                    </span>
+                  </div>
+                  <div className="w-full h-24 bg-blue-200 rounded mb-3 flex items-center justify-center">
+                    <span className="text-xs text-blue-700 font-semibold">AI INSIGHT</span>
+                  </div>
+                  <h3 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600', lineHeight: '1.4' }}>
+                    {analysis.title}
+                  </h3>
+                  <p className="text-sm text-gray-700 mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.4' }}>
+                    {analysis.insight}
+                  </p>
+                  <div className="bg-white p-3 rounded mb-2">
+                    <p className="text-sm font-medium text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '500' }}>
+                      {analysis.prediction}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                      Accuracy: {analysis.accuracy}%
+                    </span>
+                    <button className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
+                      VIEW DETAILS
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex justify-center gap-2 mt-4">
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Calendar Events Section */}
+        <div className="mt-8 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
+              Calendar Events
+            </h2>
+            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+            </svg>
+          </div>
+
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+              {[
+                {
+                  id: 1,
+                  date: '21/11/2025 15:30',
+                  country: 'US',
+                  event: 'Fed Interest Rate Decision',
+                  impact: 'High',
+                  forecast: '5.25%',
+                  previous: '5.25%',
+                  currency: 'USD'
+                },
+                {
+                  id: 2,
+                  date: '21/11/2025 13:00',
+                  country: 'EU',
+                  event: 'ECB Press Conference',
+                  impact: 'High',
+                  forecast: '-',
+                  previous: '-',
+                  currency: 'EUR'
+                },
+                {
+                  id: 3,
+                  date: '22/11/2025 08:30',
+                  country: 'UK',
+                  event: 'GDP (QoQ)',
+                  impact: 'Medium',
+                  forecast: '0.3%',
+                  previous: '0.2%',
+                  currency: 'GBP'
+                },
+                {
+                  id: 4,
+                  date: '22/11/2025 14:00',
+                  country: 'DE',
+                  event: 'German CPI (MoM)',
+                  impact: 'Medium',
+                  forecast: '0.1%',
+                  previous: '0.2%',
+                  currency: 'EUR'
+                },
+                {
+                  id: 5,
+                  date: '23/11/2025 09:30',
+                  country: 'JP',
+                  event: 'BoJ Monetary Policy Statement',
+                  impact: 'High',
+                  forecast: '-',
+                  previous: '-',
+                  currency: 'JPY'
+                }
+              ].map((event) => (
+                <div
+                  key={event.id}
+                  className="min-w-[280px] bg-gray-100 rounded-lg p-4 border border-gray-200 shadow-md"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                      {event.date}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                      event.impact === 'High' ? 'bg-red-200 text-red-700' :
+                      event.impact === 'Medium' ? 'bg-orange-200 text-orange-700' :
+                      'bg-green-200 text-green-700'
+                    }`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
+                      {event.impact} Impact
+                    </span>
+                  </div>
+                  <div className="w-full h-24 bg-green-200 rounded mb-3 flex items-center justify-center">
+                    <span className="text-xs text-green-700 font-semibold">ECONOMIC EVENT</span>
+                  </div>
+                  <h3 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600', lineHeight: '1.4' }}>
+                    {event.event}
+                  </h3>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center text-xs font-bold">
+                      {event.country}
+                    </div>
+                    <span className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
+                      {event.currency}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Forecast</span>
+                      <span className="font-semibold text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
+                        {event.forecast}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Previous</span>
+                      <span className="font-semibold text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
+                        {event.previous}
+                      </span>
+                    </div>
+                  </div>
+                  <button className="mt-3 w-full px-3 py-2 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
+                    SET REMINDER
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex justify-center gap-2 mt-4">
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Market Companion Section */}
+        <div className="mt-8 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
+              Market Companion
+            </h2>
+            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd" />
+            </svg>
+          </div>
+
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+              {[
+                {
+                  id: 1,
+                  title: 'Quick Calculator',
+                  description: 'Calculate position sizes, risk management, and profit targets',
+                  icon: '📊',
+                  type: 'TOOL',
+                  action: 'OPEN CALCULATOR'
+                },
+                {
+                  id: 2,
+                  title: 'Market Overview',
+                  description: 'Real-time prices and changes for major indices and cryptocurrencies',
+                  icon: '📈',
+                  type: 'OVERVIEW',
+                  action: 'VIEW MARKETS'
+                },
+                {
+                  id: 3,
+                  title: 'Price Alerts',
+                  description: 'Set custom alerts for price movements and market events',
+                  icon: '🔔',
+                  type: 'ALERT',
+                  action: 'SET ALERTS'
+                },
+                {
+                  id: 4,
+                  title: 'Watchlist Manager',
+                  description: 'Track your favorite assets and monitor performance',
+                  icon: '📋',
+                  type: 'WATCHLIST',
+                  action: 'MANAGE LIST'
+                },
+                {
+                  id: 5,
+                  title: 'Economic Calendar',
+                  description: 'Stay updated with upcoming economic events and their impact',
+                  icon: '📅',
+                  type: 'CALENDAR',
+                  action: 'VIEW EVENTS'
+                },
+                {
+                  id: 6,
+                  title: 'Trading Journal',
+                  description: 'Record and analyze your trading performance over time',
+                  icon: '📝',
+                  type: 'JOURNAL',
+                  action: 'OPEN JOURNAL'
+                }
+              ].map((tool) => (
+                <div
+                  key={tool.id}
+                  className="min-w-[280px] bg-gray-100 rounded-lg p-4 border border-gray-200 shadow-md"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                      MARKET TOOL
+                    </span>
+                    <span className="px-2 py-0.5 bg-purple-200 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
+                      {tool.type}
+                    </span>
+                  </div>
+                  <div className="w-full h-24 bg-purple-200 rounded mb-3 flex items-center justify-center">
+                    <span className="text-2xl">{tool.icon}</span>
+                  </div>
+                  <h3 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600', lineHeight: '1.4' }}>
+                    {tool.title}
+                  </h3>
+                  <p className="text-sm text-gray-700 mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.4' }}>
+                    {tool.description}
+                  </p>
+                  <button className="w-full px-3 py-2 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
+                    {tool.action}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex justify-center gap-2 mt-4">
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* Filter Modal */}
