@@ -199,10 +199,10 @@ function MarketCalendar() {
         </h2>
 
         {/* Calendar Grid View */}
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-6">
-          <div className="grid grid-cols-7 gap-4">
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-6 overflow-x-auto">
+          <div className="flex flex-row gap-4">
             {days.map((day) => (
-              <div key={day.date} className="flex flex-col">
+              <div key={day.date} className="flex flex-col min-w-[120px]">
                 {/* Day Header */}
                 <div className={`text-center mb-3 pb-2 ${day.isToday ? 'bg-blue-50 rounded' : ''}`}>
                   <div className="flex items-center justify-center gap-1 mb-1">
@@ -224,24 +224,24 @@ function MarketCalendar() {
                     events[day.date].map((event) => (
                       <div
                         key={event.id}
-                        className={`bg-white border-2 ${getBorderColor(event.color)} rounded-lg p-2 relative cursor-pointer hover:shadow-md transition-shadow`}
+                        className={`bg-white border-2 ${getBorderColor(event.color)} rounded-lg p-4 min-h-[120px] relative cursor-pointer hover:shadow-md transition-shadow`}
                         onClick={() => setSelectedDate(day.date)}
                       >
-                        <div className="flex items-start justify-between mb-1">
-                          <div className="flex items-center gap-1">
-                            <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center text-xs font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '9px', fontWeight: '700' }}>
-                              {event.countryCode}
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <div className="text-center">
+                            <div className="text-xs font-semibold mb-1" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', color: '#000000', fontWeight: '600' }}>
+                              {event.country}
                             </div>
-                            <span className="text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', color: '#000000', fontWeight: '600' }}>
+                            <div className="text-xs font-semibold mb-1" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', color: '#000000', fontWeight: '600' }}>
                               {event.name}
-                            </span>
+                            </div>
+                            <div className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
+                              {event.time}
+                            </div>
                           </div>
                           <div className={`absolute top-1 right-1 w-6 h-6 ${getBadgeColor(event.color)} text-white rounded-full flex items-center justify-center text-xs font-bold`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '9px', fontWeight: '700' }}>
                             {event.badge}
                           </div>
-                        </div>
-                        <div className="text-xs text-gray-600 mt-1" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
-                          {event.time}
                         </div>
                       </div>
                     ))
