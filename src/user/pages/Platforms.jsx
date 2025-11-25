@@ -8,17 +8,17 @@ function Platforms() {
 
         {/* Desktop Platform Section */}
         <div className="mb-12">
-          <h2 className="text-center mb-8 text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '28px', color: '#000000', fontWeight: '700' }}>
+          <h2 className="mb-8 text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '28px', color: '#000000', fontWeight: '700' }}>
             Desktop Platform
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* MetaTrader 4 */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
               <div className="h-48 bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-400 text-sm">MT4 Screenshot</span>
+                <img src="/mt4.png" alt="MT4" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
+                <h3 className="text-xl font-bold mb-3 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
                   MetaTrader 4
                 </h3>
                 <p className="text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>
@@ -62,10 +62,10 @@ function Platforms() {
             {/* MetaTrader 5 */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
               <div className="h-48 bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-400 text-sm">MT5 Screenshot</span>
+                <img src="/mt5.png" alt="MT5" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
+                <h3 className="text-xl font-bold mb-3 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
                   MetaTrader 5
                 </h3>
                 <p className="text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>
@@ -110,17 +110,17 @@ function Platforms() {
 
         {/* Web Platform Section */}
         <div className="mb-12">
-          <h2 className="text-center mb-8 text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '28px', color: '#000000', fontWeight: '700' }}>
+          <h2 className="mb-8 text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '28px', color: '#000000', fontWeight: '700' }}>
             Web Platform
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* MT4 WebTrader */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
               <div className="h-48 bg-gray-100 flex items-center justify-center relative">
-                <span className="text-gray-400 text-sm">MT4 WebTrader</span>
+                <img src="/mt4.png" alt="MT4 WebTrader" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
+                <h3 className="text-xl font-bold mb-3 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
                   MT4 WebTrader
                 </h3>
                 <p className="text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>
@@ -150,10 +150,10 @@ function Platforms() {
             {/* MT5 WebTrader */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
               <div className="h-48 bg-gray-100 flex items-center justify-center relative">
-                <span className="text-gray-400 text-sm">MT5 WebTrader</span>
+                <img src="/mt5.png" alt="MT5 WebTrader" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
+                <h3 className="text-xl font-bold mb-3 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
                   MT5 WebTrader
                 </h3>
                 <p className="text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>
@@ -187,7 +187,7 @@ function Platforms() {
                 <span className="text-gray-400 text-sm">Solitaire Copy</span>
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
+                <h3 className="text-xl font-bold mb-3 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
                   Solitaire Copy
                 </h3>
                 <p className="text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>
@@ -214,19 +214,19 @@ function Platforms() {
 
         {/* Mobile Platform Section */}
         <div className="mb-12">
-          <h2 className="text-center mb-8 text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '28px', color: '#000000', fontWeight: '700' }}>
+          <h2 className="mb-8 text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '28px', color: '#000000', fontWeight: '700' }}>
             Mobile Platform
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* MetaTrader 4 Mobile */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
+                <h3 className="text-xl font-bold mb-4 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
                   MetaTrader 4
                 </h3>
                 <div className="h-64 bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
                   <div className="w-32 h-56 bg-white rounded-lg border-4 border-gray-300 shadow-lg flex items-center justify-center">
-                    <span className="text-xs text-gray-400">MT4 Mobile</span>
+                    <img src="/mt4.png" alt="MT4" className="w-full h-full object-contain" />
                   </div>
                 </div>
                 <p className="text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>
@@ -270,12 +270,12 @@ function Platforms() {
             {/* MetaTrader 5 Mobile */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
+                <h3 className="text-xl font-bold mb-4 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
                   MetaTrader 5
                 </h3>
                 <div className="h-64 bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
                   <div className="w-32 h-56 bg-white rounded-lg border-4 border-gray-300 shadow-lg flex items-center justify-center">
-                    <span className="text-xs text-gray-400">MT5 Mobile</span>
+                    <img src="/mt5.png" alt="MT5" className="w-full h-full object-contain" />
                   </div>
                 </div>
                 <p className="text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400', lineHeight: '1.6' }}>
