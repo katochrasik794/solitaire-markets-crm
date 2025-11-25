@@ -1,4 +1,109 @@
 import { useState } from 'react'
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend
+);
+
+function NewsSentiment() {
+  const labels = [
+    "27.10", "30.10", "04.11", "07.11", "12.11", "17.11", "20.11"
+  ];
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Price",
+        data: [1.775, 1.768, 1.764, 1.781, 1.773, 1.789, 1.782],
+        borderColor: "#000",
+        borderWidth: 2,
+        fill: false,
+        tension: 0.4,
+        pointRadius: 0,
+      },
+      {
+        label: "Sentiment",
+        data: [0.2, -0.3, -0.6, 0.1, -0.2, -0.5, 0.3],
+        backgroundColor: (ctx) => {
+          const value = ctx.raw;
+          return value >= 0 ? "rgba(0, 150, 80, 0.4)" : "rgba(255, 99, 99, 0.4)";
+        },
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    plugins: {
+      legend: {
+        position: "top",
+        align: "end",
+        labels: {
+          usePointStyle: true,
+          boxWidth: 10,
+        },
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: "#000",
+        titleColor: "#fff",
+        bodyColor: "#fff",
+      },
+    },
+
+    scales: {
+      x: {
+        grid: { display: false },
+      },
+      y: {
+        grid: {
+          color: "rgba(0,0,0,0.15)",
+          lineWidth: 0.4,
+          drawBorder: false,
+        },
+        ticks: {
+          autoSkip: true,
+          maxTicksLimit: 10,
+        },
+      },
+    },
+  };
+
+  return (
+    <div className="w-full bg-gray-100 p-5 md:p-8 rounded-xl mt-6">
+      <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-6">
+        News Sentiment
+      </h2>
+
+      <div className="w-full h-[300px] sm:h-[350px] md:h-[450px] lg:h-[500px]">
+        <Line data={data} options={options} />
+      </div>
+    </div>
+  );
+}
 
 function MarketCalendar() {
   const [calendarType, setCalendarType] = useState('ECONOMIC')
@@ -136,16 +241,40 @@ function MarketCalendar() {
 ];
 
 const allAssets = [
- { name: "EURUSD", flag: "🇺🇸" },
- { name: "EURCAD", flag: "🇨🇦" },
- { name: "EURCHF", flag: "🇨🇭" },
- { name: "EURGBP", flag: "🇬🇧" },
- { name: "EURNOK", flag: "🇳🇴" },
- { name: "EURNZD", flag: "🇳🇿" },
- { name: "EURPLN", flag: "🇵🇱" },
- { name: "EURSGD", flag: "🇸🇬" },
- { name: "DE40", flag: "🇩🇪" },
- { name: "EU50", flag: "🇪🇺" },
+  { name: "EURUSD", flag: "🇺🇸" },
+  { name: "EURCAD", flag: "🇨🇦" },
+  { name: "EURCHF", flag: "🇨🇭" },
+  { name: "EURGBP", flag: "🇬🇧" },
+  { name: "EURNOK", flag: "🇳🇴" },
+  { name: "EURNZD", flag: "🇳🇿" },
+  { name: "EURPLN", flag: "🇵🇱" },
+  { name: "EURSGD", flag: "🇸🇬" },
+  { name: "DE40", flag: "🇩🇪" },
+  { name: "EU50", flag: "🇪🇺" },
+];
+
+const newsInsights = [
+  {
+    id: 1,
+    date: '21/11/2025 21:35',
+    category: 'MARKET INSIGHT',
+    image: 'EURJPY',
+    imageUrl: '/eurjpy.jpg',
+    title: 'EUR/JPY declines amid broader market sentiment',
+    description: 'EUR/JPY declines amid broader market sentiment. USD/JPY\'s drop influences EUR/JPY\'s trajectory, reflecting similar downward trends. The EUR/JPY currency pair has declined by 0.8% since the previous close. This movement coincides with a 0.54%',
+    tag: 'EURJPY'
+  },
+  {
+    id: 2,
+    date: '21/11/2025 20:04',
+    category: 'MACRO PREVIEW',
+    image: 'Japan',
+    imageUrl: '/japan.jpg',
+    title: 'Japan\'s Manufacturing PMI Flash Shows Slight Improvement',
+    description: 'Japan\'s Manufacturing PMI Flash Shows Slight Improvement at 48.8, Yet Signals Continued Contraction Amidst Economic Concerns and Market Volatility',
+    tags: ['Economic Indicators', 'Market Sentiment', 'Sector Weakness'],
+    partialText: 'At 00:30 UTC on November 21, 2025, the Jibun Bank'
+  }
 ];
 
   const getBadgeColor = (color) => {
@@ -393,6 +522,149 @@ const allAssets = [
             </div>
           </div>
         </div>
+
+        {/* Trade Idea Section */}
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-6">
+          <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
+            Trade Idea
+          </h2>
+
+          {/* Tag */}
+          <span className="inline-block bg-green-600 text-white text-sm font-semibold px-4 py-1 rounded-full mb-4">
+            BUY LIMIT
+          </span>
+
+          {/* Date info */}
+          <div className="text-gray-600 text-sm mb-6">
+            <p>Published at: 25/11/2025 11:10</p>
+            <p>Expires at: 26/11/2025 11:30</p>
+          </div>
+
+          {/* Description */}
+          <div className="text-gray-800 space-y-3 text-sm md:text-base">
+            <p>Price action looks to be forming a bottom</p>
+            <p>Pivot support is at 18.3000</p>
+            <p>Risk/Reward would be poor to call a buy from current levels</p>
+            <p>A move through 18.5500 will confirm the bullish momentum</p>
+            <p>The measured move target is 18.6500</p>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-300 my-6"></div>
+
+          {/* Resistance & Support Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Resistance List */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-green-700 font-semibold">
+                  <span className="text-xl mr-2">|</span> RESISTANCE 1
+                </span>
+                <span className="text-lg font-bold text-gray-900">18.55000</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-green-700 font-semibold">
+                  <span className="text-xl mr-2">|</span> RESISTANCE 2
+                </span>
+                <span className="text-lg font-bold text-gray-900">18.60000</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-green-700 font-semibold">
+                  <span className="text-xl mr-2">|</span> RESISTANCE 3
+                </span>
+                <span className="text-lg font-bold text-gray-900">18.65000</span>
+              </div>
+            </div>
+
+            {/* Support List */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-red-700 font-semibold">
+                  <span className="text-xl mr-2 text-red-700">|</span> SUPPORT 1
+                </span>
+                <span className="text-lg font-bold text-gray-900">18.45000</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-red-700 font-semibold">
+                  <span className="text-xl mr-2 text-red-700">|</span> SUPPORT 2
+                </span>
+                <span className="text-lg font-bold text-gray-900">18.40000</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-red-700 font-semibold">
+                  <span className="text-xl mr-2 text-red-700">|</span> SUPPORT 3
+                </span>
+                <span className="text-lg font-bold text-gray-900">18.37500</span>
+              </div>
+            </div>
+
+            {/* Empty third column for alignment on desktop */}
+            <div className="hidden lg:block"></div>
+          </div>
+        </div>
+
+        {/* News & Insights */}
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-md max-h-[400px] overflow-y-auto mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', color: '#000000', fontWeight: '600' }}>
+              News & Insights
+            </h3>
+            <span className="px-2 py-1 bg-gray-200 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
+              EURJPY
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {newsInsights.map((item) => (
+              <div key={item.id} className="border-b border-gray-200 pb-4 last:border-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                    {item.date}
+                  </span>
+                  <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
+                    {item.category}
+                  </span>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-[30%]">
+                    <img src={item.imageUrl} alt={item.image} className="w-full h-32 object-cover rounded" />
+                  </div>
+                  <div className="w-[70%]">
+                    <h4 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
+                      {item.title}
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.5' }}>
+                      {item.description}
+                    </p>
+                    {item.tags && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {item.tags.map((tag, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-gray-100 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {item.partialText && (
+                      <p className="text-xs text-gray-500 italic" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                        {item.partialText}...
+                      </p>
+                    )}
+                    <button className="mt-2 px-4 py-2 bg-gray-800 text-white text-xs font-semibold rounded hover:bg-gray-900 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
+                      FIND OUT MORE
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <NewsSentiment />
 
       </div>
 

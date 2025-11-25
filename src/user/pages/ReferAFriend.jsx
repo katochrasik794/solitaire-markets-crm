@@ -58,11 +58,11 @@ function ReferAFriend() {
   return (
     <div className="bg-gray-50 min-h-screen overflow-x-hidden">
       {/* Top Banner Section */}
-      <div className="bg-gradient-to-r from-gray-800 to-gray-600 rounded-lg text-white mx-4 sm:mx-8 lg:mx-auto mt-5" style={{ maxWidth: '1140px', minHeight: '230px' }}>
+      <div className="bg-gradient-to-r from-gray-800 to-gray-600 rounded-lg text-white mx-4 sm:mx-8 lg:mx-auto mt-5" style={{ maxWidth: '1145px', minHeight: '230px' }}>
         <div className="w-full h-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-center min-h-full">
             <div className="text-center lg:text-left">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
                 Refer Friends. Earn Rewards. Trade. Repeat.
               </h1>
               <p className="text-sm sm:text-base mb-3 sm:mb-4 opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>
@@ -144,7 +144,7 @@ function ReferAFriend() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
+      <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6">
         {/* Referral Summary Section */}
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
