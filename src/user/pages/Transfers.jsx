@@ -7,10 +7,11 @@ function Transfers() {
 
   return (
     <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
-      <div className="w-full max-w-[80%] mx-auto">
-        <h1 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
+      <div className="w-full max-w-[95%] mx-auto bg-gray-100 rounded-lg">
+        <h1 className="text-left p-4 md:p-6 pb-0 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '400' }}>
           Move Funds
         </h1>
+        <div className="w-full max-w-2xl mx-auto px-4 md:px-6 pb-4 md:pb-6">
         {/* Form Container */}
         <div className="bg-white rounded-lg p-6 border border-gray-200">
           <form className="space-y-6">
@@ -86,6 +87,7 @@ function Transfers() {
               Submit
             </button>
           </form>
+        </div>
         </div>
       </div>
     </div>

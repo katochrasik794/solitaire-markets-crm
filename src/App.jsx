@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import ScrollToTop from './components/ScrollToTop'
 import UserLayout from './user/components/UserLayout'
 import AdminLayout from './admin/components/AdminLayout'
 
@@ -44,6 +45,7 @@ import AdminUsers from './admin/pages/AdminUsers'
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
