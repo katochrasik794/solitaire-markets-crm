@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Scatter } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -13,6 +13,8 @@ ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
 function MarketNews() {
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0)
   const [currentAnalysisIndex, setCurrentAnalysisIndex] = useState(0)
+  const hotNewsRef = useRef(null)
+  const analysisRef = useRef(null)
 
   const marketNews = [
     {
@@ -241,6 +243,30 @@ function MarketNews() {
     setCurrentAnalysisIndex((prev) => (prev - 1 + analysisCards.length) % analysisCards.length)
   }
 
+  const scrollHotNewsLeft = () => {
+    if (hotNewsRef.current) {
+      hotNewsRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollHotNewsRight = () => {
+    if (hotNewsRef.current) {
+      hotNewsRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollAnalysisLeft = () => {
+    if (analysisRef.current) {
+      analysisRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollAnalysisRight = () => {
+    if (analysisRef.current) {
+      analysisRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
+
   // Scatter plot data for trending instruments
   const scatterData = {
     datasets: [
@@ -361,7 +387,7 @@ function MarketNews() {
           </div>
 
           <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+            <div ref={hotNewsRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
               {[
                 {
                   id: 1,
@@ -448,12 +474,12 @@ function MarketNews() {
 
             {/* Navigation Arrows */}
             <div className="flex justify-center gap-2 mt-4">
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollHotNewsLeft} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollHotNewsRight} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -556,7 +582,7 @@ function MarketNews() {
           </div>
 
           <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+            <div ref={analysisRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
               {[
                 {
                   id: 1,
@@ -643,12 +669,12 @@ function MarketNews() {
 
             {/* Navigation Arrows */}
             <div className="flex justify-center gap-2 mt-4">
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollAnalysisLeft} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollAnalysisRight} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

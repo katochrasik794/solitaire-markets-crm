@@ -7,22 +7,38 @@
 @tailwind utilities;
 
 @layer base {
-  html, body {
+  html, body, #root {
     font-family: 'Roboto', sans-serif;
     font-size: 16px;
     font-weight: 400;
     color: #4B5156;
     overflow-x: hidden;
     max-width: 100vw;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  html::-webkit-scrollbar, body::-webkit-scrollbar, #root::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 
   /* Default font styling - use normal weight (400) unless specified */
   * {
     font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
   }
 
   button, a {
     font-weight: 400;
+  }
+
+  /* Hide scrollbars on elements with horizontal scroll */
+  .overflow-x-auto::-webkit-scrollbar {
+    display: none;
+  }
+  .overflow-x-auto {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 }
 

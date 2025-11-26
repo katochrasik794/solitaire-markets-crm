@@ -533,7 +533,7 @@ const newsInsights = [
     date: '21/11/2025 21:35',
     category: 'MARKET INSIGHT',
     image: 'EURJPY',
-    imageUrl: '/eurjpy.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=60',
     title: 'EUR/JPY declines amid broader market sentiment',
     description: 'EUR/JPY declines amid broader market sentiment. USD/JPY\'s drop influences EUR/JPY\'s trajectory, reflecting similar downward trends. The EUR/JPY currency pair has declined by 0.8% since the previous close. This movement coincides with a 0.54%',
     tag: 'EURJPY'
@@ -548,6 +548,39 @@ const newsInsights = [
     description: 'Japan\'s Manufacturing PMI Flash Shows Slight Improvement at 48.8, Yet Signals Continued Contraction Amidst Economic Concerns and Market Volatility',
     tags: ['Economic Indicators', 'Market Sentiment', 'Sector Weakness'],
     partialText: 'At 00:30 UTC on November 21, 2025, the Jibun Bank'
+  },
+  {
+    id: 3,
+    date: '21/11/2025 19:45',
+    category: 'ECONOMIC INDICATORS',
+    image: 'US',
+    imageUrl: '/flag-icon.svg',
+    title: 'US Economic Data Release: Inflation Figures Beat Expectations',
+    description: 'US CPI data shows inflation cooling faster than anticipated, boosting market optimism. Federal Reserve hints at potential rate cuts in upcoming meetings.',
+    tags: ['Inflation', 'Fed Policy', 'Economic Data'],
+    partialText: 'The latest Consumer Price Index (CPI) report revealed...'
+  },
+  {
+    id: 4,
+    date: '21/11/2025 18:30',
+    category: 'CRYPTO NEWS',
+    image: 'BTC',
+    imageUrl: '/bitcoin-logo.webp',
+    title: 'Bitcoin Surges Past $100,000 Amid Institutional Adoption',
+    description: 'Bitcoin hits new all-time high as major corporations announce BTC holdings. Regulatory clarity in the US drives increased institutional interest.',
+    tags: ['Cryptocurrency', 'Institutional Investment', 'Regulation'],
+    partialText: 'Following the announcement by Tesla and MicroStrategy...'
+  },
+  {
+    id: 5,
+    date: '21/11/2025 17:15',
+    category: 'COMMODITIES UPDATE',
+    image: 'Gold',
+    imageUrl: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=800&q=60',
+    title: 'Gold Prices Rally on Geopolitical Tensions',
+    description: 'Gold futures climb as escalating tensions in the Middle East fuel safe-haven demand. Analysts predict further upside if conflicts intensify.',
+    tags: ['Gold', 'Geopolitical Risk', 'Safe Haven'],
+    partialText: 'Spot gold prices have risen approximately 2.5%...'
   }
 ];
 
@@ -874,61 +907,61 @@ const newsInsights = [
         <TradeIdeaPerformance />
 
         {/* News & Insights */}
-        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-md max-h-[400px] overflow-y-auto mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', color: '#000000', fontWeight: '600' }}>
-              News & Insights
-            </h3>
-            <span className="px-2 py-1 bg-gray-200 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
-              EURJPY
-            </span>
-          </div>
-
-          <div className="space-y-4">
-            {newsInsights.map((item) => (
-              <div key={item.id} className="border-b border-gray-200 pb-4 last:border-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                    {item.date}
-                  </span>
-                  <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
-                    {item.category}
-                  </span>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-[30%]">
-                    <img src={item.imageUrl} alt={item.image} className="w-full h-32 object-cover rounded" />
-                  </div>
-                  <div className="w-[70%]">
-                    <h4 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
-                      {item.title}
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.5' }}>
-                      {item.description}
-                    </p>
-                    {item.tags && (
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {item.tags.map((tag, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-gray-100 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {item.partialText && (
-                      <p className="text-xs text-gray-500 italic" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                        {item.partialText}...
-                      </p>
-                    )}
-                    <button className="mt-2 px-4 py-2 bg-gray-800 text-white text-xs font-semibold rounded hover:bg-gray-900 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
-                      FIND OUT MORE
-                    </button>
-                  </div>
-                </div>
+         <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-md max-h-[400px] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', color: '#000000', fontWeight: '600' }}>
+                  News & Insights
+                </h3>
+                <span className="px-2 py-1 bg-gray-200 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
+                  EURJPY
+                </span>
               </div>
-            ))}
-          </div>
-        </div>
+
+              <div className="space-y-4">
+                {newsInsights.map((item) => (
+                  <div key={item.id} className="border-b border-gray-200 pb-4 last:border-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                        {item.date}
+                      </span>
+                      <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
+                        {item.category}
+                      </span>
+                    </div>
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <div className="w-full md:w-[30%]">
+                        <img src={item.imageUrl} alt={item.image} className="w-full h-24 md:h-36 object-cover rounded" />
+                      </div>
+                      <div className="w-full md:w-[70%]">
+                        <h4 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
+                          {item.title}
+                        </h4>
+                        <p className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.5' }}>
+                          {item.description}
+                        </p>
+                        {item.tags && (
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {item.tags.map((tag, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-gray-100 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {item.partialText && (
+                          <p className="text-xs text-gray-500 italic" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
+                            {item.partialText}...
+                          </p>
+                        )}
+                        <button className="mt-2 px-4 py-2 bg-gray-800 text-white text-xs font-semibold rounded hover:bg-gray-900 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
+                          FIND OUT MORE
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
         <NewsSentiment />
 

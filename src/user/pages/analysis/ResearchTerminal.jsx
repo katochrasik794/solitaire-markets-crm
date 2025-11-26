@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 function ResearchTerminal() {
   const [selectedAssetType, setSelectedAssetType] = useState('all')
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [isColumnsModalOpen, setIsColumnsModalOpen] = useState(false)
+  const hotNewsRef = useRef(null)
+  const marketCompanionRef = useRef(null)
+  const calendarEventsRef = useRef(null)
+  const analysisIQRef = useRef(null)
 
   const hotTradeIdeas = [
     {
@@ -73,6 +77,54 @@ function ResearchTerminal() {
       timestamp: '08/11 21/11/2025 06:35'
     }
   ]
+
+  const scrollHotNewsLeft = () => {
+    if (hotNewsRef.current) {
+      hotNewsRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollHotNewsRight = () => {
+    if (hotNewsRef.current) {
+      hotNewsRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollMarketCompanionLeft = () => {
+    if (marketCompanionRef.current) {
+      marketCompanionRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollMarketCompanionRight = () => {
+    if (marketCompanionRef.current) {
+      marketCompanionRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollCalendarEventsLeft = () => {
+    if (calendarEventsRef.current) {
+      calendarEventsRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollCalendarEventsRight = () => {
+    if (calendarEventsRef.current) {
+      calendarEventsRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollAnalysisIQLeft = () => {
+    if (analysisIQRef.current) {
+      analysisIQRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollAnalysisIQRight = () => {
+    if (analysisIQRef.current) {
+      analysisIQRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
@@ -634,7 +686,7 @@ function ResearchTerminal() {
           </div>
 
           <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+            <div ref={hotNewsRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
               {[
                 {
                   id: 1,
@@ -721,12 +773,12 @@ function ResearchTerminal() {
 
             {/* Navigation Arrows */}
             <div className="flex justify-center gap-2 mt-4">
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollHotNewsLeft} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollHotNewsRight} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -747,7 +799,7 @@ function ResearchTerminal() {
           </div>
 
           <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+            <div ref={marketCompanionRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
               {[
                 {
                   id: 1,
@@ -896,12 +948,12 @@ function ResearchTerminal() {
 
             {/* Navigation Arrows */}
             <div className="flex justify-center gap-2 mt-4">
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollMarketCompanionLeft} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollMarketCompanionRight} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -922,7 +974,7 @@ function ResearchTerminal() {
           </div>
 
           <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+            <div ref={calendarEventsRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
               {[
                 {
                   id: 1,
@@ -1011,12 +1063,12 @@ function ResearchTerminal() {
 
             {/* Navigation Arrows */}
             <div className="flex justify-center gap-2 mt-4">
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollCalendarEventsLeft} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollCalendarEventsRight} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -1037,7 +1089,7 @@ function ResearchTerminal() {
           </div>
 
           <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+            <div ref={analysisIQRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
               {[
                 {
                   id: 1,
@@ -1182,12 +1234,12 @@ function ResearchTerminal() {
 
             {/* Navigation Arrows */}
             <div className="flex justify-center gap-2 mt-4">
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollAnalysisIQLeft} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+              <button onClick={scrollAnalysisIQRight} className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
