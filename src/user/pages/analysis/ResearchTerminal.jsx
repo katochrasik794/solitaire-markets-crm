@@ -738,73 +738,123 @@ function ResearchTerminal() {
               {[
                 {
                   id: 1,
-                  title: 'EUR/USD Trend Analysis',
-                  insight: 'Strong bullish momentum detected with 78% confidence. Key resistance at 1.0850.',
-                  prediction: 'Expected to reach 1.0920 within 48 hours',
-                  accuracy: 85,
-                  timestamp: '21/11/2025 14:30',
-                  type: 'TREND'
+                  asset: 'EUR/USD',
+                  assetIcon: '🇪🇺🇺🇸',
+                  direction: 'Buy',
+                  directionColor: 'green',
+                  period: 'Intraday',
+                  stop: '1.0820',
+                  entry: '1.0850',
+                  target: '1.0920',
+                  confidence: 4,
+                  status: 'Buy Limit',
+                  statusColor: 'green',
+                  expiration: '22/11/25 02:30',
+                  timestamp: '21/11/2025 14:30'
                 },
                 {
                   id: 2,
-                  title: 'Gold Price Prediction',
-                  insight: 'Technical indicators suggest consolidation phase. Support holding at $1950.',
-                  prediction: 'Potential breakout above $1980 if Fed signals dovish',
-                  accuracy: 72,
-                  timestamp: '21/11/2025 13:45',
-                  type: 'PREDICTION'
+                  asset: 'XAU/USD',
+                  assetIcon: 'Au',
+                  direction: 'Buy',
+                  directionColor: 'green',
+                  period: 'Intraday',
+                  stop: '1950.00',
+                  entry: '1980.00',
+                  target: '2050.00',
+                  confidence: 3,
+                  status: 'Buy Limit',
+                  statusColor: 'green',
+                  expiration: '22/11/25 02:30',
+                  timestamp: '21/11/2025 13:45'
                 },
                 {
                   id: 3,
-                  title: 'Crypto Market Sentiment',
-                  insight: 'Bitcoin showing accumulation patterns. RSI indicates oversold conditions.',
-                  prediction: 'Bullish reversal expected if BTC holds $45,000',
-                  accuracy: 91,
-                  timestamp: '21/11/2025 12:15',
-                  type: 'SENTIMENT'
+                  asset: 'BTC/USD',
+                  assetIcon: '₿',
+                  direction: 'Buy',
+                  directionColor: 'green',
+                  period: 'Intraday',
+                  stop: '44000.00',
+                  entry: '45000.00',
+                  target: '48000.00',
+                  confidence: 5,
+                  status: 'Buy Limit',
+                  statusColor: 'green',
+                  expiration: '22/11/25 02:30',
+                  timestamp: '21/11/2025 12:15'
                 },
                 {
                   id: 4,
-                  title: 'Oil Market Analysis',
-                  insight: 'Supply disruptions in Middle East causing upward pressure on prices.',
-                  prediction: 'WTI crude could test $85/barrel if tensions escalate',
-                  accuracy: 79,
-                  timestamp: '21/11/2025 11:20',
-                  type: 'ANALYSIS'
+                  asset: 'USOIL',
+                  assetIcon: '🛢️',
+                  direction: 'Sell',
+                  directionColor: 'red',
+                  period: 'Intraday',
+                  stop: '85.00',
+                  entry: '82.00',
+                  target: '78.00',
+                  confidence: 4,
+                  status: 'Sell Limit',
+                  statusColor: 'red',
+                  expiration: '22/11/25 02:30',
+                  timestamp: '21/11/2025 11:20'
                 }
-              ].map((analysis) => (
+              ].map((idea) => (
                 <div
-                  key={analysis.id}
-                  className="min-w-[280px] bg-gray-100 rounded-lg p-4 border border-gray-200 shadow-md"
+                  key={idea.id}
+                  className="min-w-[240px] h-64 bg-white rounded-lg p-4 border border-gray-200 shadow-md flex flex-col"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                      {analysis.timestamp}
-                    </span>
-                    <span className="px-2 py-0.5 bg-blue-200 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
-                      {analysis.type}
-                    </span>
+                  <div>
+                    <div className="flex justify-between items-center text-xs font-semibold text-gray-700">
+                      <span className="bg-gray-100 px-2 py-1 rounded-md">{idea.asset}</span>
+                      <span className="text-gray-600">{idea.period}</span>
+                    </div>
+
+                    {/* BUY LIMIT Badge */}
+                    <div className="flex justify-center mt-2">
+                      <span className={`bg-${idea.directionColor === 'green' ? 'green' : 'red'}-600 text-white text-xs px-3 py-1 rounded-full font-bold`}>
+                        {idea.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="w-full h-24 bg-blue-200 rounded mb-3 flex items-center justify-center">
-                    <span className="text-xs text-blue-700 font-semibold">AI INSIGHT</span>
+
+                  {/* Values */}
+                  <div className="text-xs text-gray-700 space-y-1 flex-1 mt-4">
+                    <div className="flex justify-between">
+                      <span>Entry</span>
+                      <span className="font-bold">{idea.entry}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Target</span>
+                      <span className="font-bold">{idea.target}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Stop</span>
+                      <span className="font-bold">{idea.stop}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>Confidence</span>
+                      <div className="flex gap-1">
+                        {[...Array(Math.min(idea.confidence, 4))].map((_, i) => (
+                          <div
+                            key={i}
+                            className={`w-1.5 rounded ${i === 0 ? 'h-3' : i === 1 ? 'h-4' : i === 2 ? 'h-5' : 'h-6'}`}
+                            style={{ backgroundColor: `rgb(${100 + i * 25}, ${100 + i * 25}, ${100 + i * 25})` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Expires</span>
+                      <span className="text-green-500 font-bold">1d 7h</span>
+                    </div>
                   </div>
-                  <h3 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600', lineHeight: '1.4' }}>
-                    {analysis.title}
-                  </h3>
-                  <p className="text-sm text-gray-700 mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.4' }}>
-                    {analysis.insight}
-                  </p>
-                  <div className="bg-white p-3 rounded mb-2">
-                    <p className="text-sm font-medium text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '500' }}>
-                      {analysis.prediction}
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                      Accuracy: {analysis.accuracy}%
-                    </span>
-                    <button className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                      VIEW DETAILS
+
+                  {/* Learn More Button */}
+                  <div className="flex justify-center mt-auto">
+                    <button className="bg-gray-900 text-white text-xs py-1 px-3 rounded-md font-semibold hover:bg-black transition">
+                      LEARN MORE
                     </button>
                   </div>
                 </div>
@@ -843,102 +893,85 @@ function ResearchTerminal() {
               {[
                 {
                   id: 1,
-                  date: '21/11/2025 15:30',
-                  country: 'US',
-                  event: 'Fed Interest Rate Decision',
-                  impact: 'High',
-                  forecast: '5.25%',
-                  previous: '5.25%',
-                  currency: 'USD'
+                  type: 'Dividends',
+                  ticker: 'CFI.XX',
+                  title: 'CF Industries Holdings Inc',
+                  subtitle: '28.11 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$0.5'
                 },
                 {
                   id: 2,
-                  date: '21/11/2025 13:00',
-                  country: 'EU',
-                  event: 'ECB Press Conference',
-                  impact: 'High',
-                  forecast: '-',
-                  previous: '-',
-                  currency: 'EUR'
+                  type: 'Dividends',
+                  ticker: 'AAPL.XX',
+                  title: 'Apple Inc',
+                  subtitle: '29.11 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$0.25'
                 },
                 {
                   id: 3,
-                  date: '22/11/2025 08:30',
-                  country: 'UK',
-                  event: 'GDP (QoQ)',
-                  impact: 'Medium',
-                  forecast: '0.3%',
-                  previous: '0.2%',
-                  currency: 'GBP'
+                  type: 'Dividends',
+                  ticker: 'MSFT.XX',
+                  title: 'Microsoft Corporation',
+                  subtitle: '30.11 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$0.75'
                 },
                 {
                   id: 4,
-                  date: '22/11/2025 14:00',
-                  country: 'DE',
-                  event: 'German CPI (MoM)',
-                  impact: 'Medium',
-                  forecast: '0.1%',
-                  previous: '0.2%',
-                  currency: 'EUR'
+                  type: 'Dividends',
+                  ticker: 'JNJ.XX',
+                  title: 'Johnson & Johnson',
+                  subtitle: '01.12 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$1.2'
                 },
                 {
                   id: 5,
-                  date: '23/11/2025 09:30',
-                  country: 'JP',
-                  event: 'BoJ Monetary Policy Statement',
-                  impact: 'High',
-                  forecast: '-',
-                  previous: '-',
-                  currency: 'JPY'
+                  type: 'Dividends',
+                  ticker: 'KO.XX',
+                  title: 'Coca-Cola Company',
+                  subtitle: '02.12 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$0.46'
                 }
               ].map((event) => (
                 <div
                   key={event.id}
-                  className="min-w-[280px] bg-gray-100 rounded-lg p-4 border border-gray-200 shadow-md"
+                  className="min-w-[280px] bg-white rounded-lg p-4 border border-gray-200 shadow-md"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                      {event.date}
+                  <div className="flex items-center justify-between mb-4">
+                    {/* Dividends Pill */}
+                    <span className="px-3 py-1 text-sm font-medium rounded-full border border-blue-500 text-blue-600 bg-white">
+                      {event.type}
                     </span>
-                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                      event.impact === 'High' ? 'bg-red-200 text-red-700' :
-                      event.impact === 'Medium' ? 'bg-orange-200 text-orange-700' :
-                      'bg-green-200 text-green-700'
-                    }`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
-                      {event.impact} Impact
+                    {/* Ticker Pill */}
+                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-gray-300 text-gray-700">
+                      {event.ticker}
                     </span>
                   </div>
-                  <div className="w-full h-24 bg-green-200 rounded mb-3 flex items-center justify-center">
-                    <span className="text-xs text-green-700 font-semibold">ECONOMIC EVENT</span>
+
+                  {/* Main Title */}
+                  <h2 className="text-center text-base font-semibold text-[#000] leading-tight">
+                    {event.title.split(' ').slice(0, -1).join(' ')}<br />{event.title.split(' ').slice(-1)}
+                  </h2>
+
+                  {/* Subtitle */}
+                  <p className="text-center text-gray-700 text-xs mt-2">
+                    {event.subtitle}
+                  </p>
+
+                  {/* Description */}
+                  <p className="text-center text-gray-700 text-xs mt-3 leading-snug">
+                    {event.description.split(' ').slice(0, -2).join(' ')}<br />{event.description.split(' ').slice(-2).join(' ')}
+                  </p>
+
+                  {/* Amount Section */}
+                  <div className="flex justify-between items-center mt-6 text-sm">
+                    <span className="text-gray-500 font-medium">Amount</span>
+                    <span className="text-black font-semibold">{event.amount}</span>
                   </div>
-                  <h3 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600', lineHeight: '1.4' }}>
-                    {event.event}
-                  </h3>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center text-xs font-bold">
-                      {event.country}
-                    </div>
-                    <span className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
-                      {event.currency}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Forecast</span>
-                      <span className="font-semibold text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                        {event.forecast}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Previous</span>
-                      <span className="font-semibold text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                        {event.previous}
-                      </span>
-                    </div>
-                  </div>
-                  <button className="mt-3 w-full px-3 py-2 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                    SET REMINDER
-                  </button>
                 </div>
               ))}
             </div>
