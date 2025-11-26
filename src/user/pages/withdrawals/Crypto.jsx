@@ -8,24 +8,25 @@ function Crypto() {
 
   return (
     <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
-      <div className="w-full max-w-full sm:max-w-2xl lg:max-w-4xl mx-auto p-4 md:p-6">
-        <h1 className="mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
+      <div className="w-full max-w-[95%] mx-auto bg-white rounded-lg">
+        <h1 className="text-left p-4 md:p-6 pb-0 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '400' }}>
           Withdraw through Crypto
         </h1>
+        <div className="w-full max-w-2xl mx-auto px-4 md:px-6 pb-4 md:pb-6">
 
         {/* Main Form Container */}
-        <div className="bg-white rounded-lg p-6 border border-gray-200">
-          <form className="space-y-6">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <form className="space-y-4">
             {/* Title */}
-            <h2 className="text-2xl font-semibold text-gray-800">Withdraw from Account</h2>
-            <p className="text-gray-500 mt-1">
+            <h2 className="text-xl font-semibold text-gray-800">Withdraw from Account</h2>
+            <p className="text-gray-500 mt-1 text-sm">
               Select a trading account or a wallet to withdraw your money from
             </p>
 
             {/* Account 1 - Active */}
             <div
               onClick={() => setSelectedAccount('wallet-1')}
-              className={`mt-5 border rounded-xl p-4 flex justify-between items-start cursor-pointer transition-all ${
+              className={`mt-3 border rounded-xl p-3 flex justify-between items-start cursor-pointer transition-all ${
                 selectedAccount === 'wallet-1' ? 'border-[#009688] bg-white shadow-sm' : 'border-gray-300 bg-white'
               }`}
             >
@@ -52,7 +53,7 @@ function Crypto() {
             {/* Account 2 */}
             <div
               onClick={() => setSelectedAccount('mt5-1')}
-              className={`mt-4 border rounded-xl p-4 flex justify-between items-start cursor-pointer transition-all ${
+              className={`mt-2 border rounded-xl p-3 flex justify-between items-start cursor-pointer transition-all ${
                 selectedAccount === 'mt5-1' ? 'border-[#009688] bg-white shadow-sm' : 'border-gray-300 bg-white'
               }`}
             >
@@ -78,13 +79,13 @@ function Crypto() {
             </div>
 
             {/* Amount Section */}
-            <h3 className="text-xl font-semibold mt-6">Amount</h3>
+            <h3 className="text-lg font-semibold mt-4">Amount</h3>
             <p className="text-gray-500 text-sm mt-1">
               Transaction limit: USD 10 - USD 20000
             </p>
 
             {/* Currency & Amount Input */}
-            <div className="mt-3 border rounded-xl flex items-center p-3 bg-white">
+            <div className="mt-2 border rounded-xl flex items-center p-3 bg-white">
               <div className="flex items-center gap-2">
                 <img src="https://flagsapi.com/US/flat/24.png" className="w-5 h-5" />
                 <span className="font-medium text-gray-700">USD</span>
@@ -101,13 +102,13 @@ function Crypto() {
             </div>
 
             {/* Quick Amount Buttons */}
-            <div className="flex gap-3 mt-4 flex-wrap">
+            <div className="flex gap-3 mt-2 flex-wrap">
               {["USD 10", "USD 50", "USD 100"].map((label) => (
                 <button
                   key={label}
                   type="button"
                   onClick={() => setAmount(label.split(' ')[1])}
-                  className="px-5 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="px-4 py-1.5 rounded-md border bg-white text-gray-700 hover:bg-gray-100 transition-colors text-sm"
                 >
                   {label}
                 </button>
@@ -115,9 +116,9 @@ function Crypto() {
             </div>
 
             {/* Password field */}
-            <p className="text-gray-700 mt-6">Enter your password to confirm this withdrawal</p>
+            <p className="text-gray-700 mt-4">Enter your password to confirm this withdrawal</p>
 
-            <div className="mt-2 border rounded-xl p-3 flex items-center bg-white">
+            <div className="mt-1 border rounded-xl p-3 flex items-center bg-white">
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -148,7 +149,7 @@ function Crypto() {
             </div>
 
             {/* Info Notice */}
-            <div className="flex items-start gap-2 mt-4 text-gray-500 text-sm">
+            <div className="flex items-start gap-2 mt-2 text-gray-500 text-sm">
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M13 16h-1v-4h-1m1-4h.01" />
               </svg>
@@ -159,7 +160,7 @@ function Crypto() {
             <button
               type="submit"
               disabled={!amount || !password}
-              className={`w-full mt-5 py-3 rounded-lg font-semibold transition-colors ${
+              className={`w-full mt-3 py-2.5 rounded-lg font-semibold transition-colors ${
                 amount && password
                   ? 'bg-[#009688] hover:bg-[#008f7a] text-white cursor-pointer'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -168,6 +169,7 @@ function Crypto() {
               Continue
             </button>
           </form>
+        </div>
         </div>
       </div>
     </div>
