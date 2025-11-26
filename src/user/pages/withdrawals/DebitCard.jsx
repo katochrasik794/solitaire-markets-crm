@@ -1,7 +1,7 @@
 function DebitCard() {
   return (
     <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
-      <div className="w-full max-w-[80%] mx-auto">
+      <div className="w-full max-w-full sm:max-w-[80%] mx-auto">
         <h1 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
           Withdraw Using Your Debit or Credit Card
         </h1>
@@ -9,7 +9,7 @@ function DebitCard() {
         {/* Card Logos and Information */}
         <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200 text-center">
           {/* Card Logos */}
-          <div className="flex items-center justify-center gap-8 mb-6">
+          <div className="flex items-center justify-center gap-4 sm:gap-8 mb-6">
             {/* VISA */}
             <div className="flex flex-col items-center">
               <div className="w-20 h-12 bg-blue-600 rounded flex items-center justify-center mb-2">
@@ -49,8 +49,8 @@ function DebitCard() {
               To make a withdrawal to a card, a deposit must first be made from a card and the details must be saved on this platform.
             </p>
           </div>
+          </div>
         </div>
-      </div>
     </div>
   )
 }

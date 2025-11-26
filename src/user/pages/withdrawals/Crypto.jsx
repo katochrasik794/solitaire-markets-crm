@@ -8,206 +8,166 @@ function Crypto() {
 
   return (
     <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
-      <div className="w-full max-w-[80%] mx-auto">
+      <div className="w-full max-w-full sm:max-w-2xl lg:max-w-4xl mx-auto p-4 md:p-6">
         <h1 className="mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
           Withdraw through Crypto
         </h1>
 
-        {/* Main Form Container - White outer div */}
-        <div className="bg-white rounded-lg p-6 border border-gray-200 text-center">
-          {/* Inner gray div - centered content */}
-          <div className="bg-gray-200 rounded-lg p-6 text-center">
-            <form className="space-y-6">
-              {/* Withdraw from Account Section */}
-              <div>
-                <h2 className="mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '400' }}>
-                  Withdraw from Account
-                </h2>
-                <p className="mb-4 text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
-                  Select a trading account or a wallet to withdraw your money from.
-                </p>
-                
-                <div className="space-y-3">
-                  {/* Wallet Option */}
-                  <div
-                    onClick={() => setSelectedAccount('wallet-1')}
-                    className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                      selectedAccount === 'wallet-1' ? 'border-[#00A896] bg-white' : 'border-gray-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>Wallet</span>
-                          <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>USD</span>
-                          <span className="text-xs">🇺🇸</span>
-                        </div>
-                        <div className="font-semibold mb-1" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', color: '#000000', fontWeight: '600' }}>
-                          W-2337894-001
-                        </div>
-                        <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
-                          Balance: USD 0.00
-                        </div>
-                      </div>
-                      {selectedAccount === 'wallet-1' ? (
-                        <svg className="w-6 h-6 text-[#00A896]" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                      ) : (
-                        <div className="w-6 h-6 border-2 border-gray-400 rounded-full"></div>
-                      )}
-                    </div>
-                  </div>
+        {/* Main Form Container */}
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <form className="space-y-6">
+            {/* Title */}
+            <h2 className="text-2xl font-semibold text-gray-800">Withdraw from Account</h2>
+            <p className="text-gray-500 mt-1">
+              Select a trading account or a wallet to withdraw your money from
+            </p>
 
-                  {/* MT5 Option */}
-                  <div
-                    onClick={() => setSelectedAccount('mt5-1')}
-                    className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                      selectedAccount === 'mt5-1' ? 'border-[#00A896] bg-white' : 'border-gray-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>MT5</span>
-                          <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>Standard</span>
-                          <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>USD</span>
-                          <span className="text-xs">🇺🇸</span>
-                        </div>
-                        <div className="font-semibold mb-1" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', color: '#000000', fontWeight: '600' }}>
-                          1013516260
-                        </div>
-                        <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
-                          Balance: USD 0.00
-                        </div>
-                      </div>
-                      {selectedAccount === 'mt5-1' ? (
-                        <svg className="w-6 h-6 text-[#00A896]" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                      ) : (
-                        <div className="w-6 h-6 border-2 border-gray-400 rounded-full"></div>
-                      )}
-                    </div>
+            {/* Account 1 - Active */}
+            <div
+              onClick={() => setSelectedAccount('wallet-1')}
+              className={`mt-5 border rounded-xl p-4 flex justify-between items-start cursor-pointer transition-all ${
+                selectedAccount === 'wallet-1' ? 'border-[#009688] bg-white shadow-sm' : 'border-gray-300 bg-white'
+              }`}
+            >
+              <div>
+                <p className="text-gray-800 font-medium">W-2337894-001</p>
+                <div className="flex gap-2 mt-1">
+                  <span className="px-2 py-0.5 text-xs rounded-md bg-gray-200">Wallet</span>
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md text-xs">
+                    <img src="https://flagsapi.com/US/flat/24.png" className="w-4 h-4" />
+                    USD
                   </div>
                 </div>
+                <p className="text-gray-600 text-sm mt-2">Balance: USD 0.00</p>
               </div>
+              <div className="flex items-center">
+                <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${
+                  selectedAccount === 'wallet-1' ? 'border-[#009688] bg-[#009688]' : 'border-gray-300'
+                }`}>
+                  {selectedAccount === 'wallet-1' && <div className="h-2.5 w-2.5 bg-white rounded-full"></div>}
+                </div>
+              </div>
+            </div>
 
-              {/* Amount Section */}
+            {/* Account 2 */}
+            <div
+              onClick={() => setSelectedAccount('mt5-1')}
+              className={`mt-4 border rounded-xl p-4 flex justify-between items-start cursor-pointer transition-all ${
+                selectedAccount === 'mt5-1' ? 'border-[#009688] bg-white shadow-sm' : 'border-gray-300 bg-white'
+              }`}
+            >
               <div>
-                <h2 className="mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '400' }}>
-                  Amount
-                </h2>
-                <p className="mb-3 text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
-                  Transaction limit: USD 10 - USD 20000
-                </p>
-                
-                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
-                  <div className="flex items-center gap-2 px-4 py-2 border-r border-gray-300 bg-gray-50">
-                    <span className="text-sm">🇺🇸</span>
-                    <span className="font-medium" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '500' }}>USD</span>
-                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                <p className="text-gray-800 font-medium">1013516260</p>
+                <div className="flex gap-2 mt-1">
+                  <span className="px-2 py-0.5 text-xs rounded-md bg-gray-200">MT5</span>
+                  <span className="px-2 py-0.5 text-xs rounded-md bg-gray-200">Standard</span>
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md text-xs">
+                    <img src="https://flagsapi.com/US/flat/24.png" className="w-4 h-4" />
+                    USD
                   </div>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="flex-1 px-4 py-2 outline-none"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px' }}
-                  />
                 </div>
-
-                {/* Quick Amount Buttons */}
-                <div className="flex gap-2 mt-3">
-                  <button
-                    type="button"
-                    onClick={() => setAmount('10')}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                  >
-                    USD 10
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAmount('50')}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                  >
-                    USD 50
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAmount('100')}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                  >
-                    USD 100
-                  </button>
+                <p className="text-gray-600 text-sm mt-2">Balance: USD 0.00</p>
+              </div>
+              <div className="flex items-center">
+                <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${
+                  selectedAccount === 'mt5-1' ? 'border-[#009688] bg-[#009688]' : 'border-gray-300'
+                }`}>
+                  {selectedAccount === 'mt5-1' && <div className="h-2.5 w-2.5 bg-white rounded-full"></div>}
                 </div>
               </div>
+            </div>
 
-              {/* Password Confirmation Section */}
-              <div>
-                <h2 className="mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '400' }}>
-                  Password Confirmation
-                </h2>
-                <p className="mb-3 text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
-                  Enter your password to confirm this withdrawal
-                </p>
-                
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg pr-10 outline-none focus:ring-2 focus:ring-[#00A896] focus:border-transparent"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px' }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      {showPassword ? (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                      ) : (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      )}
-                    </svg>
-                  </button>
-                </div>
+            {/* Amount Section */}
+            <h3 className="text-xl font-semibold mt-6">Amount</h3>
+            <p className="text-gray-500 text-sm mt-1">
+              Transaction limit: USD 10 - USD 20000
+            </p>
+
+            {/* Currency & Amount Input */}
+            <div className="mt-3 border rounded-xl flex items-center p-3 bg-white">
+              <div className="flex items-center gap-2">
+                <img src="https://flagsapi.com/US/flat/24.png" className="w-5 h-5" />
+                <span className="font-medium text-gray-700">USD</span>
               </div>
-
-              {/* Warning Message */}
-              <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                <p className="text-sm text-yellow-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
-                  Your funds will be placed on hold until the transaction is fully processed.
-                </p>
+              <div className="ml-auto">
+                <input
+                  type="text"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="text-right bg-transparent outline-none w-24"
+                  placeholder="0.00"
+                />
               </div>
+            </div>
 
-              {/* Continue Button */}
+            {/* Quick Amount Buttons */}
+            <div className="flex gap-3 mt-4 flex-wrap">
+              {["USD 10", "USD 50", "USD 100"].map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setAmount(label.split(' ')[1])}
+                  className="px-5 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Password field */}
+            <p className="text-gray-700 mt-6">Enter your password to confirm this withdrawal</p>
+
+            <div className="mt-2 border rounded-xl p-3 flex items-center bg-white">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="outline-none w-full"
+                placeholder="••••••••"
+              />
               <button
-                type="submit"
-                disabled={!amount || !password}
-                className={`w-full py-3 rounded-lg font-semibold transition-colors ${
-                  amount && password
-                    ? 'bg-[#00A896] hover:bg-[#008f7a] text-white cursor-pointer'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-                style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', fontWeight: '600' }}
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="ml-2"
               >
-                Continue
+                <svg
+                  className="w-5 h-5 text-gray-500 cursor-pointer"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  {showPassword ? (
+                    <path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  ) : (
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  )}
+                  <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
               </button>
-            </form>
-          </div>
+            </div>
+
+            {/* Info Notice */}
+            <div className="flex items-start gap-2 mt-4 text-gray-500 text-sm">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M13 16h-1v-4h-1m1-4h.01" />
+              </svg>
+              <p>Your funds will be placed on hold until the transaction is fully processed.</p>
+            </div>
+
+            {/* Continue Button */}
+            <button
+              type="submit"
+              disabled={!amount || !password}
+              className={`w-full mt-5 py-3 rounded-lg font-semibold transition-colors ${
+                amount && password
+                  ? 'bg-[#009688] hover:bg-[#008f7a] text-white cursor-pointer'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              Continue
+            </button>
+          </form>
         </div>
       </div>
     </div>
