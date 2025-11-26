@@ -1,20 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import authService from '../services/auth.js'
+import AuthLoader from '../components/AuthLoader.jsx'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 function Register() {
   const [currentPage, setCurrentPage] = useState(1) // 1 = country selection, 2 = registration form
   const [country, setCountry] = useState('')
+  const [countries, setCountries] = useState([])
+  const [countriesLoading, setCountriesLoading] = useState(true)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    phoneCode: '+91',
+    phoneCode: '',
     phoneNumber: '',
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
   const [usTaxChecked, setUsTaxChecked] = useState(true)
   const [languageOpen, setLanguageOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const navigate = useNavigate()
 
   const languages = [
@@ -29,24 +37,48 @@ function Register() {
     'English'
   ]
 
-  const countries = [
-    { name: 'India', flag: '🇮🇳' },
-    { name: 'United States', flag: '🇺🇸' },
-    { name: 'United Kingdom', flag: '🇬🇧' },
-    { name: 'Canada', flag: '🇨🇦' },
-    { name: 'Australia', flag: '🇦🇺' },
-    { name: 'Germany', flag: '🇩🇪' },
-    { name: 'France', flag: '🇫🇷' },
-    { name: 'Japan', flag: '🇯🇵' },
-    { name: 'Singapore', flag: '🇸🇬' },
-    { name: 'South Africa', flag: '🇿🇦' }
-  ]
+  // Fetch countries from database on component mount
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        setCountriesLoading(true)
+        const response = await fetch(`${API_BASE_URL}/countries?active_only=true`)
+        const data = await response.json()
+        
+        if (data.success && data.data) {
+          setCountries(data.data)
+          // Set default phone code if countries are loaded
+          if (data.data.length > 0 && !formData.phoneCode) {
+            setFormData(prev => ({
+              ...prev,
+              phoneCode: data.data[0].phone_code
+            }))
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching countries:', err)
+        setError('Failed to load countries. Please refresh the page.')
+      } finally {
+        setCountriesLoading(false)
+      }
+    }
+
+    fetchCountries()
+  }, [])
 
   const handleCountrySubmit = (e) => {
     e.preventDefault()
     if (!country) {
       alert('Please select a country')
       return
+    }
+    // Auto-set phone code based on selected country
+    const selectedCountry = countries.find(c => c.name === country)
+    if (selectedCountry) {
+      setFormData({
+        ...formData,
+        phoneCode: selectedCountry.phone_code
+      })
     }
     setCurrentPage(2)
   }
@@ -58,23 +90,64 @@ function Register() {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
+    
     // Basic validation
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-      alert('Please fill in all required fields')
+      setError('Please fill in all required fields')
       return
     }
     if (!formData.email.includes('@')) {
-      alert('Please enter a valid email address')
+      setError('Please enter a valid email address')
       return
     }
-    // Redirect to home
-    navigate('/')
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long')
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const registrationData = {
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneCode: formData.phoneCode,
+        phoneNumber: formData.phoneNumber,
+        country: country
+      }
+
+      // Minimum 3 seconds loading time for beautiful animation
+      const [result] = await Promise.all([
+        authService.register(registrationData),
+        new Promise(resolve => setTimeout(resolve, 3000))
+      ])
+      
+      if (result.success) {
+        // Auto-login after successful registration
+        navigate('/user/dashboard')
+      }
+    } catch (err) {
+      // Handle validation errors from backend
+      if (err.message && err.message.includes('Validation failed')) {
+        setError(err.message)
+      } else if (err.message && err.message.includes('already exists')) {
+        setError('An account with this email already exists')
+      } else {
+        setError(err.message || 'Registration failed. Please try again.')
+      }
+      setLoading(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Loading Animation */}
+      {loading && <AuthLoader message="Creating your account..." />}
       {/* Header */}
       <div className="w-full flex justify-between items-center px-6 py-4">
         {/* Logo */}
@@ -135,25 +208,31 @@ function Register() {
           {/* Page 1: Country Selection */}
           {currentPage === 1 && (
             <div className="bg-white rounded-lg shadow-lg p-8">
-              <form onSubmit={handleCountrySubmit}>
-                <div>
-                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    What is your country / region of residence?
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent appearance-none"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
-                    >
-                      <option value="">Select Country / Region of Residence</option>
-                      {countries.map((countryOption) => (
-                        <option key={countryOption.name} value={countryOption.name}>
-                          {countryOption.flag} {countryOption.name}
-                        </option>
-                      ))}
-                    </select>
+              {countriesLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>Loading countries...</p>
+                </div>
+              ) : (
+                <form onSubmit={handleCountrySubmit}>
+                  <div>
+                    <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      What is your country / region of residence?
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent appearance-none"
+                        style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                        disabled={countriesLoading}
+                      >
+                        <option value="">Select Country / Region of Residence</option>
+                        {countries.map((countryOption) => (
+                          <option key={countryOption.id} value={countryOption.name}>
+                            {countryOption.name}
+                          </option>
+                        ))}
+                      </select>
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -162,29 +241,42 @@ function Register() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-3 rounded-lg transition-colors font-semibold uppercase mt-6"
-                  style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
-                >
-                  CONTINUE
-                </button>
-              </form>
+                    <button
+                      type="submit"
+                      disabled={countriesLoading || !country}
+                      className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-3 rounded-lg transition-colors font-semibold uppercase mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                    >
+                      CONTINUE
+                    </button>
+                  </form>
+                )}
             </div>
           )}
 
           {/* Page 2: Registration Form */}
           {currentPage === 2 && (
             <div className="bg-white rounded-lg shadow-lg p-8">
+              {/* Error Message */}
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    {error}
+                  </p>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Selected Country Display */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-gray-600 mb-1" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    Selected Country:
-                  </p>
-                  <p className="text-base font-semibold text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    {countries.find(c => c.name === country)?.flag} {country}
-                  </p>
+                {/* Selected Country Display - Read Only */}
+                <div>
+                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    Country / Region of Residence
+                  </label>
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
+                    <p className="text-base font-normal text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      {country}
+                    </p>
+                  </div>
                 </div>
 
                 {/* First Name */}
@@ -240,32 +332,22 @@ function Register() {
                     Phone Number
                   </label>
                   <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <select
-                        name="phoneCode"
-                        value={formData.phoneCode}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent appearance-none"
-                        style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
-                      >
-                        <option value="+91">🇮🇳 +91</option>
-                        <option value="+1">🇺🇸 +1</option>
-                        <option value="+44">🇬🇧 +44</option>
-                        <option value="+49">🇩🇪 +49</option>
-                        <option value="+33">🇫🇷 +33</option>
-                      </select>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
+                    {/* Phone Code - Read Only (from selected country) */}
+                    <div className="flex-1">
+                      <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
+                        <p className="text-base font-normal text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                          {formData.phoneCode || 'N/A'}
+                        </p>
                       </div>
                     </div>
+                    {/* Phone Number Input */}
                     <input
                       type="tel"
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleChange}
-                      className="flex-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent"
+                      placeholder="Enter phone number"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent"
                       style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                     />
                   </div>
@@ -283,7 +365,9 @@ function Register() {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Account Password"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent pr-10"
+                      required
+                      disabled={loading}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent pr-10 disabled:bg-gray-100"
                       style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                     />
                     <button
@@ -304,7 +388,7 @@ function Register() {
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    This password will be used to login to your MetaTrader trading account and the MyEquiti Client Portal.
+                    This password will be used to login to your MetaTrader trading account and the MySolitaire Markets Client Portal.
                   </p>
                 </div>
 
@@ -323,42 +407,25 @@ function Register() {
                   </label>
                 </div>
 
-                {/* reCAPTCHA */}
-                <div className="border border-gray-300 rounded p-4 bg-gray-50">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                      I'm not a robot
-                    </span>
-                  </label>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                    <span>reCAPTCHA</span>
-                    <span>Privacy</span>
-                    <span>-</span>
-                    <span>Terms</span>
-                  </div>
-                </div>
 
                 {/* Continue Button */}
                 <button
                   type="submit"
-                  className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-3 rounded-lg transition-colors font-semibold uppercase"
+                  disabled={loading}
+                  className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-3 rounded-lg transition-colors font-semibold uppercase disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                 >
-                  CONTINUE
+                  {loading ? 'Registering...' : 'CONTINUE'}
                 </button>
 
                 {/* Legal Text */}
                 <div className="text-xs text-gray-600 space-y-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
                   <p>
-                    Based on the selected country of residence, you are registering with Equiti, regulated by the Seychelles FSA. By clicking Continue you confirm that you have read, understood, and agree with all the information in the{' '}
+                    Based on the selected country of residence, you are registering with Solitaire Markets, regulated by the Seychelles FSA. By clicking Continue you confirm that you have read, understood, and agree with all the information in the{' '}
                     <a href="#" className="text-blue-600 hover:text-blue-800 underline">Client Agreement</a>.
                   </p>
                   <p>
-                    Equiti Brokerage (Seychelles) Limited is authorized by the Financial Services Authority of Seychelles under license number SD064 as a Securities Dealers Broker.
+                    Solitaire Markets Brokerage (Seychelles) Limited is authorized by the Financial Services Authority of Seychelles under license number SD064 as a Securities Dealers Broker.
                   </p>
                 </div>
               </form>

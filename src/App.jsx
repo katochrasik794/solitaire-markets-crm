@@ -6,11 +6,16 @@ import AdminLayout from './admin/components/AdminLayout'
 // Auth Pages
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import NotFound from './pages/NotFound'
+import ProtectedRoute from './components/ProtectedRoute'
 
 // User Pages
 import Dashboard from './user/pages/Dashboard'
 import Deposits from './user/pages/Deposits'
+import Verification from './user/pages/Verification'
+import CreateAccount from './user/pages/CreateAccount'
 import DebitCard from './user/pages/withdrawals/DebitCard'
 import Skrill from './user/pages/withdrawals/Skrill'
 import Neteller from './user/pages/withdrawals/Neteller'
@@ -50,13 +55,21 @@ function App() {
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/user/dashboard" replace />} />
         
-        {/* User Routes */}
-        <Route path="/user" element={<UserLayout />}>
+        {/* User Routes - Protected */}
+        <Route path="/user" element={
+          <ProtectedRoute>
+            <UserLayout />
+          </ProtectedRoute>
+        }>
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="verification" element={<Verification />} />
+          <Route path="create-account" element={<CreateAccount />} />
           <Route path="deposits" element={<Deposits />} />
           <Route path="deposits/google-pay" element={<GooglePay />} />
           <Route path="deposits/apple-pay" element={<ApplePay />} />
@@ -85,8 +98,12 @@ function App() {
           <Route path="legal" element={<Legal />} />
         </Route>
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* Admin Routes - Protected */}
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
           <Route index element={<AdminHome />} />
           <Route path="users" element={<AdminUsers />} />
         </Route>

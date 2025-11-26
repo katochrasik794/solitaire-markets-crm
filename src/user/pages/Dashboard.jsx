@@ -149,13 +149,13 @@ function Dashboard() {
             </div>
 
             {/* Icon (mobile on right, desktop stays same) */}
-            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
+            <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
               <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
             </div>
               </div>
 
           {/* Desktop icon */}
-          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
+          <div className="hidden md:flex items-center justify-center bg-gray-100" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
             <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
             </div>
 
@@ -170,11 +170,11 @@ function Dashboard() {
               </div>
               <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
             </div>
-            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
+            <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
               <LuWallet className="text-gray-600 text-xl" />
             </div>
               </div>
-          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
+          <div className="hidden md:flex items-center justify-center bg-gray-100" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
             <LuWallet className="text-gray-600 text-xl md:text-2xl" />
             </div>
 
@@ -188,11 +188,11 @@ function Dashboard() {
               </div>
               <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
             </div>
-            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
+            <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
               <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl md:text-2xl" />
             </div>
               </div>
-          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
+          <div className="hidden md:flex items-center justify-center bg-gray-100" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
             <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl md:text-2xl" />
             </div>
 
@@ -206,11 +206,11 @@ function Dashboard() {
               </div>
               <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
             </div>
-            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#dff8f4] md:hidden">
+            <div className="flex items-center justify-center bg-[#dff8f4] md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
               <RiArrowUpCircleLine className="text-teal-600 text-xl" />
             </div>
               </div>
-          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-[#dff8f4]">
+          <div className="hidden md:flex items-center justify-center bg-[#dff8f4]" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
             <RiArrowUpCircleLine className="text-teal-600 text-xl md:text-2xl" />
             </div>
 
@@ -224,11 +224,11 @@ function Dashboard() {
               </div>
               <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
               </div>
-            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#ffecec] md:hidden">
+            <div className="flex items-center justify-center bg-[#ffecec] md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
               <RiArrowDownCircleLine className="text-red-500 text-xl" />
             </div>
           </div>
-          <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-[#ffecec]">
+          <div className="hidden md:flex items-center justify-center bg-[#ffecec]" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
             <RiArrowDownCircleLine className="text-red-500 text-xl md:text-2xl" />
           </div>
         </div>
@@ -270,9 +270,12 @@ function Dashboard() {
             <h2 className="text-gray-700 text-sm md:text-md font-medium">
               Live Accounts
             </h2>
-            <button className="flex items-center justify-center gap-2 border border-gray-300 bg-white px-3 py-1 rounded-md hover:bg-gray-50 transition text-sm sm:text-md">
+            <Link 
+              to="/user/create-account"
+              className="flex items-center justify-center gap-2 border border-gray-300 bg-white px-3 py-1 rounded-md hover:bg-gray-50 transition text-sm sm:text-md"
+            >
               <AiOutlinePlus /> Create Account
-            </button>
+            </Link>
           </div>
 
           {/* Table Card - Hidden on mobile, visible on desktop */}
@@ -806,7 +809,7 @@ function Dashboard() {
                 >
                   Deposit
                 </Link>
-                <button className="flex items-center justify-center w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full">
+                <button className="flex items-center justify-center bg-gray-100 hover:bg-gray-200" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
                   <svg
                     className="w-4 h-4 text-gray-600"
                     fill="none"
@@ -821,7 +824,7 @@ function Dashboard() {
                     />
                   </svg>
                 </button>
-                <button className="flex items-center justify-center w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full">
+                <button className="flex items-center justify-center bg-gray-100 hover:bg-gray-200" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
                   <svg
                     className="w-4 h-4 text-gray-600"
                     fill="none"
@@ -874,9 +877,12 @@ function Dashboard() {
           <h2 className="text-gray-700 text-sm md:text-md font-medium">
             Demo Accounts
           </h2>
-          <button className="flex items-center justify-center gap-2 border border-gray-300 bg-white px-3 py-1 rounded-md hover:bg-gray-50 transition text-sm sm:text-md">
+          <Link 
+            to="/user/create-account"
+            className="flex items-center justify-center gap-2 border border-gray-300 bg-white px-3 py-1 rounded-md hover:bg-gray-50 transition text-sm sm:text-md"
+          >
             <AiOutlinePlus /> Create Account
-          </button>
+          </Link>
         </div>
 
         {/* Demo Card */}
@@ -889,9 +895,12 @@ function Dashboard() {
           <h2 className="text-gray-700 text-sm md:text-md font-medium">
             Wallet Accounts
           </h2>
-          <button className="flex items-center justify-center gap-2 border border-gray-300 bg-white px-3 py-1 rounded-md hover:bg-gray-50 transition text-sm sm:text-md">
+          <Link 
+            to="/user/create-account"
+            className="flex items-center justify-center gap-2 border border-gray-300 bg-white px-3 py-1 rounded-md hover:bg-gray-50 transition text-sm sm:text-md"
+          >
             <AiOutlinePlus /> Create Account
-          </button>
+          </Link>
         </div>
 
         {/* Wallet Card */}

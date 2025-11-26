@@ -1,11 +1,54 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import authService from '../../services/auth.js'
 
 function Header({ onMenuClick }) {
   const [languageOpen, setLanguageOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [userName, setUserName] = useState('User')
   const languageRef = useRef(null)
   const profileRef = useRef(null)
+  const navigate = useNavigate()
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Try to get from localStorage first
+        const userData = authService.getUserData()
+        if (userData && userData.firstName) {
+          const name = userData.lastName 
+            ? `${userData.firstName} ${userData.lastName}`
+            : userData.firstName
+          setUserName(name)
+        } else {
+          // If not in localStorage, verify token to get fresh data
+          const result = await authService.verifyToken()
+          if (result.success && result.data && result.data.user) {
+            const user = result.data.user
+            const name = user.lastName 
+              ? `${user.firstName} ${user.lastName}`
+              : user.firstName
+            setUserName(name)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+        // Keep default "User" if fetch fails
+      }
+    }
+
+    fetchUserData()
+  }, [])
+
+  const handleLogout = () => {
+    // Clear authentication token
+    authService.logout()
+    // Close dropdown
+    setProfileOpen(false)
+    // Redirect to login page
+    navigate('/login')
+  }
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -104,7 +147,7 @@ function Header({ onMenuClick }) {
                 className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
                 style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
               >
-                <span>Welcome User</span>
+                <span>Welcome {userName}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -141,7 +184,7 @@ function Header({ onMenuClick }) {
                     <button
                       className="block w-full text-left px-4 py-2 text-[#00A896] hover:bg-gray-50"
                       style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={() => setProfileOpen(false)}
+                      onClick={handleLogout}
                     >
                       Logout
                     </button>

@@ -1,8 +1,11 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import { AiOutlineInfoCircle } from "react-icons/ai";
+import authService from '../../services/auth.js'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 function UserLayout() {
   // Open sidebar by default on small screens, closed on desktop
@@ -12,6 +15,7 @@ function UserLayout() {
     }
     return false
   })
+  const [kycStatus, setKycStatus] = useState(null)
 
   // Update sidebar state on resize
   useEffect(() => {
@@ -25,6 +29,33 @@ function UserLayout() {
     window.addEventListener('resize', checkScreenSize)
     
     return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+
+  // Check KYC status on mount
+  useEffect(() => {
+    const checkKYCStatus = async () => {
+      try {
+        const token = authService.getToken()
+        if (!token) return
+
+        const response = await fetch(`${API_BASE_URL}/kyc/status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data) {
+            setKycStatus(data.data.status)
+          }
+        }
+      } catch (err) {
+        console.error('Error checking KYC status:', err)
+      }
+    }
+
+    checkKYCStatus()
   }, [])
 
   return (
@@ -50,7 +81,8 @@ function UserLayout() {
       >
         <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="overflow-x-hidden min-h-screen pt-[77px] sm:pt-[77px]">
-          {/* Deposit Banner */}
+          {/* Deposit Banner - Hide when KYC is approved */}
+          {kycStatus !== 'approved' && (
           <div className="w-full bg-[#FFF9E6] border-t border-[#f3e7b5] px-4 md:px-6 py-4">
             {/* MOBILE LAYOUT */}
             <div className="flex flex-col gap-3 md:hidden">
@@ -70,9 +102,9 @@ function UserLayout() {
               </button>
 
               {/* Verification Link */}
-              <button className="text-black underline text-sm mx-auto hover:text-gray-700 transition">
+              <Link to="/user/verification" className="text-black underline text-sm mx-auto hover:text-gray-700 transition">
                 Complete verification
-              </button>
+              </Link>
             </div>
 
             {/* DESKTOP LAYOUT */}
@@ -93,12 +125,13 @@ function UserLayout() {
                   DEPOSIT NOW
                 </button>
 
-                <button className="text-black underline text-sm md:text-base hover:text-gray-700 transition">
+                <Link to="/user/verification" className="text-black underline text-sm md:text-base hover:text-gray-700 transition">
                   Complete verification
-                </button>
+                </Link>
               </div>
             </div>
           </div>
+          )}
 
           <Outlet />
         </main>

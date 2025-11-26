@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import authService from '../services/auth.js'
+import AuthLoader from '../components/AuthLoader.jsx'
 
 function Login() {
-  const [email, setEmail] = useState('katochrasik794@gmail.com')
-  const [password, setPassword] = useState('.........')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [languageOpen, setLanguageOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const navigate = useNavigate()
 
   const languages = [
@@ -21,23 +25,42 @@ function Login() {
     'English'
   ]
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
+    
     // Basic validation
     if (!email || !password) {
-      alert('Please fill in all fields')
+      setError('Please fill in all fields')
       return
     }
     if (!email.includes('@')) {
-      alert('Please enter a valid email address')
+      setError('Please enter a valid email address')
       return
     }
-    // Redirect to home
-    navigate('/')
+
+    setLoading(true)
+
+    try {
+      // Minimum 3 seconds loading time for beautiful animation
+      const [result] = await Promise.all([
+        authService.login(email, password),
+        new Promise(resolve => setTimeout(resolve, 3000))
+      ])
+      
+      if (result.success) {
+        navigate('/user/dashboard')
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.')
+      setLoading(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Loading Animation */}
+      {loading && <AuthLoader message="Logging in..." />}
       {/* Header */}
       <div className="w-full flex justify-between items-center px-6 py-4">
         <div className="w-32"></div> {/* Spacer for centering */}
@@ -104,6 +127,15 @@ function Login() {
               Manage your accounts and access insightful reports and technical analysis among many more features.
             </p>
 
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  {error}
+                </p>
+              </div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email Field */}
@@ -115,7 +147,9 @@ function Login() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent"
+                  required
+                  disabled={loading}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent disabled:bg-gray-100"
                   style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                 />
               </div>
@@ -130,7 +164,9 @@ function Login() {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent pr-10"
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent pr-10 disabled:bg-gray-100"
                     style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                   />
                   <button
@@ -165,18 +201,19 @@ function Login() {
                     Remember me
                   </span>
                 </label>
-                <a href="#" className="text-sm text-blue-600 hover:text-blue-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
                   Forgot password?
-                </a>
+                </Link>
               </div>
 
               {/* Continue Button */}
               <button
                 type="submit"
-                className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-2.5 rounded-lg transition-colors font-medium"
+                disabled={loading}
+                className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-2.5 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
               >
-                Continue
+                {loading ? 'Logging in...' : 'Continue'}
               </button>
 
               {/* Sign in with different account */}
