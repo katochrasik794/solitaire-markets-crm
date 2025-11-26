@@ -702,7 +702,7 @@ function ResearchTerminal() {
                     </div>
 
                     {/* Title */}
-                    <p className="text-base font-semibold text-black leading-snug mb-4 text-center">
+                    <p className="text-base font-semibold text-black leading-snug pt-14  text-center">
                       {news.headline.split(' ').slice(0, 4).join(' ')} <br />
                       {news.headline.split(' ').slice(4, 8).join(' ')} <br />
                       {news.headline.split(' ').slice(8).join(' ')}
@@ -710,7 +710,7 @@ function ResearchTerminal() {
 
                     {/* Pair Badge */}
                     <div className="text-center">
-                      <div className="inline-block bg-white px-3 py-1 rounded-full border border-gray-300 text-xs font-medium text-gray-700 shadow-sm">
+                      <div className="inline-block bg-white px-3 py-1 rounded-full border border-gray-300 text-xs font-medium text-gray-700 shadow-sm mt-2">
                         {news.pair}
                       </div>
                     </div>

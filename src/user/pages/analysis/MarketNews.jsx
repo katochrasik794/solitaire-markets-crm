@@ -23,6 +23,7 @@ function MarketNews() {
       change: '-2.47%',
       changeColor: 'red',
       logo: 'AVGO',
+      image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=60',
       description: 'Broadcom resumes Outperform rating at $420 target. High trading volume amid broader semiconductor sector decline.',
       type: 'performance',
       vsSector: 'BOTTOM 9%',
@@ -38,6 +39,7 @@ function MarketNews() {
       change: '-0.9%',
       changeColor: 'red',
       logo: 'TSLA',
+      image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=60',
       description: 'Tesla faces concerns over its 4% NEV market share in China. Market cap loss parallels Kia\'s value amid innovation criticism.',
       type: 'performance',
       vsSector: 'BOTTOM 7%',
@@ -53,6 +55,7 @@ function MarketNews() {
       change: '+0.66%',
       changeColor: 'green',
       logo: 'a AMZN',
+      image: 'https://images.unsplash.com/photo-1523474253046-8cd2748b5fd2?auto=format&fit=crop&w=800&q=60',
       description: 'Amazon rises amid mixed economic signals and strong services demand. CEO Jassy plans to sell shares as layoffs impact engineering roles.',
       type: 'trade',
       status: 'Sell Limit',
@@ -67,6 +70,7 @@ function MarketNews() {
       change: '-1.52%',
       changeColor: 'red',
       logo: 'MSFT',
+      image: 'https://images.unsplash.com/photo-1633419461186-7d40a38105ec?auto=format&fit=crop&w=800&q=60',
       description: 'Microsoft faces scrutiny over gaming and competition. Social media buzzes about new NVIDIA deployments and AI supercomputer plans.',
       type: 'performance',
       vsSector: 'TOP 17%',
@@ -80,6 +84,7 @@ function MarketNews() {
       name: 'Energy Markets',
       date: '21/11/2025 20:59',
       summary: 'SUMMARY',
+      image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=800&q=60',
       description: 'Energy Markets React to Breakthrough Peace Deal Between U.S., Russia, and Ukraine',
       tag: 'EURUSD'
     }
@@ -169,7 +174,7 @@ function MarketNews() {
       date: '21/11/2025 21:35',
       category: 'MARKET INSIGHT',
       image: 'EURJPY',
-      imageUrl: '/mt4.png',
+      imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=60',
       title: 'EUR/JPY declines amid broader market sentiment',
       description: 'EUR/JPY declines amid broader market sentiment. USD/JPY\'s drop influences EUR/JPY\'s trajectory, reflecting similar downward trends. The EUR/JPY currency pair has declined by 0.8% since the previous close. This movement coincides with a 0.54%',
       tag: 'EURJPY'
@@ -184,6 +189,39 @@ function MarketNews() {
       description: 'Japan\'s Manufacturing PMI Flash Shows Slight Improvement at 48.8, Yet Signals Continued Contraction Amidst Economic Concerns and Market Volatility',
       tags: ['Economic Indicators', 'Market Sentiment', 'Sector Weakness'],
       partialText: 'At 00:30 UTC on November 21, 2025, the Jibun Bank'
+    },
+    {
+      id: 3,
+      date: '21/11/2025 19:45',
+      category: 'ECONOMIC INDICATORS',
+      image: 'US',
+      imageUrl: '/flag-icon.svg',
+      title: 'US Economic Data Release: Inflation Figures Beat Expectations',
+      description: 'US CPI data shows inflation cooling faster than anticipated, boosting market optimism. Federal Reserve hints at potential rate cuts in upcoming meetings.',
+      tags: ['Inflation', 'Fed Policy', 'Economic Data'],
+      partialText: 'The latest Consumer Price Index (CPI) report revealed...'
+    },
+    {
+      id: 4,
+      date: '21/11/2025 18:30',
+      category: 'CRYPTO NEWS',
+      image: 'BTC',
+      imageUrl: '/bitcoin-logo.webp',
+      title: 'Bitcoin Surges Past $100,000 Amid Institutional Adoption',
+      description: 'Bitcoin hits new all-time high as major corporations announce BTC holdings. Regulatory clarity in the US drives increased institutional interest.',
+      tags: ['Cryptocurrency', 'Institutional Investment', 'Regulation'],
+      partialText: 'Following the announcement by Tesla and MicroStrategy...'
+    },
+    {
+      id: 5,
+      date: '21/11/2025 17:15',
+      category: 'COMMODITIES UPDATE',
+      image: 'Gold',
+      imageUrl: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=800&q=60',
+      title: 'Gold Prices Rally on Geopolitical Tensions',
+      description: 'Gold futures climb as escalating tensions in the Middle East fuel safe-haven demand. Analysts predict further upside if conflicts intensify.',
+      tags: ['Gold', 'Geopolitical Risk', 'Safe Haven'],
+      partialText: 'Spot gold prices have risen approximately 2.5%...'
     }
   ]
 
@@ -312,88 +350,97 @@ function MarketNews() {
           {/* <h2 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '400' }}>
             Market News
           </h2> */}
+          <div className="mt-8 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
+              Hot News
+            </h2>
+            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+
           <div className="relative">
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
-              {marketNews.map((news) => (
+              {[
+                {
+                  id: 1,
+                  date: '21/11/2025 20:59',
+                  type: 'TECHNICAL ANALYSIS',
+                  image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=60',
+                  headline: 'EUR/USD Technical Analysis: Bullish Momentum Building',
+                  pair: 'EURUSD'
+                },
+                {
+                  id: 2,
+                  date: '21/11/2025 20:58',
+                  type: 'FUNDAMENTAL ANALYSIS',
+                  image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=60',
+                  headline: 'Oil Markets Fundamental Outlook: Supply Chain Disruptions',
+                  pair: 'WTI'
+                },
+                {
+                  id: 3,
+                  date: '21/11/2025 19:22',
+                  type: 'SENTIMENT ANALYSIS',
+                  image: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=800&q=60',
+                  headline: 'Market Sentiment Analysis: Risk Appetite Rising',
+                  pair: 'SP500'
+                },
+                {
+                  id: 4,
+                  date: '21/11/2025 19:22',
+                  type: 'QUANTITATIVE ANALYSIS',
+                  image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=60',
+                  headline: 'Quantitative Analysis: Algorithmic Trading Trends',
+                  pair: 'NASDAQ'
+                },
+                {
+                  id: 5,
+                  date: '21/11/2025 19:07',
+                  type: 'MACRO ANALYSIS',
+                  image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=800&q=60',
+                  headline: 'Macro Analysis: Global Economic Indicators Review',
+                  pair: 'GDP'
+                }
+              ].map((news) => (
                 <div
                   key={news.id}
-                  className="min-w-[320px] bg-white rounded-lg p-6 border border-gray-200 shadow-md relative overflow-hidden"
+                  className="min-w-[240px] rounded-lg p-3 pb-8 border border-gray-200 shadow-md relative overflow-hidden"
+                  style={{
+                    backgroundImage: `url('${news.image}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
                 >
-                  {/* Background Pattern */}
-                  <div className="absolute inset-0 opacity-5 pointer-events-none">
-                    <div className="w-full h-full bg-gradient-to-br from-gray-400 to-gray-600"></div>
-                  </div>
-
+                  <div className="absolute inset-0 bg-white bg-opacity-60"></div>
                   <div className="relative z-10">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <div className={`text-sm font-semibold mb-1 ${news.changeColor === 'red' ? 'text-red-600' : 'text-green-600'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
-                          {news.movement} {news.change}
-                        </div>
-                        {news.date && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                              {news.date}
-                            </span>
-                            <span className="text-xs text-gray-700 font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                              {news.summary}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xs font-bold ${news.changeColor === 'red' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '700' }}>
-                        {news.logo}
-                      </div>
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="text-gray-600">{news.date}</span>
+                      <span className="text-[#00A896] font-semibold">{news.type}</span>
                     </div>
 
-                    {/* Description */}
-                    <p className="text-sm text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.5' }}>
-                      {news.description}
+                    {/* New badge with line */}
+                    <div className="w-full flex items-center justify-center mb-5 relative">
+                      <div className="absolute w-full h-[1px] bg-gray-300"></div>
+                      <span className="relative bg-[#00A896] text-white text-xs px-3 py-1 rounded-full z-10 shadow">
+                        New
+                      </span>
+                    </div>
+
+                    {/* Title */}
+                    <p className="text-base font-semibold text-black leading-snug pt-14  text-center">
+                      {news.headline.split(' ').slice(0, 4).join(' ')} <br />
+                      {news.headline.split(' ').slice(4, 8).join(' ')} <br />
+                      {news.headline.split(' ').slice(8).join(' ')}
                     </p>
 
-                    {/* Performance or Trade Info */}
-                    {news.type === 'performance' && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>VS Sector</span>
-                          <span className={`font-semibold ${news.vsSectorColor === 'red' ? 'text-red-600' : 'text-green-600'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                            {news.vsSector}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>VS S&P500</span>
-                          <span className={`font-semibold ${news.vsSP500Color === 'red' ? 'text-red-600' : 'text-green-600'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                            {news.vsSP500}
-                          </span>
-                        </div>
+                    {/* Pair Badge */}
+                    <div className="text-center">
+                      <div className="inline-block bg-white px-3 py-1 rounded-full border border-gray-300 text-xs font-medium text-gray-700 shadow-sm mt-2">
+                        {news.pair}
                       </div>
-                    )}
-
-                    {news.type === 'trade' && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Status</span>
-                          <span className={`font-semibold ${news.statusColor === 'red' ? 'text-red-600' : 'text-green-600'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                            {news.status}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Target</span>
-                          <span className="font-semibold text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                            {news.target}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {news.tag && (
-                      <div className="mt-4">
-                        <span className="px-2 py-1 bg-gray-200 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
-                          {news.tag}
-                        </span>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -401,24 +448,19 @@ function MarketNews() {
 
             {/* Navigation Arrows */}
             <div className="flex justify-center gap-2 mt-4">
-              <button
-                onClick={prevNews}
-                className="w-8 h-8 bg-black text-white rounded flex items-center justify-center hover:bg-gray-800 transition-colors"
-              >
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button
-                onClick={nextNews}
-                className="w-8 h-8 bg-black text-white rounded flex items-center justify-center hover:bg-gray-800 transition-colors"
-              >
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
           </div>
+        </div>
         </div>
 
         {/* Trending Instruments Section */}
@@ -465,11 +507,11 @@ function MarketNews() {
                         {item.category}
                       </span>
                     </div>
-                    <div className="flex gap-4">
-                      <div className="w-[30%]">
-                        <img src={item.imageUrl} alt={item.image} className="w-full h-36 object-fit rounded" />
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <div className="w-full md:w-[30%]">
+                        <img src={item.imageUrl} alt={item.image} className="w-full h-24 md:h-36 object-cover rounded" />
                       </div>
-                      <div className="w-[70%]">
+                      <div className="w-full md:w-[70%]">
                         <h4 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
                           {item.title}
                         </h4>
@@ -503,81 +545,97 @@ function MarketNews() {
         </div>
 
         {/* Analysis Section */}
-        <div>
-          <h2 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '400' }}>
-            Analysis
-          </h2>
+        <div className="mt-8 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
+              Analysis
+            </h2>
+            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+
           <div className="relative">
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
-              {analysisCards.map((card) => (
+              {[
+                {
+                  id: 1,
+                  date: '21/11/2025 20:59',
+                  type: 'SUMMARY',
+                  image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=800&q=60',
+                  headline: 'Energy Markets React to Breakthrough Peace Deal Between U.S., Russia, and Ukraine',
+                  pair: 'EURUSD'
+                },
+                {
+                  id: 2,
+                  date: '21/11/2025 20:58',
+                  type: 'SNAPSHOTS',
+                  image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=60',
+                  headline: 'Currency pairs: Latest news',
+                  pair: 'EURUSD'
+                },
+                {
+                  id: 3,
+                  date: '21/11/2025 19:22',
+                  type: 'SUMMARY',
+                  image: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=800&q=60',
+                  headline: 'Charting the Future: Vice Chair Jefferson Speaks on AI and Financial Stability',
+                  pair: 'EURUSD'
+                },
+                {
+                  id: 4,
+                  date: '21/11/2025 19:22',
+                  type: 'SNAPSHOTS',
+                  image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=60',
+                  headline: 'Currency pairs: Latest news',
+                  pair: 'USDCAD'
+                },
+                {
+                  id: 5,
+                  date: '21/11/2025 19:07',
+                  type: 'SUMMARY',
+                  image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=60',
+                  headline: 'Federal Reserve Welcomes Young M at the 2025 National College Fed Challenge Finals',
+                  pair: 'EURUSD'
+                }
+              ].map((news) => (
                 <div
-                  key={card.id}
-                  className="min-w-[320px] bg-white rounded-lg p-6 border border-gray-200 shadow-md relative overflow-hidden"
+                  key={news.id}
+                  className="min-w-[240px] rounded-lg p-3 pb-8 border border-gray-200 shadow-md relative overflow-hidden"
+                  style={{
+                    backgroundImage: `url('${news.image}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
                 >
+                  <div className="absolute inset-0 bg-white bg-opacity-60"></div>
                   <div className="relative z-10">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <div className={`text-sm font-semibold mb-1 ${card.changeColor === 'red' ? 'text-red-600' : 'text-green-600'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '600' }}>
-                          {card.movement} {card.change}
-                        </div>
-                      </div>
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xs font-bold ${card.changeColor === 'red' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '700' }}>
-                        {card.logo}
-                      </div>
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="text-gray-600">{news.date}</span>
+                      <span className="text-[#00A896] font-semibold">{news.type}</span>
                     </div>
 
-                    {/* Description */}
-                    <p className="text-sm text-gray-700 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.5' }}>
-                      {card.description}
+                    {/* New badge with line */}
+                    <div className="w-full flex items-center justify-center mb-5 relative">
+                      <div className="absolute w-full h-[1px] bg-gray-300"></div>
+                      <span className="relative bg-[#00A896] text-white text-xs px-3 py-1 rounded-full z-10 shadow">
+                        New
+                      </span>
+                    </div>
+
+                    {/* Title */}
+                    <p className="text-base font-semibold text-black leading-snug pt-14  text-center">
+                      {news.headline.split(' ').slice(0, 4).join(' ')} <br />
+                      {news.headline.split(' ').slice(4, 8).join(' ')} <br />
+                      {news.headline.split(' ').slice(8).join(' ')}
                     </p>
 
-                    {/* Performance or Trade Info */}
-                    {card.type === 'performance' && (
-                      <div className="space-y-2 mb-4">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>VS Sector</span>
-                          <span className={`font-semibold ${card.vsSectorColor === 'red' ? 'text-red-600' : 'text-green-600'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                            {card.vsSector}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>VS S&P500</span>
-                          <span className={`font-semibold ${card.vsSP500Color === 'red' ? 'text-red-600' : 'text-green-600'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                            {card.vsSP500}
-                          </span>
-                        </div>
+                    {/* Pair Badge */}
+                    <div className="text-center">
+                      <div className="inline-block bg-white px-3 py-1 rounded-full border border-gray-300 text-xs font-medium text-gray-700 shadow-sm mt-2">
+                        {news.pair}
                       </div>
-                    )}
-
-                    {card.type === 'trade' && (
-                      <div className="space-y-2 mb-4">
-                        <div className="text-xs font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600', color: '#000000' }}>
-                          Trade Idea
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Status</span>
-                          <span className={`font-semibold ${card.statusColor === 'red' ? 'text-red-600' : 'text-green-600'}`} style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                            {card.status}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>Target</span>
-                          <span className="font-semibold text-gray-800" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                            {card.target}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {card.readMore && (
-                      <button className="text-sm text-gray-700 hover:text-gray-900 font-medium flex items-center gap-1" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '500' }}>
-                        READ MORE
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -585,18 +643,12 @@ function MarketNews() {
 
             {/* Navigation Arrows */}
             <div className="flex justify-center gap-2 mt-4">
-              <button
-                onClick={prevAnalysis}
-                className="w-8 h-8 bg-black text-white rounded flex items-center justify-center hover:bg-gray-800 transition-colors"
-              >
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button
-                onClick={nextAnalysis}
-                className="w-8 h-8 bg-black text-white rounded flex items-center justify-center hover:bg-gray-800 transition-colors"
-              >
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -610,3 +662,4 @@ function MarketNews() {
 }
 
 export default MarketNews
+
