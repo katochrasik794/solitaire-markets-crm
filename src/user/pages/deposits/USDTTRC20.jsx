@@ -182,7 +182,7 @@ function USDTTRC20() {
 
         {/* USDT TRC20 BUTTON (CENTERED FULL WIDTH) */}
         <div className="flex justify-center"  >
-        <button className="max-w-4xl w-full bg-green-600 text-white py-4 rounded-lg flex items-center justify-center hover:bg-green-700 transition-all">
+        <button className="max-w-4xl w-full bg-[#e6c200] text-gray-900 py-4 rounded-lg flex items-center justify-center hover:bg-[#d4b000] transition-all">
           <img src="/tether.svg" alt="Tether" className="w-6 h-6 mr-2" />
           Continue with USDT:TRC20
         </button>

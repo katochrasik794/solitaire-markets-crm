@@ -65,7 +65,7 @@ function UserLayout() {
               </div>
 
               {/* Deposit Button */}
-              <button className="w-full bg-[#FFB933] hover:bg-[#f0c21d] text-black text-sm py-3 rounded-md font-semibold transition">
+              <button className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 text-sm py-3 rounded-md font-semibold transition">
                 DEPOSIT NOW
               </button>
 
@@ -89,7 +89,7 @@ function UserLayout() {
 
               {/* Right Section */}
               <div className="flex items-center gap-4">
-                <button className="bg-[#FFB933] hover:bg-[#f0c21d] text-black text-sm md:text-base px-6 py-2 rounded-md font-medium transition">
+                <button className="bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 text-sm md:text-base px-6 py-2 rounded-md font-medium transition">
                   DEPOSIT NOW
                 </button>
 

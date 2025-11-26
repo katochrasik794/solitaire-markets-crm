@@ -2,6 +2,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import UserLayout from './user/components/UserLayout'
 import AdminLayout from './admin/components/AdminLayout'
 
+// Auth Pages
+import Login from './pages/Login'
+import Register from './pages/Register'
+import NotFound from './pages/NotFound'
+
 // User Pages
 import Dashboard from './user/pages/Dashboard'
 import Deposits from './user/pages/Deposits'
@@ -40,6 +45,10 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Auth Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/user/dashboard" replace />} />
         
@@ -79,6 +88,9 @@ function App() {
           <Route index element={<AdminHome />} />
           <Route path="users" element={<AdminUsers />} />
         </Route>
+
+        {/* 404 - Catch all unmatched routes */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   )

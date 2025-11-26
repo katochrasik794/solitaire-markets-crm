@@ -51,22 +51,22 @@ function Dashboard() {
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
               <div className="flex-1 pr-0 sm:pr-8">
                 <h3 className="text-white text-2xl font-normal leading-snug">
-                  Get up to USD 125 for every friend you refer
-                </h3>
+                Get up to USD 125 for every friend you refer
+              </h3>
 
                 <p className="text-gray-300 mt-2 text-sm sm:text-base">
                   Invite a Like-Minded trader to create a live account and earn
                   up to USD 125 per friend
-                </p>
-              </div>
+              </p>
+            </div>
 
-              <Link
-                to="/user/refer-a-friend"
-                className="bg-[#00A896] hover:bg-[#008f7a] text-white px-6 py-2 rounded-lg 
+            <Link
+              to="/user/refer-a-friend"
+                className="bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 px-6 py-2 rounded-lg 
         whitespace-nowrap text-sm sm:text-base transition-colors z-10"
-              >
-                Refer a Friend
-              </Link>
+            >
+              Refer a Friend
+            </Link>
             </div>
           </div>
         )}
@@ -104,28 +104,28 @@ function Dashboard() {
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
               <div className="flex-1 pr-0 sm:pr-8">
                 <h3 className="text-white text-2xl font-normal leading-snug">
-                  Copy trades to diversify your portfolio
-                </h3>
+                Copy trades to diversify your portfolio
+              </h3>
 
                 <p className="text-gray-300 mt-2 text-sm sm:text-base">
-                  Follow successful traders to copy their strategies instantly
-                </p>
-              </div>
+                Follow successful traders to copy their strategies instantly
+              </p>
+            </div>
 
-              <button
-                className="bg-[#00A896] hover:bg-[#008f7a] text-white px-6 py-2 rounded-lg 
+            <button
+                className="bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 px-6 py-2 rounded-lg 
         whitespace-nowrap text-sm sm:text-base transition-colors z-10"
-              >
-                Start now
-              </button>
+            >
+              Start now
+            </button>
             </div>
           </div>
         )}
 
         {/* Account Summary */}
         <h2 className="text-sm md:text-md font-medium text-gray-800 mb-3">
-          Account Summary
-        </h2>
+            Account Summary
+          </h2>
 
         {/* Card */}
         <div
@@ -152,12 +152,12 @@ function Dashboard() {
             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
               <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
             </div>
-          </div>
+              </div>
 
           {/* Desktop icon */}
           <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
             <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
-          </div>
+            </div>
 
           {/* Divider */}
           <div className="hidden md:block w-px h-14 bg-gray-200"></div>
@@ -173,10 +173,10 @@ function Dashboard() {
             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
               <LuWallet className="text-gray-600 text-xl" />
             </div>
-          </div>
+              </div>
           <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
             <LuWallet className="text-gray-600 text-xl md:text-2xl" />
-          </div>
+            </div>
 
           <div className="hidden md:block w-px h-14 bg-gray-200"></div>
 
@@ -191,10 +191,10 @@ function Dashboard() {
             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 md:hidden">
               <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl md:text-2xl" />
             </div>
-          </div>
+              </div>
           <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100">
             <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl md:text-2xl" />
-          </div>
+            </div>
 
           <div className="hidden md:block w-px h-14 bg-gray-200"></div>
 
@@ -209,10 +209,10 @@ function Dashboard() {
             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#dff8f4] md:hidden">
               <RiArrowUpCircleLine className="text-teal-600 text-xl" />
             </div>
-          </div>
+              </div>
           <div className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-[#dff8f4]">
             <RiArrowUpCircleLine className="text-teal-600 text-xl md:text-2xl" />
-          </div>
+            </div>
 
           <div className="hidden md:block w-px h-14 bg-gray-200"></div>
 
@@ -223,7 +223,7 @@ function Dashboard() {
                 Total Withdrawals
               </div>
               <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
-            </div>
+              </div>
             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#ffecec] md:hidden">
               <RiArrowDownCircleLine className="text-red-500 text-xl" />
             </div>
@@ -236,13 +236,13 @@ function Dashboard() {
         {/* Recent Activity */}
         <div className="flex items-center justify-between mb-0">
           <h2 className="text-sm md:text-md font-medium text-gray-800">
-            Recent Activity
-          </h2>
+              Recent Activity
+            </h2>
 
           <button className="border border-gray-300 bg-white px-3 py-1 rounded-md text-sm hover:bg-gray-50 transition">
-            View More
-          </button>
-        </div>
+              View More
+            </button>
+          </div>
 
         {/* Activity Card */}
         <div className="bg-white border border-gray-200 rounded-lg w-full p-4 md:p-6 flex items-center justify-between">
@@ -253,14 +253,14 @@ function Dashboard() {
             </span>
 
             <span className="text-gray-700 text-sm md:md">
-              New account application
+                  New account application
             </span>
-          </div>
+              </div>
 
           {/* Right Section */}
           <span className="text-orange-500 font-medium text-sm md:text-md">
-            Pending
-          </span>
+                Pending
+              </span>
         </div>
 
         {/* Live Accounts */}
@@ -381,8 +381,8 @@ function Dashboard() {
                     >
                       Options
                     </th>
-                  </tr>
-                </thead>
+                </tr>
+              </thead>
                 <tbody>
                   <tr className="border-b border-gray-200">
                     <td className="px-4 py-2">
@@ -415,8 +415,8 @@ function Dashboard() {
                                   strokeWidth={2}
                                   d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                                 />
-                              </svg>
-                            </button>
+                        </svg>
+                      </button>
                             <span
                               className="text-gray-800"
                               style={{
@@ -447,9 +447,9 @@ function Dashboard() {
                                   strokeWidth="2"
                                   d="M12 16v-4m0-4h.01"
                                 />
-                              </svg>
-                            </button>
-                          </div>
+                        </svg>
+                      </button>
+                    </div>
                           <small>
                             <span
                               className="font-bold text-gray-800"
@@ -529,7 +529,7 @@ function Dashboard() {
                       }}
                     >
                       0.00
-                    </td>
+                  </td>
                     <td className="py-2"></td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
@@ -551,11 +551,11 @@ function Dashboard() {
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                           </svg>
                         </button>
-                      </div>
-                    </td>
+                    </div>
+                  </td>
                     <td className="px-4 py-2 text-center">
-                      <Link
-                        to="/user/deposits"
+                    <Link
+                      to="/user/deposits"
                         className="inline-flex items-center gap-1 bg-white hover:bg-gray-50 text-[#00A896] px-3 py-1.5 rounded border border-[#00A896] transition-colors"
                         style={{
                           fontFamily: "Roboto, sans-serif",
@@ -585,10 +585,10 @@ function Dashboard() {
                             strokeWidth="1.5"
                             d="M12 7v6m0 0l-2.5-2.5m2.5 2.5l2.5-2.5"
                           />
-                        </svg>
-                        <span>Deposit</span>
-                      </Link>
-                    </td>
+                      </svg>
+                      <span>Deposit</span>
+                    </Link>
+                  </td>
                     <td className="px-4 py-2 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center">
@@ -604,8 +604,8 @@ function Dashboard() {
                               strokeWidth={2}
                               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                             />
-                          </svg>
-                        </button>
+                        </svg>
+                      </button>
                         <button className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center">
                           <svg
                             className="w-4 h-4 text-gray-600"
@@ -619,11 +619,11 @@ function Dashboard() {
                               strokeWidth={2}
                               d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
                             />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
                 </tbody>
                 <tfoot>
                   <tr>
@@ -656,8 +656,8 @@ function Dashboard() {
                         >
                           Total
                         </span>
-                      </div>
-                    </td>
+                    </div>
+                  </td>
                     <td className="px-4 py-2"></td>
                     <td
                       className="px-4 py-2 text-right text-gray-800 font-semibold"
@@ -707,11 +707,11 @@ function Dashboard() {
                     <td className="px-4 py-2"></td>
                     <td className="px-4 py-2"></td>
                     <td className="px-4 py-2"></td>
-                  </tr>
+                </tr>
                 </tfoot>
-              </table>
-            </div>
+            </table>
           </div>
+        </div>
 
           {/* Mobile Card View - Visible on mobile and tablet, hidden on desktop */}
           <div className="lg:hidden space-y-4">
@@ -741,8 +741,8 @@ function Dashboard() {
                       d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
                     />
                   </svg>
-                </button>
-              </div>
+            </button>
+          </div>
 
               {/* Account Details */}
               <div className="grid grid-cols-2 gap-3 mb-4">
@@ -750,8 +750,8 @@ function Dashboard() {
                   <p className="text-gray-500 text-xs">Platform</p>
                   <p className="text-gray-800 font-semibold text-sm">
                     MT5 Standard
-                  </p>
-                </div>
+            </p>
+          </div>
                 <div>
                   <p className="text-gray-500 text-xs">Leverage</p>
                   <p className="text-gray-800 font-semibold text-sm">1:2000</p>
@@ -759,11 +759,11 @@ function Dashboard() {
                 <div>
                   <p className="text-gray-500 text-xs">Equity</p>
                   <p className="text-gray-800 font-semibold text-sm">0.00</p>
-                </div>
+        </div>
                 <div>
                   <p className="text-gray-500 text-xs">Balance</p>
                   <p className="text-gray-800 font-semibold text-sm">0.0000</p>
-                </div>
+          </div>
                 <div>
                   <p className="text-gray-500 text-xs">Margin</p>
                   <p className="text-gray-800 font-semibold text-sm">0.00</p>
@@ -802,7 +802,7 @@ function Dashboard() {
               <div className="flex gap-2">
                 <Link
                   to="/user/deposits"
-                  className="flex-1 bg-[#00A896] hover:bg-[#008f7a] text-white px-4 py-2 rounded text-center text-sm font-medium transition-colors"
+                  className="flex-1 bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 px-4 py-2 rounded text-center text-sm font-medium transition-colors"
                 >
                   Deposit
                 </Link>
@@ -863,7 +863,7 @@ function Dashboard() {
                 <div>
                   <span className="text-gray-500">Credit: </span>
                   <span className="text-gray-800 font-semibold">0.00</span>
-                </div>
+              </div>
               </div>
             </div>
           </div>

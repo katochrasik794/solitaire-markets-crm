@@ -80,7 +80,7 @@ function Transfers() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#00A896] hover:bg-[#008f7a] text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+              className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 font-semibold py-3 px-4 rounded-lg transition-colors"
               style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', fontWeight: '600' }}
             >
               Submit

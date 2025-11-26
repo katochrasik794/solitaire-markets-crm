@@ -182,7 +182,7 @@ function OtherCrypto() {
 
         {/* OTHER CRYPTO BUTTON (CENTERED FULL WIDTH) */}
         <div className="flex justify-center"  >
-        <button className="max-w-4xl w-full bg-[#00A896] text-white py-4 rounded-lg flex items-center justify-center hover:bg-[#008f7a] transition-all">
+        <button className="max-w-4xl w-full bg-[#e6c200] text-gray-900 py-4 rounded-lg flex items-center justify-center hover:bg-[#d4b000] transition-all">
           <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>

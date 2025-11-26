@@ -168,7 +168,7 @@ function Header({ onMenuClick }) {
           <div className="flex items-center gap-4 flex-shrink-0">
             <Link
               to="/user/deposits"
-              className="bg-[#F5C842] hover:bg-[#E0B238] text-gray-900 px-4 py-1.5 rounded transition-colors whitespace-nowrap"
+              className="bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 px-4 py-1.5 rounded transition-colors whitespace-nowrap"
               style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
             >
               DEPOSIT NOW

@@ -145,7 +145,7 @@ function ReferAFriend() {
             {/* Right Side - How it works, QR and Download Buttons */}
             <div className="flex flex-col items-center lg:items-end justify-center gap-3 sm:gap-4 mt-4 lg:mt-0 lg:pr-4">
               {/* How it works Button */}
-              <button className="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg transition-colors w-40 sm:w-44 lg:w-48 text-sm sm:text-base" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
+              <button className="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 font-semibold rounded-lg transition-colors w-40 sm:w-44 lg:w-48 text-sm sm:text-base" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
                 How it works
               </button>
               

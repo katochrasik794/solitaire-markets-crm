@@ -161,7 +161,7 @@ function Crypto() {
               disabled={!amount || !password}
               className={`w-full mt-5 py-3 rounded-lg font-semibold transition-colors ${
                 amount && password
-                  ? 'bg-[#009688] hover:bg-[#008f7a] text-white cursor-pointer'
+                  ? 'bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 cursor-pointer'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
