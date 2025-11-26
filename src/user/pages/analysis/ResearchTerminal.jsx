@@ -640,337 +640,80 @@ function ResearchTerminal() {
                   id: 1,
                   date: '21/11/2025 20:59',
                   type: 'SUMMARY',
-                  image: 'Energy',
+                  image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=800&q=60',
                   headline: 'Energy Markets React to Breakthrough Peace Deal Between U.S., Russia, and Ukraine',
-                  tags: ['EURUSD']
+                  pair: 'EURUSD'
                 },
                 {
                   id: 2,
                   date: '21/11/2025 20:58',
                   type: 'SNAPSHOTS',
-                  image: 'Dollar',
+                  image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=60',
                   headline: 'Currency pairs: Latest news',
-                  tags: ['EURUSD']
+                  pair: 'EURUSD'
                 },
                 {
                   id: 3,
                   date: '21/11/2025 19:22',
                   type: 'SUMMARY',
-                  image: 'World',
+                  image: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=800&q=60',
                   headline: 'Charting the Future: Vice Chair Jefferson Speaks on AI and Financial Stability',
-                  tags: ['EURUSD', 'USDJPY']
+                  pair: 'EURUSD'
                 },
                 {
                   id: 4,
                   date: '21/11/2025 19:22',
                   type: 'SNAPSHOTS',
-                  image: 'Eye',
+                  image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=60',
                   headline: 'Currency pairs: Latest news',
-                  tags: ['USDCAD', 'USDJPY', 'EURUSD']
+                  pair: 'USDCAD'
                 },
                 {
                   id: 5,
                   date: '21/11/2025 19:07',
                   type: 'SUMMARY',
-                  image: 'Piggy',
+                  image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=60',
                   headline: 'Federal Reserve Welcomes Young M at the 2025 National College Fed Challenge Finals',
-                  tags: ['EURUSD', 'USDJPY', 'Gold']
+                  pair: 'EURUSD'
                 }
               ].map((news) => (
                 <div
                   key={news.id}
-                  className="min-w-[280px] bg-gray-100 rounded-lg p-4 border border-gray-200 shadow-md"
+                  className="min-w-[240px] rounded-lg p-3 pb-8 border border-gray-200 shadow-md relative overflow-hidden"
+                  style={{
+                    backgroundImage: `url('${news.image}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                      {news.date}
-                    </span>
-                    <span className="px-2 py-0.5 bg-gray-200 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
-                      {news.type}
-                    </span>
-                  </div>
-                  <div className="w-full h-32 bg-gray-200 rounded mb-3 flex items-center justify-center">
-                    <span className="text-xs text-gray-400">{news.image}</span>
-                  </div>
-                  <h3 className="font-semibold mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', color: '#000000', fontWeight: '600', lineHeight: '1.4' }}>
-                    {news.headline}
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {news.tags.map((tag, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-white border border-gray-300 rounded-full text-xs" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '400' }}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Navigation Arrows */}
-            <div className="flex justify-center gap-2 mt-4">
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* AnalysisIQ Section */}
-        <div className="mt-8 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
-              AnalysisIQ
-            </h2>
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          </div>
-
-          <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
-              {[
-                {
-                  id: 1,
-                  asset: 'EUR/USD',
-                  assetIcon: '🇪🇺🇺🇸',
-                  direction: 'Buy',
-                  directionColor: 'green',
-                  period: 'Intraday',
-                  stop: '1.0820',
-                  entry: '1.0850',
-                  target: '1.0920',
-                  confidence: 4,
-                  status: 'Buy Limit',
-                  statusColor: 'green',
-                  expiration: '22/11/25 02:30',
-                  timestamp: '21/11/2025 14:30'
-                },
-                {
-                  id: 2,
-                  asset: 'XAU/USD',
-                  assetIcon: 'Au',
-                  direction: 'Buy',
-                  directionColor: 'green',
-                  period: 'Intraday',
-                  stop: '1950.00',
-                  entry: '1980.00',
-                  target: '2050.00',
-                  confidence: 3,
-                  status: 'Buy Limit',
-                  statusColor: 'green',
-                  expiration: '22/11/25 02:30',
-                  timestamp: '21/11/2025 13:45'
-                },
-                {
-                  id: 3,
-                  asset: 'BTC/USD',
-                  assetIcon: '₿',
-                  direction: 'Buy',
-                  directionColor: 'green',
-                  period: 'Intraday',
-                  stop: '44000.00',
-                  entry: '45000.00',
-                  target: '48000.00',
-                  confidence: 5,
-                  status: 'Buy Limit',
-                  statusColor: 'green',
-                  expiration: '22/11/25 02:30',
-                  timestamp: '21/11/2025 12:15'
-                },
-                {
-                  id: 4,
-                  asset: 'USOIL',
-                  assetIcon: '🛢️',
-                  direction: 'Sell',
-                  directionColor: 'red',
-                  period: 'Intraday',
-                  stop: '85.00',
-                  entry: '82.00',
-                  target: '78.00',
-                  confidence: 4,
-                  status: 'Sell Limit',
-                  statusColor: 'red',
-                  expiration: '22/11/25 02:30',
-                  timestamp: '21/11/2025 11:20'
-                }
-              ].map((idea) => (
-                <div
-                  key={idea.id}
-                  className="min-w-[240px] h-64 bg-white rounded-lg p-4 border border-gray-200 shadow-md flex flex-col"
-                >
-                  <div>
-                    <div className="flex justify-between items-center text-xs font-semibold text-gray-700">
-                      <span className="bg-gray-100 px-2 py-1 rounded-md">{idea.asset}</span>
-                      <span className="text-gray-600">{idea.period}</span>
+                  <div className="absolute inset-0 bg-white bg-opacity-60"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="text-gray-600">{news.date}</span>
+                      <span className="text-[#00A896] font-semibold">{news.type}</span>
                     </div>
 
-                    {/* BUY LIMIT Badge */}
-                    <div className="flex justify-center mt-2">
-                      <span className={`bg-${idea.directionColor === 'green' ? 'green' : 'red'}-600 text-white text-xs px-3 py-1 rounded-full font-bold`}>
-                        {idea.status}
+                    {/* New badge with line */}
+                    <div className="w-full flex items-center justify-center mb-5 relative">
+                      <div className="absolute w-full h-[1px] bg-gray-300"></div>
+                      <span className="relative bg-[#00A896] text-white text-xs px-3 py-1 rounded-full z-10 shadow">
+                        New
                       </span>
                     </div>
-                  </div>
 
-                  {/* Values */}
-                  <div className="text-xs text-gray-700 space-y-1 flex-1 mt-4">
-                    <div className="flex justify-between">
-                      <span>Entry</span>
-                      <span className="font-bold">{idea.entry}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Target</span>
-                      <span className="font-bold">{idea.target}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Stop</span>
-                      <span className="font-bold">{idea.stop}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Confidence</span>
-                      <div className="flex gap-1">
-                        {[...Array(Math.min(idea.confidence, 4))].map((_, i) => (
-                          <div
-                            key={i}
-                            className={`w-1.5 rounded ${i === 0 ? 'h-3' : i === 1 ? 'h-4' : i === 2 ? 'h-5' : 'h-6'}`}
-                            style={{ backgroundColor: `rgb(${100 + i * 25}, ${100 + i * 25}, ${100 + i * 25})` }}
-                          />
-                        ))}
+                    {/* Title */}
+                    <p className="text-base font-semibold text-black leading-snug mb-4 text-center">
+                      {news.headline.split(' ').slice(0, 4).join(' ')} <br />
+                      {news.headline.split(' ').slice(4, 8).join(' ')} <br />
+                      {news.headline.split(' ').slice(8).join(' ')}
+                    </p>
+
+                    {/* Pair Badge */}
+                    <div className="text-center">
+                      <div className="inline-block bg-white px-3 py-1 rounded-full border border-gray-300 text-xs font-medium text-gray-700 shadow-sm">
+                        {news.pair}
                       </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Expires</span>
-                      <span className="text-green-500 font-bold">1d 7h</span>
-                    </div>
-                  </div>
-
-                  {/* Learn More Button */}
-                  <div className="flex justify-center mt-auto">
-                    <button className="bg-gray-900 text-white text-xs py-1 px-3 rounded-md font-semibold hover:bg-black transition">
-                      LEARN MORE
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Navigation Arrows */}
-            <div className="flex justify-center gap-2 mt-4">
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Calendar Events Section */}
-        <div className="mt-8 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
-              Calendar Events
-            </h2>
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-            </svg>
-          </div>
-
-          <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
-              {[
-                {
-                  id: 1,
-                  type: 'Dividends',
-                  ticker: 'CFI.XX',
-                  title: 'CF Industries Holdings Inc',
-                  subtitle: '28.11 NA',
-                  description: 'Quarterly 2025 Dividend Payment Date',
-                  amount: '$0.5'
-                },
-                {
-                  id: 2,
-                  type: 'Dividends',
-                  ticker: 'AAPL.XX',
-                  title: 'Apple Inc',
-                  subtitle: '29.11 NA',
-                  description: 'Quarterly 2025 Dividend Payment Date',
-                  amount: '$0.25'
-                },
-                {
-                  id: 3,
-                  type: 'Dividends',
-                  ticker: 'MSFT.XX',
-                  title: 'Microsoft Corporation',
-                  subtitle: '30.11 NA',
-                  description: 'Quarterly 2025 Dividend Payment Date',
-                  amount: '$0.75'
-                },
-                {
-                  id: 4,
-                  type: 'Dividends',
-                  ticker: 'JNJ.XX',
-                  title: 'Johnson & Johnson',
-                  subtitle: '01.12 NA',
-                  description: 'Quarterly 2025 Dividend Payment Date',
-                  amount: '$1.2'
-                },
-                {
-                  id: 5,
-                  type: 'Dividends',
-                  ticker: 'KO.XX',
-                  title: 'Coca-Cola Company',
-                  subtitle: '02.12 NA',
-                  description: 'Quarterly 2025 Dividend Payment Date',
-                  amount: '$0.46'
-                }
-              ].map((event) => (
-                <div
-                  key={event.id}
-                  className="min-w-[280px] bg-white rounded-lg p-4 border border-gray-200 shadow-md"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    {/* Dividends Pill */}
-                    <span className="px-3 py-1 text-sm font-medium rounded-full border border-blue-500 text-blue-600 bg-white">
-                      {event.type}
-                    </span>
-                    {/* Ticker Pill */}
-                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-gray-300 text-gray-700">
-                      {event.ticker}
-                    </span>
-                  </div>
-
-                  {/* Main Title */}
-                  <h2 className="text-center text-base font-semibold text-[#000] leading-tight">
-                    {event.title.split(' ').slice(0, -1).join(' ')}<br />{event.title.split(' ').slice(-1)}
-                  </h2>
-
-                  {/* Subtitle */}
-                  <p className="text-center text-gray-700 text-xs mt-2">
-                    {event.subtitle}
-                  </p>
-
-                  {/* Description */}
-                  <p className="text-center text-gray-700 text-xs mt-3 leading-snug">
-                    {event.description.split(' ').slice(0, -2).join(' ')}<br />{event.description.split(' ').slice(-2).join(' ')}
-                  </p>
-
-                  {/* Amount Section */}
-                  <div className="flex justify-between items-center mt-6 text-sm">
-                    <span className="text-gray-500 font-medium">Amount</span>
-                    <span className="text-black font-semibold">{event.amount}</span>
                   </div>
                 </div>
               ))}
@@ -1166,6 +909,296 @@ function ResearchTerminal() {
             </div>
           </div>
         </div>
+
+        {/* Calendar Events Section */}
+        <div className="mt-8 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
+              Calendar Events
+            </h2>
+            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+            </svg>
+          </div>
+
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+              {[
+                {
+                  id: 1,
+                  type: 'Dividends',
+                  ticker: 'CFI.XX',
+                  title: 'CF Industries Holdings Inc',
+                  subtitle: '28.11 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$0.5'
+                },
+                {
+                  id: 2,
+                  type: 'Dividends',
+                  ticker: 'AAPL.XX',
+                  title: 'Apple Inc',
+                  subtitle: '29.11 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$0.25'
+                },
+                {
+                  id: 3,
+                  type: 'Dividends',
+                  ticker: 'MSFT.XX',
+                  title: 'Microsoft Corporation',
+                  subtitle: '30.11 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$0.75'
+                },
+                {
+                  id: 4,
+                  type: 'Dividends',
+                  ticker: 'JNJ.XX',
+                  title: 'Johnson & Johnson',
+                  subtitle: '01.12 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$1.2'
+                },
+                {
+                  id: 5,
+                  type: 'Dividends',
+                  ticker: 'KO.XX',
+                  title: 'Coca-Cola Company',
+                  subtitle: '02.12 NA',
+                  description: 'Quarterly 2025 Dividend Payment Date',
+                  amount: '$0.46'
+                }
+              ].map((event) => (
+                <div
+                  key={event.id}
+                  className="min-w-[280px] bg-white rounded-lg p-4 border border-gray-200 shadow-md"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    {/* Dividends Pill */}
+                    <span className="px-3 py-1 text-sm font-medium rounded-full border border-blue-500 text-blue-600 bg-white">
+                      {event.type}
+                    </span>
+                    {/* Ticker Pill */}
+                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-gray-300 text-gray-700">
+                      {event.ticker}
+                    </span>
+                  </div>
+
+                  {/* Main Title */}
+                  <h2 className="text-center text-base font-semibold text-[#000] leading-tight">
+                    {event.title.split(' ').slice(0, -1).join(' ')}<br />{event.title.split(' ').slice(-1)}
+                  </h2>
+
+                  {/* Subtitle */}
+                  <p className="text-center text-gray-700 text-xs mt-2">
+                    {event.subtitle}
+                  </p>
+
+                  {/* Description */}
+                  <p className="text-center text-gray-700 text-xs mt-3 leading-snug">
+                    {event.description.split(' ').slice(0, -2).join(' ')}<br />{event.description.split(' ').slice(-2).join(' ')}
+                  </p>
+
+                  {/* Amount Section */}
+                  <div className="flex justify-between items-center mt-6 text-sm">
+                    <span className="text-gray-500 font-medium">Amount</span>
+                    <span className="text-black font-semibold">{event.amount}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex justify-center gap-2 mt-4">
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* AnalysisIQ Section */}
+        <div className="mt-8 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
+              AnalysisIQ
+            </h2>
+            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+              {[
+                {
+                  id: 1,
+                  asset: 'EUR/USD',
+                  assetIcon: '🇪🇺🇺🇸',
+                  direction: 'Buy',
+                  directionColor: 'green',
+                  period: 'Intraday',
+                  stop: '1.0820',
+                  entry: '1.0850',
+                  target: '1.0920',
+                  confidence: 4,
+                  status: 'Buy Limit',
+                  statusColor: 'green',
+                  expiration: '22/11/25 02:30',
+                  timestamp: '21/11/2025 14:30'
+                },
+                {
+                  id: 2,
+                  asset: 'XAU/USD',
+                  assetIcon: 'Au',
+                  direction: 'Buy',
+                  directionColor: 'green',
+                  period: 'Intraday',
+                  stop: '1950.00',
+                  entry: '1980.00',
+                  target: '2050.00',
+                  confidence: 3,
+                  status: 'Buy Limit',
+                  statusColor: 'green',
+                  expiration: '22/11/25 02:30',
+                  timestamp: '21/11/2025 13:45'
+                },
+                {
+                  id: 3,
+                  asset: 'BTC/USD',
+                  assetIcon: '₿',
+                  direction: 'Buy',
+                  directionColor: 'green',
+                  period: 'Intraday',
+                  stop: '44000.00',
+                  entry: '45000.00',
+                  target: '48000.00',
+                  confidence: 5,
+                  status: 'Buy Limit',
+                  statusColor: 'green',
+                  expiration: '22/11/25 02:30',
+                  timestamp: '21/11/2025 12:15'
+                },
+                {
+                  id: 4,
+                  asset: 'USOIL',
+                  assetIcon: '🛢️',
+                  direction: 'Sell',
+                  directionColor: 'red',
+                  period: 'Intraday',
+                  stop: '85.00',
+                  entry: '82.00',
+                  target: '78.00',
+                  confidence: 4,
+                  status: 'Sell Limit',
+                  statusColor: 'red',
+                  expiration: '22/11/25 02:30',
+                  timestamp: '21/11/2025 11:20'
+                },
+                {
+                  id: 5,
+                  asset: 'BTC/USD',
+                  assetIcon: '₿',
+                  direction: 'Buy',
+                  directionColor: 'green',
+                  period: 'Intraday',
+                  stop: '44000.00',
+                  entry: '45000.00',
+                  target: '48000.00',
+                  confidence: 5,
+                  status: 'Buy Limit',
+                  statusColor: 'green',
+                  expiration: '22/11/25 02:30',
+                  timestamp: '21/11/2025 12:15'
+                }
+              ].map((idea) => (
+                <div
+                  key={idea.id}
+                  className="min-w-[240px] h-64 bg-white rounded-lg p-4 border border-gray-200 shadow-md flex flex-col"
+                >
+                  <div>
+                    <div className="flex justify-between items-center text-xs font-semibold text-gray-700">
+                      <span className="bg-gray-100 px-2 py-1 rounded-md">{idea.asset}</span>
+                      <span className="text-gray-600">{idea.period}</span>
+                    </div>
+
+                    {/* BUY LIMIT Badge */}
+                    <div className="flex justify-center mt-2">
+                      <span className={`bg-${idea.directionColor === 'green' ? 'green' : 'red'}-600 text-white text-xs px-3 py-1 rounded-full font-bold`}>
+                        {idea.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Values */}
+                  <div className="text-xs text-gray-700 space-y-1 flex-1 mt-4">
+                    <div className="flex justify-between">
+                      <span>Entry</span>
+                      <span className="font-bold">{idea.entry}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Target</span>
+                      <span className="font-bold">{idea.target}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Stop</span>
+                      <span className="font-bold">{idea.stop}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>Confidence</span>
+                      <div className="flex gap-1">
+                        {[...Array(Math.min(idea.confidence, 4))].map((_, i) => (
+                          <div
+                            key={i}
+                            className={`w-1.5 rounded ${i === 0 ? 'h-3' : i === 1 ? 'h-4' : i === 2 ? 'h-5' : 'h-6'}`}
+                            style={{ backgroundColor: `rgb(${100 + i * 25}, ${100 + i * 25}, ${100 + i * 25})` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Expires</span>
+                      <span className="text-green-500 font-bold">1d 7h</span>
+                    </div>
+                  </div>
+
+                  {/* Learn More Button */}
+                  <div className="flex justify-center mt-auto">
+                    <button className="bg-gray-900 text-white text-xs py-1 px-3 rounded-md font-semibold hover:bg-black transition">
+                      LEARN MORE
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex justify-center gap-2 mt-4">
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button className="w-8 h-8 bg-gray-800 text-white rounded flex items-center justify-center hover:bg-gray-900 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        
+
+        
 
       </div>
 
