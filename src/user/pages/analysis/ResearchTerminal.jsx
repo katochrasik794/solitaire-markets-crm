@@ -1008,77 +1008,145 @@ function ResearchTerminal() {
               {[
                 {
                   id: 1,
-                  title: 'Quick Calculator',
-                  description: 'Calculate position sizes, risk management, and profit targets',
-                  icon: '📊',
-                  type: 'TOOL',
-                  action: 'OPEN CALCULATOR'
+                  date: '26/11/2025 10:32',
+                  type: 'MACRO PREVIEW',
+                  image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=600&q=60',
+                  country: 'DE',
+                  flag: 'https://flagcdn.com/w20/de.png',
+                  title: 'German Consumer Confidence Expected to Decline Amid Weakened Business Sentiment and Economic Concerns',
+                  impact: 'High',
+                  eventDate: '27 Nov 2025, 12:30'
                 },
                 {
                   id: 2,
-                  title: 'Market Overview',
-                  description: 'Real-time prices and changes for major indices and cryptocurrencies',
-                  icon: '📈',
-                  type: 'OVERVIEW',
-                  action: 'VIEW MARKETS'
+                  date: '26/11/2025 11:15',
+                  type: 'MACRO PREVIEW',
+                  image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=60',
+                  country: 'US',
+                  flag: 'https://flagcdn.com/w20/us.png',
+                  title: 'US Federal Reserve Meeting to Discuss Interest Rate Policy and Economic Outlook',
+                  impact: 'High',
+                  eventDate: '28 Nov 2025, 14:00',
+                  change: '0.76%',
+                  direction: 'up'
                 },
                 {
                   id: 3,
-                  title: 'Price Alerts',
-                  description: 'Set custom alerts for price movements and market events',
-                  icon: '🔔',
-                  type: 'ALERT',
-                  action: 'SET ALERTS'
+                  date: '26/11/2025 12:45',
+                  type: 'MACRO PREVIEW',
+                  image: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=600&q=60',
+                  country: 'UK',
+                  flag: 'https://flagcdn.com/w20/gb.png',
+                  title: 'Bank of England Monetary Policy Statement and Interest Rate Decision',
+                  impact: 'Medium',
+                  eventDate: '29 Nov 2025, 11:00',
+                  change: '-0.23%',
+                  direction: 'down'
                 },
                 {
                   id: 4,
-                  title: 'Watchlist Manager',
-                  description: 'Track your favorite assets and monitor performance',
-                  icon: '📋',
-                  type: 'WATCHLIST',
-                  action: 'MANAGE LIST'
+                  date: '26/11/2025 13:20',
+                  type: 'MACRO PREVIEW',
+                  image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&q=60',
+                  country: 'JP',
+                  flag: 'https://flagcdn.com/w20/jp.png',
+                  title: 'Bank of Japan Policy Meeting and Economic Assessment',
+                  impact: 'High',
+                  eventDate: '30 Nov 2025, 09:00',
+                  change: '1.15%',
+                  direction: 'up'
                 },
                 {
                   id: 5,
-                  title: 'Economic Calendar',
-                  description: 'Stay updated with upcoming economic events and their impact',
-                  icon: '📅',
-                  type: 'CALENDAR',
-                  action: 'VIEW EVENTS'
+                  date: '26/11/2025 14:10',
+                  type: 'MACRO PREVIEW',
+                  image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=600&q=60',
+                  country: 'EU',
+                  flag: 'https://flagcdn.com/w20/eu.png',
+                  title: 'European Central Bank Press Conference and Economic Projections',
+                  impact: 'High',
+                  eventDate: '01 Dec 2025, 13:45',
+                  change: '-0.45%',
+                  direction: 'down'
                 },
                 {
                   id: 6,
-                  title: 'Trading Journal',
-                  description: 'Record and analyze your trading performance over time',
-                  icon: '📝',
-                  type: 'JOURNAL',
-                  action: 'OPEN JOURNAL'
+                  date: '26/11/2025 15:05',
+                  type: 'MACRO PREVIEW',
+                  image: 'https://images.unsplash.com/photo-1493655161922-ef98929de9d8?auto=format&fit=crop&w=600&q=60',
+                  country: 'CN',
+                  flag: 'https://flagcdn.com/w20/cn.png',
+                  title: 'China Central Bank Interest Rate Decision and Monetary Policy Update',
+                  impact: 'Medium',
+                  eventDate: '02 Dec 2025, 10:30',
+                  change: '0.92%',
+                  direction: 'up'
                 }
               ].map((tool) => (
                 <div
                   key={tool.id}
-                  className="min-w-[280px] bg-gray-100 rounded-lg p-4 border border-gray-200 shadow-md"
+                  className="min-w-[240px] rounded-lg p-3 pb-6 border border-gray-200 shadow-md relative overflow-hidden"
+                  style={{
+                    backgroundImage: `url('${tool.image}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                      MARKET TOOL
-                    </span>
-                    <span className="px-2 py-0.5 bg-purple-200 rounded text-xs font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px', fontWeight: '600' }}>
-                      {tool.type}
-                    </span>
+                  <div className="absolute inset-0 bg-white bg-opacity-60"></div>
+                  <div className="relative z-10">
+                    {tool.id === 1 ? (
+                      <div className="flex items-center justify-between text-xs mb-2">
+                        <span className="text-gray-500">{tool.date}</span>
+                        <span className="text-[#00A896] font-semibold">{tool.type}</span>
+                      </div>
+                    ) : (
+                      <div className="text-center mb-2">
+                        <span className={`text-sm font-semibold ${tool.direction === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                          Moving {tool.direction === 'up' ? 'Up' : 'Down'} {tool.change}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Country Pill */}
+                    <div className="flex justify-center mb-2">
+                      <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-full shadow-md">
+                        <img
+                          src={tool.flag}
+                          alt={`${tool.country} Flag`}
+                          className="w-4 h-4 rounded-sm"
+                        />
+                        <span className="text-xs font-medium">{tool.country}</span>
+                      </div>
+                    </div>
+
+                    {/* Title */}
+                    <p className="text-center text-sm font-medium text-black leading-snug px-1">
+                      {tool.title.split(' ').slice(0, 4).join(' ')} <br />
+                      {tool.title.split(' ').slice(4, 8).join(' ')} <br />
+                      {tool.title.split(' ').slice(8, 12).join(' ')} <br />
+                      {tool.title.split(' ').slice(12).join(' ')}
+                    </p>
+
+                    {/* Event Details */}
+                    <p className="mt-3 text-center font-semibold text-black text-sm">
+                      Event Details
+                    </p>
+
+                    {/* Detail Rows */}
+                    <div className="mt-3 space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600 font-medium">Impact</span>
+                        <span className={`font-semibold ${tool.impact === 'High' ? 'text-red-600' : 'text-orange-600'}`}>{tool.impact}</span>
+                      </div>
+
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600 font-medium">Date</span>
+                        <span className="text-black font-semibold">
+                          {tool.eventDate}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-full h-24 bg-purple-200 rounded mb-3 flex items-center justify-center">
-                    <span className="text-2xl">{tool.icon}</span>
-                  </div>
-                  <h3 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '600', lineHeight: '1.4' }}>
-                    {tool.title}
-                  </h3>
-                  <p className="text-sm text-gray-700 mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400', lineHeight: '1.4' }}>
-                    {tool.description}
-                  </p>
-                  <button className="w-full px-3 py-2 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '600' }}>
-                    {tool.action}
-                  </button>
                 </div>
               ))}
             </div>
