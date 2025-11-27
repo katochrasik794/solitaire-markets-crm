@@ -1,16 +1,5 @@
-import { Outlet } from 'react-router-dom'
-import AdminSidebar from './AdminSidebar'
+// AdminLayout is now replaced by Shell layout
+// This file is kept for backward compatibility but Shell should be used directly
+import Shell from '../layouts/Shell'
 
-function AdminLayout() {
-  return (
-    <div className="flex min-h-screen bg-gray-50">
-      <AdminSidebar />
-      <main className="flex-1 ml-64">
-        <Outlet />
-      </main>
-    </div>
-  )
-}
-
-export default AdminLayout
-
+export default Shell

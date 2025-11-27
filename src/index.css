@@ -23,6 +23,10 @@
 }
 
 @layer base {
+  :root {
+    --app-x: clamp(1rem, 4vw, 2rem);
+  }
+
   html, body, #root {
     font-family: 'Roboto', sans-serif;
     font-size: 16px;

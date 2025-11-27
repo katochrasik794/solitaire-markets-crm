@@ -1,7 +1,15 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
 import UserLayout from './user/components/UserLayout'
-import AdminLayout from './admin/components/AdminLayout'
+
+// Admin imports
+import { AuthProvider } from './admin/contexts/AuthContext'
+import Shell from './admin/layouts/Shell'
+import ProtectedRoute from './admin/components/ProtectedRoute'
+import FeatureGuard from './admin/components/FeatureGuard'
+import AdminIndexRedirect from './admin/components/AdminIndexRedirect'
+import adminRoutes from './admin/routes/adminRoutes'
+import AdminLogin from './admin/pages/Login'
 
 // Auth Pages
 import Login from './pages/Login'
@@ -9,7 +17,7 @@ import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import NotFound from './pages/NotFound'
-import ProtectedRoute from './components/ProtectedRoute'
+import UserProtectedRoute from './components/ProtectedRoute'
 
 // User Pages
 import Dashboard from './user/pages/Dashboard'
@@ -43,10 +51,6 @@ import Ethereum from './user/pages/deposits/Ethereum'
 import BankTransfer from './user/pages/deposits/BankTransfer'
 import OtherCrypto from './user/pages/deposits/OtherCrypto'
 
-// Admin Pages
-import AdminHome from './admin/pages/AdminHome'
-import AdminUsers from './admin/pages/AdminUsers'
-
 function App() {
   return (
     <Router>
@@ -58,14 +62,21 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         
+        {/* Admin Login Route */}
+        <Route path="/admin/login" element={
+          <AuthProvider>
+            <AdminLogin />
+          </AuthProvider>
+        } />
+        
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/user/dashboard" replace />} />
         
         {/* User Routes - Protected */}
         <Route path="/user" element={
-          <ProtectedRoute>
+          <UserProtectedRoute>
             <UserLayout />
-          </ProtectedRoute>
+          </UserProtectedRoute>
         }>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="verification" element={<Verification />} />
@@ -99,13 +110,27 @@ function App() {
         </Route>
 
         {/* Admin Routes - Protected */}
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <AdminLayout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<AdminHome />} />
-          <Route path="users" element={<AdminUsers />} />
+        <Route 
+          path="/admin" 
+          element={
+            <AuthProvider>
+              <ProtectedRoute>
+                <Shell />
+              </ProtectedRoute>
+            </AuthProvider>
+          }
+        >
+          {adminRoutes.map((r) => {
+            const fullFeature = (r.path || '').trim();
+            return (
+              <Route
+                key={`ad-${r.path}`}
+                path={r.path}
+                element={<FeatureGuard feature={fullFeature}>{r.element}</FeatureGuard>}
+              />
+            );
+          })}
+          <Route index element={<AdminIndexRedirect />} />
         </Route>
 
         {/* 404 - Catch all unmatched routes */}
