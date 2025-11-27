@@ -1,4 +1,4 @@
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import Header from './Header'
@@ -7,7 +7,42 @@ import authService from '../../services/auth.js'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+// Route to title mapping
+const routeTitles = {
+  '/user/dashboard': 'Dashboard',
+  '/user/verification': 'Verification',
+  '/user/create-account': 'Create Account',
+  '/user/deposits': 'Deposits',
+  '/user/deposits/google-pay': 'Google Pay',
+  '/user/deposits/apple-pay': 'Apple Pay',
+  '/user/deposits/debit-card': 'Debit Card Deposit',
+  '/user/deposits/usdt-trc20': 'USDT TRC20',
+  '/user/deposits/bitcoin': 'Bitcoin',
+  '/user/deposits/usdt-erc20': 'USDT ERC20',
+  '/user/deposits/usdt-bep20': 'USDT BEP20',
+  '/user/deposits/ethereum': 'Ethereum',
+  '/user/deposits/bank-transfer': 'Bank Transfer',
+  '/user/deposits/other-crypto': 'Other Crypto',
+  '/user/withdrawals': 'Withdrawals',
+  '/user/withdrawals/debit-card': 'Debit Card Withdrawal',
+  '/user/withdrawals/skrill': 'Skrill Withdrawal',
+  '/user/withdrawals/neteller': 'Neteller Withdrawal',
+  '/user/withdrawals/crypto': 'Crypto Withdrawal',
+  '/user/transfers': 'Transfers',
+  '/user/reports': 'Reports',
+  '/user/analysis/signal-centre': 'Signal Centre',
+  '/user/analysis/assets-overview': 'Assets Overview',
+  '/user/analysis/market-news': 'Market News',
+  '/user/analysis/market-calendar': 'Market Calendar',
+  '/user/analysis/research-terminal': 'Research Terminal',
+  '/user/platforms': 'Platforms',
+  '/user/refer-a-friend': 'Refer a Friend',
+  '/user/legal': 'Legal Terms'
+};
+
 function UserLayout() {
+  const location = useLocation();
+  
   // Open sidebar by default on small screens, closed on desktop
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -30,6 +65,13 @@ function UserLayout() {
     
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
+
+  // Update page title based on current route
+  useEffect(() => {
+    const pathname = location.pathname;
+    const pageTitle = routeTitles[pathname] || 'Dashboard';
+    document.title = `Solitaire : ${pageTitle}`;
+  }, [location.pathname]);
 
   // Check KYC status on mount
   useEffect(() => {

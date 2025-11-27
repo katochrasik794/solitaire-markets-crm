@@ -58,9 +58,16 @@ function AdminLogin() {
     try {
       // Minimum 3 seconds loading time for beautiful animation
       // Ensure BASE includes /api
-      const apiBase = BASE.endsWith('/api') ? BASE : `${BASE}/api`;
+      let apiBase = BASE;
+      if (!apiBase.endsWith('/api')) {
+        apiBase = apiBase.endsWith('/') ? `${apiBase}api` : `${apiBase}/api`;
+      }
+      
+      const loginUrl = `${apiBase}/admin/login`;
+      console.log('Admin login URL:', loginUrl); // Debug log
+      
       const [response] = await Promise.all([
-        fetch(`${apiBase}/admin/login`, {
+        fetch(loginUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -70,9 +77,17 @@ function AdminLogin() {
         new Promise(resolve => setTimeout(resolve, 3000))
       ])
       
+      // Check if response is ok before parsing JSON
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Server error: ${response.status}` }));
+        setError(errorData.message || `Login failed: ${response.status}`)
+        setLoading(false)
+        return
+      }
+      
       const data = await response.json()
       
-      if (response.ok && data.success) {
+      if (data.success) {
         // Store admin token and info
         login(data.data.admin || data.data, data.data.token)
         navigate('/admin/dashboard')
@@ -81,7 +96,8 @@ function AdminLogin() {
         setLoading(false)
       }
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.')
+      console.error('Admin login error:', err);
+      setError(err.message || 'Login failed. Please check your credentials and ensure the backend is running.')
       setLoading(false)
     }
   }
