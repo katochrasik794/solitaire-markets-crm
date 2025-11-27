@@ -520,7 +520,7 @@ export default function SendEmails() {
                 <div className="relative bg-gradient-to-br from-white/30 to-white/10 p-3 rounded-xl backdrop-blur-sm border border-white/20">
                   <img 
                     src="/favicon-32x32.png" 
-                    alt="Zuperior" 
+                    alt="Solitaire" 
                     className="h-8 w-8 rounded-lg"
                     onError={(e) => {
                       e.target.style.display = 'none';
@@ -534,7 +534,7 @@ export default function SendEmails() {
               </div>
               <div className="hidden sm:block">
                 <h2 className="text-lg md:text-xl font-bold bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                  Zuperior Mail
+                  Solitaire Mail
                 </h2>
                 <p className="text-xs text-white/70 mt-0.5">Professional Email Suite</p>
               </div>
@@ -596,7 +596,7 @@ export default function SendEmails() {
           <div className="p-4 border-t border-violet-500/30">
             <div className="flex items-center gap-2 text-white/70 text-xs">
               <Sparkles size={14} />
-              <span>Powered by Zuperior</span>
+              <span>Powered by Solitaire</span>
             </div>
           </div>
         </div>

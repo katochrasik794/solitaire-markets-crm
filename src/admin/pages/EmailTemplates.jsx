@@ -22,7 +22,7 @@ const AVAILABLE_VARIABLES = [
   { name: 'content', description: 'Email body content' },
   { name: 'subject', description: 'Email subject' },
   { name: 'logoUrl', description: 'Company logo URL' },
-  { name: 'companyName', description: 'Zuperior FX Limited' },
+  { name: 'companyName', description: 'Solitaire Markets Limited' },
   { name: 'companyEmail', description: 'Company email address' },
   { name: 'companyPhone', description: 'Company phone number' },
   { name: 'imageUrl', description: 'Optional footer image URL' },
@@ -329,7 +329,7 @@ export default function EmailTemplates() {
                   type="email"
                   value={fromEmail}
                   onChange={(e) => setFromEmail(e.target.value)}
-                  placeholder="e.g., noreply@zuperior.com or leave empty for default"
+                  placeholder="e.g., noreply@solitaire.com or leave empty for default"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-500 mt-1">Email address to send from when using this template. Leave empty to use default SMTP settings.</p>
