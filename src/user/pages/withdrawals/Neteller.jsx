@@ -10,7 +10,7 @@ function Neteller() {
         <div className="bg-white rounded-lg p-8 border border-gray-200 text-center">
           {/* Neteller Logo with gray background */}
           <div className="bg-gray-200 rounded-lg p-4 mb-6 flex items-center justify-center">
-            <img src="/netellerw.png" alt="Neteller" className="h-8 w-auto" />
+            <img src="/netellerw.png" alt="Neteller" className="h-20 w-auto mr-10" />
           </div>
           
           <p className="text-center max-w-lg mx-auto" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#4B5156', fontWeight: '400', lineHeight: '1.6' }}>

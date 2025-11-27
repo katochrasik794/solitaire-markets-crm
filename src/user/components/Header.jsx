@@ -98,7 +98,7 @@ function Header({ onMenuClick }) {
           {/* Logo (Mobile - centered, Desktop - hidden) */}
           <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden">
             <Link to="/user/dashboard">
-              <img src="/logo.svg" alt="Solitaire Logo" className="h-10 w-auto" style={{ background: 'transparent' }} />
+              <img src="/logo.svg" alt="Solitaire Logo" className="h-20 w-auto" style={{ background: 'transparent' }} />
             </Link>
           </div>
 

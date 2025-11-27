@@ -10,7 +10,7 @@ function NotFound() {
         <img 
           src="/logo.svg" 
           alt="Logo" 
-          className="h-16 w-auto"
+          className="h-20 w-auto"
           style={{ maxWidth: '300px' }}
         />
       </div>

@@ -112,7 +112,7 @@ function Login() {
               <img 
                 src="/logo.svg" 
                 alt="Logo" 
-                className="h-10 w-auto"
+                className="h-20 w-auto mr-10"
                 style={{ filter: 'none' }}
               />
             </div>
