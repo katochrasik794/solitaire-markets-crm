@@ -1,5 +1,5 @@
 // src/layouts/Shell.jsx
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import Topbar from "../components/Topbar.jsx";
@@ -32,12 +32,24 @@ export default function Shell() {
 
     let matched = null;
     let parent = null;
+    // Remove /admin prefix from pathname for matching
+    const cleanPath = pathname.replace(/^\/admin\/?/, '').replace(/^\//, '');
+    
     menu.forEach(section => {
       section.items.forEach(item => {
         if (item.children?.length) {
-          const found = item.children.find(c => c.to === pathname);
+          const found = item.children.find(c => {
+            const childPath = c.to?.replace(/^\//, '');
+            return childPath === cleanPath || pathname.endsWith(`/${childPath}`) || pathname === `/admin/${childPath}`;
+          });
           if (found) { matched = found; parent = item; }
-        } else if (item.to === pathname) { matched = item; parent = null; }
+        } else {
+          const itemPath = item.to?.replace(/^\//, '');
+          if (itemPath === cleanPath || pathname.endsWith(`/${itemPath}`) || pathname === `/admin/${itemPath}`) {
+            matched = item; 
+            parent = null;
+          }
+        }
       });
     });
 
@@ -57,6 +69,23 @@ export default function Shell() {
     }
     return list;
   }, [menu, pathname, role]);
+
+  // Update page title based on active menu
+  useEffect(() => {
+    let activeMenuLabel = 'Dashboard';
+    
+    // Find the active menu item from breadcrumbs
+    if (breadcrumbs.length > 0) {
+      // Get the last breadcrumb (most specific)
+      const lastBreadcrumb = breadcrumbs[breadcrumbs.length - 1];
+      if (lastBreadcrumb?.label) {
+        activeMenuLabel = lastBreadcrumb.label;
+      }
+    }
+    
+    // Format: "Solitaire : Admin-{active menu}"
+    document.title = `Solitaire : Admin-${activeMenuLabel}`;
+  }, [breadcrumbs]);
 
   return (
     <div className="min-h-screen bg-gray-100 relative">
