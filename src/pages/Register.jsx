@@ -213,26 +213,26 @@ function Register() {
                   <p className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>Loading countries...</p>
                 </div>
               ) : (
-                <form onSubmit={handleCountrySubmit}>
-                  <div>
-                    <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                      What is your country / region of residence?
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent appearance-none"
-                        style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+              <form onSubmit={handleCountrySubmit}>
+                <div>
+                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    What is your country / region of residence?
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent appearance-none"
+                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                         disabled={countriesLoading}
-                      >
-                        <option value="">Select Country / Region of Residence</option>
-                        {countries.map((countryOption) => (
+                    >
+                      <option value="">Select Country / Region of Residence</option>
+                      {countries.map((countryOption) => (
                           <option key={countryOption.id} value={countryOption.name}>
                             {countryOption.name}
-                          </option>
-                        ))}
-                      </select>
+                        </option>
+                      ))}
+                    </select>
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -241,15 +241,15 @@ function Register() {
                   </div>
                 </div>
 
-                    <button
-                      type="submit"
+                <button
+                  type="submit"
                       disabled={countriesLoading || !country}
                       className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-3 rounded-lg transition-colors font-semibold uppercase mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
-                    >
-                      CONTINUE
-                    </button>
-                  </form>
+                  style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                >
+                  CONTINUE
+                </button>
+              </form>
                 )}
             </div>
           )}
@@ -275,7 +275,7 @@ function Register() {
                   <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
                     <p className="text-base font-normal text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
                       {country}
-                    </p>
+                  </p>
                   </div>
                 </div>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import authService from '../../services/auth.js'
 import AuthLoader from '../../components/AuthLoader.jsx'
@@ -12,11 +12,13 @@ function CreateAccount() {
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [mt5Groups, setMt5Groups] = useState([])
+  const [loadingGroups, setLoadingGroups] = useState(true)
   
   const [formData, setFormData] = useState({
     platform: 'MT5',
-    accountType: 'standard',
-    currency: 'USD',
+    mt5GroupId: '',
+    leverage: 2000,
     isSwapFree: false,
     isCopyAccount: false,
     reasonForAccount: 'Different trading strategy',
@@ -24,13 +26,85 @@ function CreateAccount() {
   })
 
   const [createdAccount, setCreatedAccount] = useState(null)
+  const [selectedGroup, setSelectedGroup] = useState(null)
+
+  // Fetch active MT5 groups on component mount
+  useEffect(() => {
+    const fetchMt5Groups = async () => {
+      try {
+        const token = authService.getToken()
+        if (!token) {
+          navigate('/login')
+          return
+        }
+
+        const response = await fetch(`${API_BASE_URL}/accounts/groups`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        const data = await response.json()
+
+        if (data.success && data.data.length > 0) {
+          setMt5Groups(data.data)
+          // Auto-select first group if available
+          if (data.data[0]) {
+            setFormData(prev => ({ ...prev, mt5GroupId: data.data[0].id.toString() }))
+            setSelectedGroup(data.data[0])
+          }
+        } else {
+          setToast({
+            message: 'No active MT5 groups available. Please contact support.',
+            type: 'error'
+          })
+        }
+      } catch (err) {
+        console.error('Error fetching MT5 groups:', err)
+        setToast({
+          message: 'Failed to load MT5 groups. Please try again.',
+          type: 'error'
+        })
+      } finally {
+        setLoadingGroups(false)
+      }
+    }
+
+    fetchMt5Groups()
+  }, [navigate])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData({
+    let newFormData = {
       ...formData,
       [name]: type === 'checkbox' ? checked : value
-    })
+    }
+    
+    // If MT5 group changed, update selected group
+    if (name === 'mt5GroupId') {
+      const group = mt5Groups.find(g => g.id.toString() === value)
+      setSelectedGroup(group || null)
+      // Also update formData with the group ID as string
+      newFormData.mt5GroupId = value
+    }
+    
+    // If swap free is checked, limit leverage to 500
+    if (name === 'isSwapFree' && checked) {
+      const currentLeverage = parseInt(newFormData.leverage)
+      if (currentLeverage > 500) {
+        newFormData.leverage = 500
+      }
+    }
+    
+    // If leverage is changed and swap free is enabled, limit to 500
+    if (name === 'leverage' && newFormData.isSwapFree) {
+      const leverageValue = parseInt(value)
+      if (leverageValue > 500) {
+        newFormData.leverage = 500
+      }
+    }
+    
+    setFormData(newFormData)
   }
 
   const handleSubmit = async (e) => {
@@ -54,8 +128,8 @@ function CreateAccount() {
           },
           body: JSON.stringify({
             platform: formData.platform,
-            accountType: formData.accountType,
-            currency: formData.currency,
+            mt5GroupId: parseInt(formData.mt5GroupId),
+            leverage: parseInt(formData.leverage),
             isSwapFree: formData.isSwapFree,
             isCopyAccount: formData.isCopyAccount,
             reasonForAccount: formData.reasonForAccount,
@@ -84,12 +158,6 @@ function CreateAccount() {
       })
     }
   }
-
-  const currencies = [
-    { code: 'USD', name: 'US Dollar', flag: '🇺🇸' },
-    { code: 'EUR', name: 'Euro', flag: '🇪🇺' },
-    { code: 'GBP', name: 'British Pound', flag: '🇬🇧' }
-  ]
 
   const reasons = [
     'Different trading strategy',
@@ -168,99 +236,79 @@ function CreateAccount() {
                 </div>
               </div>
 
-              {/* Account Type */}
+              {/* Trading Group Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  Account Type
+                  Trading Group
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Standard */}
-                  <label className="cursor-pointer">
-                    <input
-                      type="radio"
-                      name="accountType"
-                      value="standard"
-                      checked={formData.accountType === 'standard'}
-                      onChange={handleChange}
-                      className="sr-only"
-                    />
-                    <div className={`border-2 rounded-lg p-4 transition-all ${
-                      formData.accountType === 'standard'
-                        ? 'border-[#e6c200] bg-[#e6c200] bg-opacity-5'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className={`w-4 h-4 rounded-full ${
-                          formData.accountType === 'standard' ? 'bg-[#e6c200]' : 'bg-gray-300'
-                        }`}></div>
-                        <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
+                {loadingGroups ? (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-center">
+                    <svg className="animate-spin h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span className="ml-2 text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>Loading groups...</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {mt5Groups.map((group) => (
+                      <label key={group.id} className="cursor-pointer">
+                        <input
+                          type="radio"
+                          name="mt5GroupId"
+                          value={group.id}
+                          checked={formData.mt5GroupId === group.id.toString()}
+                          onChange={handleChange}
+                          className="sr-only"
+                        />
+                        <div className={`border-2 rounded-lg p-4 transition-all ${
+                          formData.mt5GroupId === group.id.toString()
+                            ? 'border-[#e6c200] bg-[#e6c200] bg-opacity-5'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}>
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className={`w-4 h-4 rounded-full ${
+                              formData.mt5GroupId === group.id.toString() ? 'bg-[#e6c200]' : 'bg-gray-300'
+                            }`}></div>
+                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <span className="font-semibold text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                              {group.dedicated_name || 'Unnamed Group'}
+                            </span>
+                          </div>
+                          <ul className="space-y-1 text-sm text-gray-600 ml-11" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                            <li>• Currency: {group.currency}</li>
+                          </ul>
                         </div>
-                        <span className="font-semibold text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>Standard</span>
-                      </div>
-                      <ul className="space-y-1 text-sm text-gray-600 ml-11" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                        <li>• No minimum deposit</li>
-                        <li>• Average spreads of 1.4 pips</li>
-                        <li>• $0 Commission</li>
-                      </ul>
-                    </div>
-                  </label>
-
-                  {/* Premier */}
-                  <label className="cursor-pointer">
-                    <input
-                      type="radio"
-                      name="accountType"
-                      value="premier"
-                      checked={formData.accountType === 'premier'}
-                      onChange={handleChange}
-                      className="sr-only"
-                    />
-                    <div className={`border-2 rounded-lg p-4 transition-all ${
-                      formData.accountType === 'premier'
-                        ? 'border-[#e6c200] bg-[#e6c200] bg-opacity-5'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className={`w-4 h-4 rounded-full ${
-                          formData.accountType === 'premier' ? 'bg-[#e6c200]' : 'bg-gray-300'
-                        }`}></div>
-                        <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                          </svg>
-                        </div>
-                        <span className="font-semibold text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>Premier</span>
-                      </div>
-                      <ul className="space-y-1 text-sm text-gray-600 ml-11" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                        <li>• Deposits from $100</li>
-                        <li>• Spreads from 0.0 pips</li>
-                        <li>• $7/lot commission</li>
-                      </ul>
-                    </div>
-                  </label>
-                </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Currency */}
+              {/* Leverage Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  Currency
+                  Leverage
                 </label>
                 <select
-                  name="currency"
-                  value={formData.currency}
+                  name="leverage"
+                  value={formData.leverage}
                   onChange={handleChange}
+                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e6c200] focus:border-transparent"
                   style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                 >
-                  {currencies.map((curr) => (
-                    <option key={curr.code} value={curr.code}>
-                      {curr.flag} {curr.code} {curr.name}
-                    </option>
-                  ))}
+                  <option value="50">1:50</option>
+                  <option value="100">1:100</option>
+                  <option value="200">1:200</option>
+                  <option value="500">1:500</option>
+                  <option value="1000">1:1000</option>
+                  <option value="1500">1:1500</option>
+                  <option value="2000">1:2000</option>
                 </select>
               </div>
 
@@ -288,11 +336,11 @@ function CreateAccount() {
                 </p>
               </div>
 
-              {/* Equiti Copy Account */}
+              {/* Solitaire Markets Copy Account */}
               <div>
                 <div className="flex items-center justify-between">
                   <label className="block text-sm font-medium text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    Equiti Copy Account
+                    Solitaire Markets Copy Account
                   </label>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -368,7 +416,7 @@ function CreateAccount() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || loadingGroups || !formData.mt5GroupId}
                 className="w-full bg-[#d4b000] hover:bg-[#c2a000] text-gray-900 py-3 rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
               >
@@ -411,15 +459,21 @@ function CreateAccount() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 font-medium" style={{ fontFamily: 'Roboto, sans-serif' }}>Trading account:</span>
-                  <span className="text-gray-900 font-semibold" style={{ fontFamily: 'Roboto, sans-serif' }}>{createdAccount.account_number}</span>
+                  <span className="text-gray-900 font-semibold" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    {createdAccount.api_account_number || createdAccount.account_number}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 font-medium" style={{ fontFamily: 'Roboto, sans-serif' }}>Trading server:</span>
                   <span className="text-gray-900 font-semibold" style={{ fontFamily: 'Roboto, sans-serif' }}>{createdAccount.trading_server}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600 font-medium" style={{ fontFamily: 'Roboto, sans-serif' }}>Password:</span>
-                  <span className="text-gray-900 font-semibold" style={{ fontFamily: 'Roboto, sans-serif' }}>Please use your Portal password</span>
+                  <span className="text-gray-600 font-medium" style={{ fontFamily: 'Roboto, sans-serif' }}>Group:</span>
+                  <span className="text-gray-900 font-semibold" style={{ fontFamily: 'Roboto, sans-serif' }}>{createdAccount.mt5_group_name || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 font-medium" style={{ fontFamily: 'Roboto, sans-serif' }}>Leverage:</span>
+                  <span className="text-gray-900 font-semibold" style={{ fontFamily: 'Roboto, sans-serif' }}>1:{createdAccount.leverage || 'N/A'}</span>
                 </div>
               </div>
             </div>
