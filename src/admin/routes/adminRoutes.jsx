@@ -2,10 +2,10 @@
 import BrandCard from "../components/BrandCard.jsx";
 import ProTable from "../components/ProTable.jsx";
 import EmptyState from "../components/EmptyState.jsx";
-// import ReportsBookPnL from "../pages/admin/ReportsBookPnL.jsx";
-// import ReportsProfitLoss from "../pages/admin/ReportsProfitLoss.jsx";
-// import ReportsLPStatement from "../pages/admin/ReportsLPStatement.jsx";
-// import ReportsPartnerReport from "../pages/admin/ReportsPartnerReport.jsx";
+import ReportsBookPnL from "../pages/ReportsBookPnL.jsx";
+import ReportsProfitLoss from "../pages/ReportsProfitLoss.jsx";
+import ReportsLPStatement from "../pages/ReportsLPStatement.jsx";
+import ReportsPartnerReport from "../pages/ReportsPartnerReport.jsx";
 import ReportsDeposits from "../pages/ReportsDeposits.jsx";
 import ReportsWithdrawals from "../pages/ReportsWithdrawals.jsx";
 import ReportsInternalTransfers from "../pages/ReportsInternalTransfers.jsx";
@@ -57,10 +57,10 @@ export default [
   { path: "my-deals",      element: <EmptyState title="My Deals" subtitle="My executed trades" /> },
 
   /* ----------------------------- REPORTS ------------------------------ */
-  // { path: "book-pnl",      element: <ReportsBookPnL /> },
-  // { path: "finance",       element: <ReportsProfitLoss /> },
-  // { path: "lp-statement",  element: <ReportsLPStatement /> },
-  // { path: "ib-dashboard",  element: <ReportsPartnerReport /> },
+  { path: "book-pnl",      element: <ReportsBookPnL /> },
+  { path: "finance",       element: <ReportsProfitLoss /> },
+  { path: "lp-statement",  element: <ReportsLPStatement /> },
+  { path: "ib-dashboard",  element: <ReportsPartnerReport /> },
   { path: "deposit-report",        element: <ReportsDeposits /> },
   { path: "withdrawal-report",     element: <ReportsWithdrawals /> },
   { path: "internal-transfer",     element: <ReportsInternalTransfers /> },

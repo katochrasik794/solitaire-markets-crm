@@ -18,7 +18,8 @@ export default function FeatureGuard({ feature, children }) {
 
   useEffect(() => {
     async function check() {
-      if (adminRole === "superadmin") {
+      // Superadmin and regular admin get access to all features
+      if (adminRole === "superadmin" || adminRole === "admin") {
         setAllowed(true);
         return;
       }

@@ -23,10 +23,10 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
           const withinChild = hasChildren && it.children.some((c) => pathname.startsWith(c.to));
           const isOpen = openMap?.[it.to || it.label] ?? withinChild;
 
-          const parentBase = isDark ? "text-slate-200 hover:bg-white/5" : "text-gray-700 hover:bg-gray-200/50";
-          const parentActive = isDark ? "bg-white/10 text-white shadow-sm" : "bg-gray-300 text-gray-900 shadow-sm";
-          const childBase = isDark ? "text-slate-300 hover:bg-white/5" : "text-gray-600 hover:bg-gray-200/50";
-          const childActive = isDark ? "bg-white/10 text-white" : "bg-gray-300 text-gray-900";
+          const parentBase = isDark ? "text-slate-200 hover:bg-yellow-800/30 hover:text-black" : "text-gray-700 hover:bg-yellow-800/30 hover:text-black";
+          const parentActive = isDark ? "bg-yellow-800/40 text-black shadow-sm" : "bg-yellow-800/40 text-black shadow-sm";
+          const childBase = isDark ? "text-slate-300 hover:bg-yellow-800/25 hover:text-black" : "text-gray-600 hover:bg-yellow-800/25 hover:text-black";
+          const childActive = isDark ? "bg-yellow-800/35 text-black" : "bg-yellow-800/35 text-black";
           const dotCls = isDark ? "bg-white/60" : "bg-gray-600";
 
           if (hasChildren) {
@@ -35,16 +35,19 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
                 <button
                   type="button"
                   onClick={() => onToggle(it.to || it.label)}
-                  className={`w-full flex items-center justify-between rounded-xl px-3 py-2 transition ${
+                  className={`w-full flex items-center justify-between rounded-xl px-3 py-2 transition-all duration-200 relative group ${
                     isOpen || active ? parentActive : parentBase
                   }`}
                 >
+                  <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-[#ffd700] transition-all duration-200 ${
+                    isOpen || active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  }`} />
                   <span className="flex items-center gap-2 min-w-0">
-                    {it.icon ? <it.icon size={18} /> : <span className={`h-2 w-2 rounded-full ${dotCls}`} />}
-                    <span className="font-medium truncate">{it.label}</span>
+                    {it.icon ? <it.icon size={16} className="shrink-0" /> : <span className={`h-2 w-2 rounded-full ${dotCls} shrink-0`} />}
+                    <span className="font-medium truncate text-sm">{it.label}</span>
                   </span>
                   <ChevronDown
-                    size={16}
+                    size={14}
                     className={`ml-1 shrink-0 opacity-75 transition-transform ${isOpen ? "rotate-180" : ""}`}
                   />
                 </button>
@@ -61,17 +64,24 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
                         to={child.to}
                         onClick={onNavigate}
                         className={({ isActive }) =>
-                          `flex items-center gap-2 rounded-lg px-2 py-1 text-sm ${
+                          `flex items-center gap-2 rounded-lg px-2 py-1 text-xs transition-all duration-200 relative group ${
                             isActive ? childActive : childBase
                           }`
                         }
                       >
-                        {child.icon ? (
-                          <child.icon size={16} className="shrink-0 opacity-80" />
-                        ) : (
-                          <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${dotCls}`} />
+                        {({ isActive }) => (
+                          <>
+                            <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-[#ffd700] transition-all duration-200 ${
+                              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                            }`} />
+                            {child.icon ? (
+                              <child.icon size={14} className="shrink-0 opacity-80" />
+                            ) : (
+                              <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${dotCls}`} />
+                            )}
+                            <span className="truncate">{child.label}</span>
+                          </>
                         )}
-                        <span className="truncate">{child.label}</span>
                       </NavLink>
                     ))}
                   </div>
@@ -86,13 +96,20 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
               to={it.to}
               onClick={onNavigate}
               className={({ isActive }) =>
-                `w-full flex items-center gap-2 rounded-xl px-3 py-2 transition ${
+                `w-full flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 relative group ${
                   active || isActive ? parentActive : parentBase
                 }`
               }
             >
-              {it.icon ? <it.icon size={18} /> : <span className={`h-2 w-2 rounded-full ${dotCls}`} />}
-              <span className="font-medium truncate">{it.label}</span>
+              {({ isActive }) => (
+                <>
+                  <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-[#ffd700] transition-all duration-200 ${
+                    active || isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  }`} />
+                  {it.icon ? <it.icon size={16} className="shrink-0" /> : <span className={`h-2 w-2 rounded-full ${dotCls} shrink-0`} />}
+                  <span className="font-medium truncate text-sm">{it.label}</span>
+                </>
+              )}
             </NavLink>
           );
         })}
@@ -351,9 +368,11 @@ export default function Sidebar({
           role="dialog"
           aria-modal="true"
           aria-label="Sidebar"
-          style={{ ...backgroundStyle, width: "70vw", maxWidth: 380, scrollBehavior: "smooth" }}
+          style={{ ...backgroundStyle, width: "70vw", maxWidth: 380 }}
           className={`fixed left-0 top-0 bottom-0 transform transition-transform overflow-y-auto overflow-x-hidden
-                      sidebar ${textTheme} shadow-xl ${open ? "translate-x-0" : "-translate-x-full"}`}
+                      sidebar ${textTheme} shadow-xl ${open ? "translate-x-0" : "-translate-x-full"}
+                      scrollbar-thin scrollbar-thumb-yellow-700/50 scrollbar-track-gray-900/30
+                      hover:scrollbar-thumb-yellow-600/70`}
         >
           <Header role={role} />
           <nav className="pb-8">
@@ -375,9 +394,11 @@ export default function Sidebar({
 
       {/* DESKTOP (fixed so no bottom gap) */}
       <aside
-        style={{ ...backgroundStyle, scrollBehavior: "smooth" }}
+        style={{ ...backgroundStyle }}
         className={`hidden lg:block fixed left-0 top-0 bottom-0 w-[320px] shrink-0 overflow-y-auto overflow-x-hidden
-                    sidebar ${textTheme} shadow-xl ${className}`}
+                    sidebar ${textTheme} shadow-xl ${className}
+                    scrollbar-thin scrollbar-thumb-yellow-700/50 scrollbar-track-gray-900/30
+                    hover:scrollbar-thumb-yellow-600/70`}
       >
         <Header role={role} />
         <nav className="pb-8">
