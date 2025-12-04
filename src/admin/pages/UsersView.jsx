@@ -32,7 +32,8 @@ export default function UsersView(){
   const [actionModal, setActionModal] = useState(null); // { type, accountId, amount, comment }
   const [mt5Map, setMt5Map] = useState({}); // accountId -> {balance, equity}
   const [submitting, setSubmitting] = useState(false);
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  // Backend base URL (Express server runs on 5000 with /api prefix)
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
 
 
@@ -239,7 +240,10 @@ export default function UsersView(){
 
   const fetchUser = useCallback(()=>{
     let stop=false;
-    fetch(`${BASE}/admin/users/${id}`)
+    const token = localStorage.getItem('adminToken');
+    fetch(`${BASE}/admin/users/${id}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    })
       .then(r=>r.json())
       .then(d=>{ if(stop) return; if(!d?.ok) throw new Error(d?.error||'Failed'); setData(d); })
       .catch(e=>setErr(e.message||String(e)));

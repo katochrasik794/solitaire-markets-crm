@@ -62,7 +62,7 @@ export default function UsersWithBalance() {
   const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 0 });
   const [actionModal, setActionModal] = useState(null); // { type:'deposit'|'withdraw', accountId, amount:'', comment:'' }
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     let stop = false;

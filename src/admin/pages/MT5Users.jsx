@@ -63,7 +63,7 @@ export default function MT5Users() {
   const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 0 });
   const [actionModal, setActionModal] = useState(null); // { type, accountId, amount, comment }
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
   const { admin } = useAuth();
   const [countryScope, setCountryScope] = useState("");
   const [scopeResolved, setScopeResolved] = useState(false);

@@ -326,17 +326,6 @@ function Sidebar({ isOpen, onClose }) {
           </Link>
         </div>
       </nav>
-
-      {/* Legal Terms */}
-      <div className="flex-shrink-0 px-4 py-6 border-t border-gray-200 bg-white mt-auto">
-        <Link 
-          to="/user/legal" 
-          className="text-[#ffd700] hover:underline transition-colors" 
-          style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}
-        >
-          Legal Terms and Policies
-        </Link>
-      </div>
     </div>
   )
 }

@@ -7,15 +7,27 @@ export default function AddUser(){
   const [state, setState] = useState({ name:'', email:'', phone:'', country:'', password:'', role:'user', status:'active', emailVerified:false, kycVerified:false });
   const [submitting,setSubmitting] = useState(false);
   const [msg,setMsg] = useState('');
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:5003';
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:5000/api';
   const navigate = useNavigate(); // <-- for redirect
   const [countries, setCountries] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
-    fetch(`${BASE}/admin/countries`, { headers: { 'Authorization': `Bearer ${token}` }} )
+    // Use the public countries API backed by the countries table
+    fetch(`${BASE}/countries?active_only=true`, { headers: { 'Authorization': `Bearer ${token}` }} )
       .then(r => r.json())
-      .then(data => { if (data?.ok && Array.isArray(data.countries)) setCountries(data.countries); })
+      .then(data => {
+        if (data?.success && Array.isArray(data.data)) {
+          // Normalize to { country, code, phoneCode } for the select
+          setCountries(
+            data.data.map(c => ({
+              country: c.name,
+              code: c.country_code,
+              phoneCode: c.phone_code
+            }))
+          );
+        }
+      })
       .catch(() => {});
   }, [BASE]);
 

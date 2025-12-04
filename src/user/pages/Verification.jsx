@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import authService from '../../services/auth.js'
 import AuthLoader from '../../components/AuthLoader.jsx'
@@ -14,6 +14,12 @@ function Verification() {
   const [error, setError] = useState('')
   const [kycStatus, setKycStatus] = useState(null)
   const [toast, setToast] = useState(null)
+  const [sumsubInitialized, setSumsubInitialized] = useState(false)
+  const [sumsubAccessToken, setSumsubAccessToken] = useState(null)
+  const [sumsubApplicantId, setSumsubApplicantId] = useState(null)
+  const [sumsubStatus, setSumsubStatus] = useState(null)
+  const sumsubContainerRef = useRef(null)
+  const sumsubInstanceRef = useRef(null)
   
   const [formData, setFormData] = useState({
     hasTradingExperience: '',
@@ -31,9 +37,120 @@ function Verification() {
     backPreview: null
   })
 
-  // Check existing KYC status on mount
+  // Load Sumsub SDK script
+  // Note: Sumsub SDK URL needs to be obtained from Sumsub dashboard
+  // The SDK is typically loaded via their API or provided URL in dashboard
   useEffect(() => {
-    const checkKYCStatus = async () => {
+    const loadSumsubSDK = () => {
+      if (window.snsml) {
+        return Promise.resolve()
+      }
+
+      return new Promise((resolve, reject) => {
+        // Check if script already exists
+        const existingScript = document.querySelector('script[src*="sumsub"]')
+        if (existingScript && window.snsml) {
+          resolve()
+          return
+        }
+
+        // IMPORTANT: Sumsub SDK domain restriction
+        // The 403 error occurs because your current domain (localhost) is not in the allowed domains
+        // in your Sumsub dashboard. You need to:
+        // 
+        // SOLUTION 1: Add localhost to allowed domains (for development)
+        // 1. Go to Sumsub Dashboard -> Your App -> Integration -> Web SDK
+        // 2. In "Domains to host WebSDK" section, add: http://localhost:3000
+        // 3. Click "Test and save"
+        //
+        // SOLUTION 2: Only load SDK in production (recommended)
+        // The SDK will only work on https://portal.solitairemarkets.com/ which is already configured
+        // For development, use manual verification fallback
+        
+        // Only try to load SDK if we're on the production domain or localhost is configured
+        const currentHost = window.location.hostname
+        const isProductionDomain = currentHost.includes('solitairemarkets.com')
+        const isLocalhost = currentHost === 'localhost' || currentHost === '127.0.0.1'
+        
+        // Skip SDK loading if not on allowed domain (will use manual verification)
+        if (!isProductionDomain && !isLocalhost) {
+          reject(new Error('Domain not configured in Sumsub. Using manual verification.'))
+          return
+        }
+        
+        const script = document.createElement('script')
+        // Use the standard Sumsub SDK URL
+        // This will work once the domain is added to Sumsub dashboard
+        script.src = 'https://static.sumsub.com/idensic/static/sns-web-sdk-build/sns-web-sdk-loader.js'
+        script.async = true
+        script.type = 'text/javascript'
+        
+        const timeout = setTimeout(() => {
+          script.remove()
+          reject(new Error('Sumsub SDK loading timeout. Please check the SDK URL in your Sumsub dashboard.'))
+        }, 15000)
+
+        script.onload = () => {
+          clearTimeout(timeout)
+          // Wait for snsml to be available (Sumsub SDK global object)
+          const checkSnsml = setInterval(() => {
+            if (window.snsml || window.SNSML) {
+              // Some versions use SNSML instead of snsml
+              if (window.SNSML && !window.snsml) {
+                window.snsml = window.SNSML
+              }
+              clearInterval(checkSnsml)
+              resolve()
+            }
+          }, 100)
+          
+          // Timeout after 5 seconds if snsml doesn't become available
+          setTimeout(() => {
+            clearInterval(checkSnsml)
+            if (!window.snsml && !window.SNSML) {
+              script.remove()
+              reject(new Error('Sumsub SDK loaded but snsml object not found'))
+            }
+          }, 5000)
+        }
+        
+        script.onerror = (error) => {
+          clearTimeout(timeout)
+          script.remove()
+          console.error('Sumsub SDK loading error:', error)
+          reject(new Error('Failed to load Sumsub SDK. Please check the SDK URL in your Sumsub dashboard or use manual verification.'))
+        }
+        
+        document.head.appendChild(script)
+      })
+    }
+
+    loadSumsubSDK().catch(err => {
+      console.error('Error loading Sumsub SDK:', err)
+      if (err.message.includes('403') || err.message.includes('Forbidden')) {
+        console.warn(`
+          ⚠️ Sumsub SDK blocked due to domain restriction.
+          
+          TO FIX:
+          1. Go to Sumsub Dashboard: https://dashboard.sumsub.com
+          2. Navigate to: Your App → Integration → Web SDK
+          3. In "Domains to host WebSDK", add your development domain:
+             - For localhost: http://localhost:3000
+             - Or your staging domain if different
+          4. Click "Test and save"
+          
+          For now, manual verification is available as fallback.
+        `)
+      } else {
+        console.warn('Sumsub SDK failed to load. Manual verification will be available as fallback.')
+      }
+      // Don't set error state - allow fallback to manual verification
+    })
+  }, [])
+
+  // Check existing KYC status and initialize Sumsub on mount
+  useEffect(() => {
+    const checkKYCStatusAndInitSumsub = async () => {
       try {
         const token = authService.getToken()
         if (!token) {
@@ -41,30 +158,290 @@ function Verification() {
           return
         }
 
-        const response = await fetch(`${API_BASE_URL}/kyc/status`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          if (data.success && data.data) {
-            setKycStatus(data.data.status)
-            if (data.data.status === 'pending') {
-              // If pending, show pending message
-            } else if (data.data.status === 'approved') {
-              // If approved, show success
+        // Check KYC status
+        try {
+          const statusResponse = await fetch(`${API_BASE_URL}/kyc/status`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
             }
+          })
+
+          if (statusResponse.ok) {
+            const statusData = await statusResponse.json()
+            if (statusData.success && statusData.data) {
+              setKycStatus(statusData.data.status)
+              setSumsubApplicantId(statusData.data.sumsub_applicant_id)
+              setSumsubStatus(statusData.data.sumsub_verification_status)
+              
+              // If already approved, don't initialize Sumsub
+              if (statusData.data.status === 'approved') {
+                return
+              }
+
+              // If pending with Sumsub, try to get access token
+              if (statusData.data.sumsub_applicant_id) {
+                try {
+                  const tokenResponse = await fetch(
+                    `${API_BASE_URL}/kyc/sumsub/access-token/${statusData.data.sumsub_applicant_id}`,
+                    {
+                      headers: {
+                        'Authorization': `Bearer ${token}`
+                      }
+                    }
+                  )
+                  if (tokenResponse.ok) {
+                    const tokenData = await tokenResponse.json()
+                    if (tokenData.success) {
+                      setSumsubAccessToken(tokenData.data.accessToken)
+                      setSumsubApplicantId(tokenData.data.applicantId)
+                      // Widget will be initialized when container is ready
+                    }
+                  }
+                } catch (err) {
+                  console.error('Error getting access token:', err)
+                }
+                return
+              }
+            }
+          } else if (statusResponse.status === 401) {
+            // Token expired or invalid
+            console.error('Authentication failed, redirecting to login')
+            navigate('/login')
+            return
           }
+        } catch (err) {
+          console.error('Error checking KYC status:', err)
+          // Continue with initialization even if status check fails
+        }
+
+        // If no Sumsub applicant exists, initialize Sumsub
+        if (!sumsubAccessToken) {
+          // Wait for SDK to load before initializing
+          const waitForSDK = setInterval(() => {
+            if (window.snsml) {
+              clearInterval(waitForSDK)
+              setLoading(true)
+              fetch(`${API_BASE_URL}/kyc/sumsub/init`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                }
+              })
+                .then(async (initResponse) => {
+                  if (initResponse.ok) {
+                    const initData = await initResponse.json()
+                    if (initData.success) {
+                      setSumsubAccessToken(initData.data.accessToken)
+                      setSumsubApplicantId(initData.data.applicantId)
+                      setSumsubInitialized(true)
+                    }
+                  } else {
+                    const errorData = await initResponse.json().catch(() => ({}))
+                    console.error('Failed to initialize Sumsub:', errorData)
+                    // Don't show error - allow fallback to manual verification
+                    // setError(errorData.message || 'Failed to initialize verification')
+                  }
+                })
+                .catch((err) => {
+                  console.error('Error initializing Sumsub:', err)
+                  // Don't show error - allow fallback to manual verification
+                  // setError('Failed to initialize verification. Please try again.')
+                })
+                .finally(() => {
+                  setLoading(false)
+                })
+            }
+          }, 100)
+
+          // Timeout after 10 seconds
+          setTimeout(() => {
+            clearInterval(waitForSDK)
+            if (!sumsubAccessToken) {
+              setLoading(false)
+              // Allow fallback to manual verification
+            }
+          }, 10000)
         }
       } catch (err) {
         console.error('Error checking KYC status:', err)
       }
     }
 
-    checkKYCStatus()
+    // Wait for SDK to load before initializing, but don't block if it takes too long
+    let checkSDK = null
+    const timeout = setTimeout(() => {
+      if (checkSDK) clearInterval(checkSDK)
+      // Proceed even if SDK hasn't loaded (will use manual verification)
+      checkKYCStatusAndInitSumsub()
+    }, 5000) // 5 second timeout
+
+    checkSDK = setInterval(() => {
+      if (window.snsml) {
+        clearInterval(checkSDK)
+        clearTimeout(timeout)
+        checkKYCStatusAndInitSumsub()
+      }
+    }, 100)
+
+    return () => {
+      if (checkSDK) clearInterval(checkSDK)
+      clearTimeout(timeout)
+    }
   }, [navigate])
+
+  // Initialize widget when access token and container are ready
+  useEffect(() => {
+    if (sumsubAccessToken && sumsubContainerRef.current && window.snsml && !sumsubInstanceRef.current) {
+      initializeSumsubWidget(sumsubAccessToken)
+    }
+  }, [sumsubAccessToken])
+
+  // Initialize Sumsub widget
+  const initializeSumsubWidget = (accessToken) => {
+    if (!window.snsml) {
+      console.warn('Sumsub SDK not loaded yet')
+      return
+    }
+
+    if (!sumsubContainerRef.current) {
+      console.warn('Sumsub container not ready yet')
+      return
+    }
+
+    try {
+      // Destroy existing instance if any
+      if (sumsubInstanceRef.current) {
+        try {
+          sumsubInstanceRef.current.destroy()
+        } catch (e) {
+          console.warn('Error destroying previous Sumsub instance:', e)
+        }
+        sumsubInstanceRef.current = null
+      }
+
+      const snsml = window.snsml
+      if (!snsml || typeof snsml.init !== 'function') {
+        console.error('Sumsub SDK not properly initialized')
+        return
+      }
+
+      const snsmlInstance = snsml.init(
+        accessToken,
+        () => {
+          // Token expired callback - get new token
+          refreshAccessToken()
+        }
+      )
+
+      snsmlInstance.on('idCheck.onStepCompleted', (payload) => {
+        console.log('Sumsub step completed:', payload)
+        setSumsubStatus(payload.reviewStatus || 'pending')
+      })
+
+      snsmlInstance.on('idCheck.onApplicantSubmitted', (payload) => {
+        console.log('Applicant submitted:', payload)
+        setSumsubStatus('pending')
+        setKycStatus('pending')
+        setToast({
+          message: 'Verification submitted successfully! Your documents are under review.',
+          type: 'success'
+        })
+        // Check status after a delay
+        setTimeout(() => {
+          checkSumsubStatus()
+        }, 2000)
+      })
+
+      snsmlInstance.on('idCheck.onReviewCompleted', (payload) => {
+        console.log('Review completed:', payload)
+        setSumsubStatus(payload.reviewStatus)
+        if (payload.reviewResult === 'GREEN') {
+          setKycStatus('approved')
+          setToast({
+            message: 'Verification approved! You can now make deposits without limitations.',
+            type: 'success'
+          })
+        } else if (payload.reviewResult === 'RED') {
+          setKycStatus('rejected')
+          setToast({
+            message: `Verification rejected: ${payload.reviewComment || 'Please try again.'}`,
+            type: 'error'
+          })
+        }
+      })
+
+      snsmlInstance.on('idCheck.onError', (error) => {
+        console.error('Sumsub error:', error)
+        setError('Verification error occurred. Please try again.')
+        setToast({
+          message: 'An error occurred during verification. Please try again.',
+          type: 'error'
+        })
+      })
+
+      snsmlInstance.mount(sumsubContainerRef.current)
+      sumsubInstanceRef.current = snsmlInstance
+    } catch (err) {
+      console.error('Error initializing Sumsub widget:', err)
+      setError('Failed to load verification widget. Please try again.')
+    }
+  }
+
+  // Refresh access token
+  const refreshAccessToken = async () => {
+    try {
+      const token = authService.getToken()
+      if (!token || !sumsubApplicantId) return
+
+      const response = await fetch(
+        `${API_BASE_URL}/kyc/sumsub/access-token/${sumsubApplicantId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      )
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setSumsubAccessToken(data.data.accessToken)
+          initializeSumsubWidget(data.data.accessToken)
+        }
+      }
+    } catch (err) {
+      console.error('Error refreshing access token:', err)
+    }
+  }
+
+  // Check Sumsub status
+  const checkSumsubStatus = async () => {
+    try {
+      const token = authService.getToken()
+      if (!token) return
+
+      const response = await fetch(`${API_BASE_URL}/kyc/sumsub/status?refresh=true`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.data) {
+          setSumsubStatus(data.data.status)
+          if (data.data.reviewResult === 'GREEN') {
+            setKycStatus('approved')
+          } else if (data.data.reviewResult === 'RED') {
+            setKycStatus('rejected')
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error checking Sumsub status:', err)
+    }
+  }
 
   const handleFormChange = (e) => {
     const { name, value } = e.target
@@ -257,8 +634,47 @@ function Verification() {
     )
   }
 
+  // Show Sumsub widget if initialized and SDK is loaded
+  if (sumsubAccessToken && window.snsml) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        {loading && <AuthLoader message="Initializing verification..." />}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+        
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              Identity Verification
+            </h1>
+            <p className="text-gray-600 mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              Please complete the verification process below to verify your identity.
+            </p>
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  {error}
+                </p>
+              </div>
+            )}
+
+            {/* Sumsub Widget Container */}
+            <div ref={sumsubContainerRef} id="sumsub-container" className="min-h-[600px]"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      {loading && <AuthLoader message="Initializing verification..." />}
       {submitting && <AuthLoader message="Document submitted..." />}
       {toast && (
         <Toast
@@ -303,11 +719,23 @@ function Verification() {
           </p>
         </div>
 
-        {/* Error Message */}
-        {error && (
+        {/* Loading Message */}
+        {loading && !sumsubAccessToken && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              Initializing verification service...
+            </p>
+          </div>
+        )}
+
+        {/* Error Message - Only show critical errors */}
+        {error && error.includes('Failed to load verification service') && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
               {error}
+            </p>
+            <p className="text-sm text-red-700 mt-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              You can still complete verification using the manual form below.
             </p>
           </div>
         )}

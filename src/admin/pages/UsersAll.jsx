@@ -26,7 +26,8 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
   const [countryScope, setCountryScope] = useState("");
   const navigate = useNavigate();
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  // Backend base URL (Express server runs on 5000 with /api prefix)
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
   const { admin } = useAuth();
 
   useEffect(() => {

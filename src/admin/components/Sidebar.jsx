@@ -141,7 +141,7 @@ export default function Sidebar({
   const { admin } = useAuth();
 
   const [customFeatures, setCustomFeatures] = useState(null); // null = unknown, [] = none
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     // Check if user is a country admin

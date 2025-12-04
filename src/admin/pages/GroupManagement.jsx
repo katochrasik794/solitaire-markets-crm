@@ -23,7 +23,8 @@ export default function GroupManagement() {
   const [editModal, setEditModal] = useState(null); // { id, group, dedicated_name }
   const [savingDedicatedName, setSavingDedicatedName] = useState(false);
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  // Backend base URL (Express server runs on 5000 with /api prefix)
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
   const loadGroups = useCallback(async () => {
     try {
@@ -71,10 +72,15 @@ export default function GroupManagement() {
         }
       });
       
-      const response = await axios.post(`${BASE}/admin/group-management/sync`, {}, {
+      // Use Axios with no timeout so sync can run until the API finishes
+      const response = await axios.post(
+        `${BASE}/admin/group-management/sync`,
+        {},
+        {
         headers: { 'Authorization': `Bearer ${token}` },
-        timeout: 60000, // 60 seconds timeout for sync
-      });
+          timeout: 0 // 0 = no timeout
+        }
+      );
       
       if (!response.data?.ok) {
         throw new Error(response.data?.error || "Sync failed");

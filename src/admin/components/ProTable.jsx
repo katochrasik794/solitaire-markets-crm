@@ -140,8 +140,56 @@ export default function ProTable({ title, kpis=[], rows=[], columns=[], filters,
 
       {/* Table */}
       <div className="rounded-2xl overflow-hidden bg-white shadow-sm border border-gray-200">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+        <style>{`
+          .protable-scroll-wrapper {
+            width: 100%;
+            max-width: 100%;
+            position: relative;
+          }
+          .protable-scroll-container {
+            width: 100%;
+            overflow-x: scroll !important;
+            overflow-y: visible !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: #94a3b8 #f1f5f9 !important;
+            -ms-overflow-style: scrollbar !important;
+            display: block !important;
+          }
+          .protable-scroll-container::-webkit-scrollbar {
+            height: 14px !important;
+            display: block !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
+          }
+          .protable-scroll-container::-webkit-scrollbar-track {
+            background: #f1f5f9 !important;
+            border-radius: 0;
+            border-top: 1px solid #e2e8f0;
+            display: block !important;
+          }
+          .protable-scroll-container::-webkit-scrollbar-thumb {
+            background: #94a3b8 !important;
+            border-radius: 7px;
+            border: 2px solid #f1f5f9;
+            min-width: 20px;
+            display: block !important;
+          }
+          .protable-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #64748b !important;
+          }
+          .protable-scroll-container table {
+            width: 100% !important;
+            table-layout: auto;
+          }
+          .protable-scroll-container th,
+          .protable-scroll-container td {
+            white-space: nowrap;
+            padding: 0.75rem 1rem !important;
+          }
+        `}</style>
+        <div className="protable-scroll-wrapper">
+          <div className="protable-scroll-container" style={{ width: '100%', overflowX: 'auto' }}>
+            <table className="text-sm w-full" style={{ tableLayout: 'auto' }}>
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-[1]">
               <tr>
                 {columns.map(col=>(
@@ -152,7 +200,7 @@ export default function ProTable({ title, kpis=[], rows=[], columns=[], filters,
                           ? {key:col.key, dir: s.dir==="asc"?"desc":"asc"}
                           : {key:col.key, dir:"asc"});
                       }}
-                      className={`px-6 py-4 font-semibold text-gray-800 select-none whitespace-nowrap text-center border-r border-gray-200 last:border-r-0 ${col.key==='__index' || col.sortable===false ? '' : 'cursor-pointer hover:bg-gray-200 transition-colors'}`}>
+                      className={`px-3 py-2 text-xs font-semibold text-gray-800 select-none whitespace-nowrap text-center border-r border-gray-200 last:border-r-0 ${col.key==='__index' || col.sortable===false ? '' : 'cursor-pointer hover:bg-gray-200 transition-colors'}`}>
                     {col.label}{sortBy?.key===col.key ? (sortBy.dir==="asc"?" ▲":" ▼") : ""}
                   </th>
                 ))}
@@ -166,7 +214,7 @@ export default function ProTable({ title, kpis=[], rows=[], columns=[], filters,
                       ? (baseIndex + i + 1)
                       : (c.render ? c.render(r[c.key], r, Badge, baseIndex + i) : r[c.key]);
                     return (
-                      <td key={c.key} className="px-6 py-4 whitespace-nowrap text-center border-r border-gray-100 last:border-r-0">
+                      <td key={c.key} className="px-3 py-2 text-xs whitespace-nowrap text-center border-r border-gray-100 last:border-r-0">
                         {content}
                       </td>
                     );
@@ -185,6 +233,7 @@ export default function ProTable({ title, kpis=[], rows=[], columns=[], filters,
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Pagination */}

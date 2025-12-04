@@ -12,6 +12,7 @@ function CreateAccount() {
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [showMasterPassword, setShowMasterPassword] = useState(false)
   const [mt5Groups, setMt5Groups] = useState([])
   const [loadingGroups, setLoadingGroups] = useState(true)
   
@@ -22,6 +23,7 @@ function CreateAccount() {
     isSwapFree: false,
     isCopyAccount: false,
     reasonForAccount: 'Different trading strategy',
+    masterPassword: '',
     portalPassword: ''
   })
 
@@ -133,6 +135,7 @@ function CreateAccount() {
             isSwapFree: formData.isSwapFree,
             isCopyAccount: formData.isCopyAccount,
             reasonForAccount: formData.reasonForAccount,
+            masterPassword: formData.masterPassword,
             portalPassword: formData.portalPassword
           })
         }),
@@ -375,6 +378,44 @@ function CreateAccount() {
                 </select>
               </div>
 
+              {/* Master Password (for MT5) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  Master Password (MT5 Login Password)
+                </label>
+                <p className="text-xs text-gray-600 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  This will be your main password to login to MT5. Keep it strong and do not share it with anyone.
+                </p>
+                <div className="relative">
+                  <input
+                    type={showMasterPassword ? 'text' : 'password'}
+                    name="masterPassword"
+                    value={formData.masterPassword}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e6c200] focus:border-transparent pr-10"
+                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                    placeholder="Set your MT5 master password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowMasterPassword(!showMasterPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showMasterPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
               {/* Portal Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
@@ -460,7 +501,7 @@ function CreateAccount() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 font-medium" style={{ fontFamily: 'Roboto, sans-serif' }}>Trading account:</span>
                   <span className="text-gray-900 font-semibold" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    {createdAccount.api_account_number || createdAccount.account_number}
+                    {createdAccount.mt5Response || createdAccount.account_number}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -469,7 +510,9 @@ function CreateAccount() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 font-medium" style={{ fontFamily: 'Roboto, sans-serif' }}>Group:</span>
-                  <span className="text-gray-900 font-semibold" style={{ fontFamily: 'Roboto, sans-serif' }}>{createdAccount.mt5_group_name || 'N/A'}</span>
+                  <span className="text-gray-900 font-semibold" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    {createdAccount.mt5_group_name || selectedGroup?.dedicated_name || selectedGroup?.group_name || 'N/A'}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 font-medium" style={{ fontFamily: 'Roboto, sans-serif' }}>Leverage:</span>

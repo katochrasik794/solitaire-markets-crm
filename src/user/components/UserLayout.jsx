@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import Header from './Header'
+import Footer from './Footer'
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import authService from '../../services/auth.js'
 
@@ -113,7 +114,7 @@ function UserLayout() {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <div 
-        className="flex-1 overflow-x-hidden w-full lg:ml-[324px] relative z-10 transition-all duration-300"
+        className="flex-1 overflow-x-hidden w-full lg:ml-[324px] relative z-10 transition-all duration-300 flex flex-col min-h-screen"
         onClick={() => {
           // Close sidebar when clicking on main content area on mobile
           if (typeof window !== 'undefined' && window.innerWidth < 1024 && sidebarOpen) {
@@ -122,7 +123,7 @@ function UserLayout() {
         }}
       >
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main className="overflow-x-hidden min-h-screen pt-[77px] sm:pt-[77px]">
+        <main className="overflow-x-hidden flex-1 pt-[77px] sm:pt-[77px]">
           {/* Deposit Banner - Hide when KYC is approved */}
           {kycStatus !== 'approved' && (
           <div className="w-full bg-[#FFF9E6] border-t border-[#f3e7b5] px-4 md:px-6 py-4">
@@ -177,6 +178,7 @@ function UserLayout() {
 
           <Outlet />
         </main>
+        <Footer />
       </div>
     </div>
   )

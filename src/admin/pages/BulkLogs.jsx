@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ProTable from "../components/ProTable.jsx";
 import Badge from "../components/Badge.jsx";
+import { ArrowUp, ArrowDown, UserPlus } from "lucide-react";
 
 function fmtDate(v) {
   if (!v) return "-";
@@ -28,24 +29,15 @@ export default function BulkLogs() {
     search: "",
   });
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     let stop = false;
     setLoading(true);
     setError("");
 
-    const params = new URLSearchParams({
-      limit: '500',
-      ...(filters.type !== 'all' ? { type: filters.type } : {}),
-      ...(filters.status !== 'all' ? { status: filters.status } : {}),
-      ...(filters.from ? { from: filters.from } : {}),
-      ...(filters.to ? { to: filters.to } : {}),
-      ...(filters.search ? { search: filters.search } : {}),
-    });
-
     const token = localStorage.getItem('adminToken');
-    fetch(`${BASE}/admin/activity-logs?${params.toString()}`, {
+    fetch(`${BASE}/admin/activity-logs?limit=500`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(r => r.json())
@@ -53,15 +45,61 @@ export default function BulkLogs() {
         if (stop) return;
         if (!data?.ok) throw new Error(data?.error || "Failed to load");
         const items = Array.isArray(data.items) ? data.items : [];
-        setRows(items.map((item, index) => ({
+
+        // Apply client-side filters based on the common activity log shape
+        const filteredItems = items.filter((item) => {
+          const type = (item.type || '').toLowerCase();
+          const status = (item.status || '').toLowerCase();
+          const search = (filters.search || '').toLowerCase();
+
+          // Type filter
+          if (filters.type !== 'all') {
+            if (filters.type === 'deposit' && type !== 'deposit') return false;
+            if (filters.type === 'withdrawal' && type !== 'withdrawal') return false;
+            if (filters.type === 'account' && type !== 'account') return false;
+          }
+
+          // Status filter
+          if (filters.status !== 'all') {
+            if (status !== filters.status.toLowerCase()) return false;
+          }
+
+          // Date range filter (compare by date only)
+          if (filters.from || filters.to) {
+            const time = item.time ? new Date(item.time) : null;
+            if (!time || Number.isNaN(time.getTime())) return false;
+            const itemDateStr = time.toISOString().slice(0, 10); // YYYY-MM-DD
+            if (filters.from && itemDateStr < filters.from) return false;
+            if (filters.to && itemDateStr > filters.to) return false;
+          }
+
+          // Search filter (user/email/accountId/details)
+          if (search) {
+            const haystack = [
+              item.user,
+              item.email,
+              item.accountId,
+              item.details,
+              item.status,
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+            if (!haystack.includes(search)) return false;
+          }
+
+          return true;
+        });
+
+        setRows(filteredItems.map((item, index) => ({
           ...item,
           __index: index + 1,
         })));
 
         // Extract recent activities for cards
-        const deposits = items.filter(i => i.type === 'Deposit').slice(0, 5);
-        const withdrawals = items.filter(i => i.type === 'Withdrawal').slice(0, 5);
-        const accounts = items.filter(i => i.type === 'Account').slice(0, 5);
+        const deposits = filteredItems.filter(i => i.type === 'Deposit').slice(0, 5);
+        const withdrawals = filteredItems.filter(i => i.type === 'Withdrawal').slice(0, 5);
+        const accounts = filteredItems.filter(i => i.type === 'Account').slice(0, 5);
 
         setRecentDeposits(deposits);
         setRecentWithdrawals(withdrawals);
@@ -75,22 +113,54 @@ export default function BulkLogs() {
   const columns = useMemo(() => [
     { key: "__index", label: "Sr No", sortable: false },
     { key: "time", label: "Time", render: (v) => fmtDate(v) },
-    { key: "type", label: "Type" },
+    {
+      key: "type",
+      label: "Type",
+      render: (v, row, BadgeComp) => {
+        if (v === 'Deposit') {
+          return (
+            <BadgeComp tone="blue">
+              <ArrowUp size={12} className="inline mr-1" /> Deposit
+            </BadgeComp>
+          );
+        }
+        if (v === 'Withdrawal') {
+          return (
+            <BadgeComp tone="red">
+              <ArrowDown size={12} className="inline mr-1" /> Withdrawal
+            </BadgeComp>
+          );
+        }
+        if (v === 'Account') {
+          return (
+            <BadgeComp tone="green">
+              <UserPlus size={12} className="inline mr-1" /> Account
+            </BadgeComp>
+          );
+        }
+        return <BadgeComp tone="gray">{v}</BadgeComp>;
+      }
+    },
     { key: "user", label: "User" },
-    { key: "mts", label: "MTS" },
+    { key: "email", label: "Email" },
+    { key: "accountId", label: "Account ID" },
     { key: "amount", label: "Amount", render: (v) => fmtAmount(v) },
-    { key: "status", label: "Status", render: (v, row, Badge) => {
-      let tone = 'gray';
-      if (v === 'Approved' || v === 'Opened') tone = 'green';
-      else if (v === 'Rejected') tone = 'red';
-      else if (v === 'Pending') tone = 'amber';
-      return <Badge tone={tone}>{v}</Badge>;
-    } },
+    {
+      key: "status",
+      label: "Status",
+      render: (v, row, BadgeComp) => {
+        let tone = 'gray';
+        if (v === 'Approved' || v === 'Opened' || v === 'Active') tone = 'green';
+        else if (v === 'Rejected' || v === 'Suspended') tone = 'red';
+        else if (v === 'Pending') tone = 'amber';
+        return <BadgeComp tone={tone}>{v}</BadgeComp>;
+      }
+    },
     { key: "details", label: "Details" },
   ], []);
 
   const tableFilters = useMemo(() => ({
-    searchKeys: ["user", "userName", "mts", "details", "status"],
+    searchKeys: ["user", "email", "accountId", "details", "status"],
   }), []);
 
   const handleFilterChange = (newFilters) => {
@@ -105,8 +175,8 @@ export default function BulkLogs() {
       <div className="w-full space-y-4 sm:space-y-6">
         {/* Page Title */}
         <div className="mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">All Operation Logs</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Monitor all CRM activities and operations</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Bulk Operation Logs</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Filter and analyze all CRM activities in bulk</p>
         </div>
 
         {/* Cards for Recent Activities */}
@@ -125,11 +195,11 @@ export default function BulkLogs() {
                     <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">{item.user}</div>
                     <div className="text-xs text-gray-500 mt-1">
                       <div className="hidden sm:block">
-                        {new Date(item.time).toLocaleDateString()} {new Date(item.time).toLocaleTimeString()} • MTS: {item.mts}
+                        {new Date(item.time).toLocaleDateString()} {new Date(item.time).toLocaleTimeString()} • Account: {item.accountId}
                       </div>
                       <div className="sm:hidden">
                         <div>{new Date(item.time).toLocaleDateString()}</div>
-                        <div>MTS: {item.mts}</div>
+                        <div>Account: {item.accountId}</div>
                       </div>
                     </div>
                     {item.details && item.details !== '-' && (
@@ -218,7 +288,7 @@ export default function BulkLogs() {
                         <div>{new Date(item.time).toLocaleTimeString()}</div>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-500">MTS: {item.mts}</div>
+                    <div className="text-xs text-gray-500">Account: {item.accountId}</div>
                   </div>
                   <div className="flex flex-col sm:items-end gap-1">
                     <Badge tone="green">Opened</Badge>
@@ -279,18 +349,18 @@ export default function BulkLogs() {
             value={filters.search}
             onChange={(e) => handleFilterChange({ search: e.target.value })}
             className="rounded-md border border-gray-300 h-9 sm:h-10 px-2 sm:px-3 text-sm"
-            placeholder="Search email / MTS / txn"
+            placeholder="Search user / email / account / details"
           />
         </div>
       </div>
 
         {/* Table */}
         <ProTable
-          title="Activity Logs"
+          title="Bulk Logs"
           rows={rows}
           columns={columns}
           filters={tableFilters}
-          searchPlaceholder="Search user, MTS, details…"
+          searchPlaceholder="Search user, email, account ID, details…"
           pageSize={10}
         />
       </div>

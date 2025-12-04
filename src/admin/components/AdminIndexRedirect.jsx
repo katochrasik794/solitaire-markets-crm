@@ -8,7 +8,7 @@ export default function AdminIndexRedirect() {
   const adminRole = admin?.admin_role || admin?.role || "admin";
   const [target, setTarget] = useState(null);
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
   const builtin = useMemo(() => ["superadmin", "admin", "moderator", "support", "analyst"], []);
   
   // Extract stable string values for dependencies

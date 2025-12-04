@@ -162,7 +162,7 @@ export default function AdminDashboard() {
   const [bulkLogsLoading, setBulkLogsLoading] = useState(true);
   const [bulkLogsError, setBulkLogsError] = useState("");
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
   const { admin } = useAuth();
   const [countryScope, setCountryScope] = useState("");
   const [scopeResolved, setScopeResolved] = useState(false);

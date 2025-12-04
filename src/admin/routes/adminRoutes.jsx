@@ -24,6 +24,8 @@ import UsersView from "../pages/UsersView.jsx";
 import UsersActive from "../pages/UsersActive.jsx";
 import UsersBanned from "../pages/UsersBanned.jsx";
 import UsersEmailUnverified from "../pages/UsersEmailUnverified.jsx";
+import UsersKycUnverified from "../pages/UsersKycUnverified.jsx";
+import UsersKycPending from "../pages/UsersKycPending.jsx";
 import AddUser from "../pages/AddUser.jsx";
 import UsersWithBalance from "../pages/UsersWithBalance.jsx";
 import MT5Users from "../pages/MT5Users.jsx";
@@ -37,6 +39,7 @@ import WithdrawalsApproved from "../pages/WithdrawalsApproved.jsx";
 import WithdrawalsRejected from "../pages/WithdrawalsRejected.jsx";
 import WithdrawalsAll from "../pages/WithdrawalsAll.jsx";
 import BulkLogs from "../pages/BulkLogs.jsx";
+import ActivityLogs from "../pages/ActivityLogs.jsx";
 import Logout from "../pages/Logout.jsx";
 import PaymentDetails from "../pages/PaymentDetails.jsx";
 import SupportTicketsList from "../pages/SupportTicketsList.jsx";
@@ -77,12 +80,12 @@ export default [
   { path: "users/active",              element: <UsersActive /> },
   { path: "users/banned",              element: <UsersBanned /> },
   { path: "users/email-unverified",    element: <UsersEmailUnverified /> },
-  { path: "users/kyc-unverified",      element: <EmptyState title="KYC Unverified" subtitle="Users without KYC" /> },
-  { path: "users/kyc-pending",         element: <EmptyState title="KYC Pending" subtitle="Awaiting review" /> },
+  { path: "users/kyc-unverified",      element: <UsersKycUnverified /> },
+  { path: "users/kyc-pending",         element: <UsersKycPending /> },
   { path: "users/with-balance",        element: <UsersWithBalance /> },
   { path: "kyc",                       element: <KycList /> },
   { path: "add-group",                 element: <EmptyState title="Client Groups" subtitle="Manage client groups" /> },
-  { path: "activity-logs",             element: <EmptyState title="Activity / Login Logs" subtitle="Audit trail & logins" /> },
+  { path: "activity-logs",             element: <ActivityLogs /> },
 
   /* --------------------------- BOOK MGMT ------------------------------ */
   { path: "book-management",                 element: <EmptyState title="Book Management" subtitle="Configure A/B/Combined books" /> },

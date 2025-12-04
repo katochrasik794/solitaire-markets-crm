@@ -8,7 +8,7 @@ export default function FeatureGuard({ feature, children }) {
   const { admin } = useAuth();
   const adminRole = admin?.admin_role || admin?.role || "admin";
   const [allowed, setAllowed] = useState(null); // null=loading, true/false=decision
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
   const isBuiltin = useMemo(() => ["superadmin", "admin", "moderator", "support", "analyst"].includes(adminRole), [adminRole]);
   
