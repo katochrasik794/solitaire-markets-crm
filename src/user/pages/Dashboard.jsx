@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AiOutlinePlus } from "react-icons/ai";
 import { RiLoginBoxLine } from "react-icons/ri";
 import { RiArrowLeftRightLine } from "react-icons/ri";
@@ -13,6 +13,7 @@ import authService from "../../services/auth.js";
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [showReferBanner, setShowReferBanner] = useState(true);
   const [showCopyTradingBanner, setShowCopyTradingBanner] = useState(true);
   const [showKycBanner, setShowKycBanner] = useState(true);
@@ -26,6 +27,17 @@ function Dashboard() {
   const [activityPage, setActivityPage] = useState(1);
   const [wallet, setWallet] = useState(null);
   const [loadingWallet, setLoadingWallet] = useState(true);
+  
+  // Wallet modal state
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [walletModalStep, setWalletModalStep] = useState(1); // 1: Details, 2: Confirmation, 3: Confirmed
+  const [walletModalAction, setWalletModalAction] = useState(null); // 'deposit', 'withdraw', 'transfer'
+  const [walletFormData, setWalletFormData] = useState({
+    amount: '',
+    mt5Account: '',
+    direction: 'to-mt5' // 'to-mt5' or 'from-mt5'
+  });
+  const [walletSubmitting, setWalletSubmitting] = useState(false);
 
   // Fetch accounts from API
   useEffect(() => {
@@ -432,9 +444,9 @@ function Dashboard() {
             </Link>
           </div>
 
-          {/* Table Card - Hidden on mobile, visible on desktop */}
+          {/* Table Card - Responsive, scrollable on small screens */}
           {loadingAccounts ? (
-            <div className="hidden lg:block bg-white rounded-lg shadow p-8 text-center">
+            <div className="bg-white rounded-lg shadow p-8 text-center">
               <div className="flex items-center justify-center">
                 <svg className="animate-spin h-8 w-8 text-gray-600" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -443,90 +455,97 @@ function Dashboard() {
               </div>
             </div>
           ) : accounts.length === 0 ? (
-            <div className="hidden lg:block bg-white rounded-lg shadow p-8 text-center">
+            <div className="bg-white rounded-lg shadow p-8 text-center">
               <p className="text-gray-600" style={{ fontFamily: "Roboto, sans-serif", fontSize: "14px" }}>
                 No trading account
               </p>
             </div>
           ) : (
-            <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr style={{ backgroundColor: "#EAECEE" }}>
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="overflow-x-auto w-full">
+                <table className="w-auto border-collapse table-fixed mx-auto">
+                  <thead className="bg-[#EAECEE]">
+                    <tr>
                       <th
-                        className="px-4 py-4 text-left uppercase"
+                        className="px-4 py-4 text-center uppercase"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "12px",
                           fontWeight: "500",
                           color: "#4B5156",
+                          width: "11.11%"
                         }}
                       >
                         Account Details
                       </th>
                       <th
-                        className="px-4 py-4 text-right uppercase"
+                        className="px-4 py-4 text-center uppercase"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "12px",
                           fontWeight: "500",
                           color: "#4B5156",
+                          width: "11.11%"
                         }}
                       >
                         Leverage
                       </th>
                       <th
-                        className="px-4 py-4 text-right uppercase"
+                        className="px-4 py-4 text-center uppercase"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "12px",
                           fontWeight: "500",
                           color: "#4B5156",
+                          width: "11.11%"
                         }}
                       >
                         Equity
                       </th>
                       <th
-                        className="px-4 py-4 text-right uppercase"
+                        className="px-4 py-4 text-center uppercase"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "12px",
                           fontWeight: "500",
                           color: "#4B5156",
+                          width: "11.11%"
                         }}
                       >
                         Balance
                       </th>
                       <th
-                        className="px-4 py-4 text-right uppercase"
+                        className="px-4 py-4 text-center uppercase"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "12px",
                           fontWeight: "500",
                           color: "#4B5156",
+                          width: "11.11%"
                         }}
                       >
                         Margin
                       </th>
                       <th
-                        className="px-4 py-4 text-right uppercase"
+                        className="px-4 py-4 text-center uppercase"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "12px",
                           fontWeight: "500",
                           color: "#4B5156",
+                          width: "11.11%"
                         }}
                       >
                         Credit
                       </th>
                       <th
-                        className="px-4 py-4 text-left uppercase"
+                        className="px-4 py-4 text-center uppercase"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "12px",
                           fontWeight: "500",
                           color: "#4B5156",
+                          width: "11.11%"
                         }}
                       >
                         Platforms
@@ -538,6 +557,7 @@ function Dashboard() {
                           fontSize: "12px",
                           fontWeight: "500",
                           color: "#4B5156",
+                          width: "11.11%"
                         }}
                       >
                         Action
@@ -549,6 +569,7 @@ function Dashboard() {
                           fontSize: "12px",
                           fontWeight: "500",
                           color: "#4B5156",
+                          width: "11.11%"
                         }}
                       >
                         Options
@@ -558,8 +579,8 @@ function Dashboard() {
                   <tbody>
                     {accounts.map((account) => (
                       <tr key={account.id} className="border-b border-gray-200">
-                        <td className="px-4 py-2">
-                          <div className="flex items-center gap-3.5 flex-nowrap">
+                        <td className="px-4 py-2 text-center">
+                          <div className="flex items-center justify-center gap-3.5 flex-nowrap">
                             <span
                               className="px-2 py-1 bg-[#e5f5ea] text-green-600 rounded text-xs whitespace-nowrap"
                               style={{
@@ -570,7 +591,7 @@ function Dashboard() {
                             >
                               {account.currency || 'USD'}
                             </span>
-                            <div>
+                            <div className="flex flex-col items-center">
                               <div className="flex items-center gap-1.5 mb-1">
                                 <button
                                   className="text-gray-400 hover:text-gray-600"
@@ -626,7 +647,7 @@ function Dashboard() {
                                   </svg>
                                 </button>
                               </div>
-                              <small>
+                              <small className="text-center">
                                 <span
                                   className="font-bold text-gray-800"
                                   style={{
@@ -652,7 +673,7 @@ function Dashboard() {
                           </div>
                         </td>
                         <td
-                          className="px-4 py-2 text-right text-gray-800"
+                          className="px-4 py-2 text-center text-gray-800"
                           style={{
                             fontFamily: "Roboto, sans-serif",
                             fontSize: "13px",
@@ -663,7 +684,7 @@ function Dashboard() {
                           1:{account.leverage || 2000}
                         </td>
                         <td
-                          className="px-4 py-2 text-right text-gray-800"
+                          className="px-4 py-2 text-center text-gray-800"
                           style={{
                             fontFamily: "Roboto, sans-serif",
                             fontSize: "13px",
@@ -674,7 +695,7 @@ function Dashboard() {
                           0.00
                         </td>
                         <td
-                          className="px-4 py-2 text-right text-gray-800"
+                          className="px-4 py-2 text-center text-gray-800"
                           style={{
                             fontFamily: "Roboto, sans-serif",
                             fontSize: "13px",
@@ -685,7 +706,7 @@ function Dashboard() {
                           0.0000
                         </td>
                         <td
-                          className="px-4 py-2 text-right text-gray-800"
+                          className="px-4 py-2 text-center text-gray-800"
                           style={{
                             fontFamily: "Roboto, sans-serif",
                             fontSize: "13px",
@@ -696,7 +717,7 @@ function Dashboard() {
                           0.00
                         </td>
                         <td
-                          className="px-4 py-2 text-right text-gray-800"
+                          className="px-4 py-2 text-center text-gray-800"
                           style={{
                             fontFamily: "Roboto, sans-serif",
                             fontSize: "13px",
@@ -816,8 +837,8 @@ function Dashboard() {
                       className="border-t border-gray-200"
                       style={{ backgroundColor: "#F9FAFB" }}
                     >
-                      <td className="px-4 py-2">
-                        <div className="flex items-center gap-3.5 flex-nowrap">
+                      <td className="px-4 py-2 text-center">
+                        <div className="flex items-center justify-center gap-3.5 flex-nowrap">
                           <span
                             className="px-2 py-1 bg-[#e5f5ea] text-green-600 rounded text-xs whitespace-nowrap"
                             style={{
@@ -841,9 +862,9 @@ function Dashboard() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-2"></td>
+                      <td className="px-4 py-2 text-center"></td>
                       <td
-                        className="px-4 py-2 text-right text-gray-800 font-semibold"
+                        className="px-4 py-2 text-center text-gray-800 font-semibold"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "13px",
@@ -854,7 +875,7 @@ function Dashboard() {
                         0.00
                       </td>
                       <td
-                        className="px-4 py-2 text-right text-gray-800 font-semibold"
+                        className="px-4 py-2 text-center text-gray-800 font-semibold"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "13px",
@@ -865,7 +886,7 @@ function Dashboard() {
                         0.00
                       </td>
                       <td
-                        className="px-4 py-2 text-right text-gray-800 font-semibold"
+                        className="px-4 py-2 text-center text-gray-800 font-semibold"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "13px",
@@ -876,7 +897,7 @@ function Dashboard() {
                         0.00
                       </td>
                       <td
-                        className="px-4 py-2 text-right text-gray-800 font-semibold"
+                        className="px-4 py-2 text-center text-gray-800 font-semibold"
                         style={{
                           fontFamily: "Roboto, sans-serif",
                           fontSize: "13px",
@@ -886,10 +907,10 @@ function Dashboard() {
                       >
                         0.00
                       </td>
-                      <td className="py-2"></td>
-                      <td className="px-4 py-2"></td>
-                      <td className="px-4 py-2"></td>
-                      <td className="px-4 py-2"></td>
+                      <td className="px-4 py-2 text-center"></td>
+                      <td className="px-4 py-2 text-center"></td>
+                      <td className="px-4 py-2 text-center"></td>
+                      <td className="px-4 py-2 text-center"></td>
                     </tr>
                   </tfoot>
                 </table>
@@ -1176,16 +1197,10 @@ function Dashboard() {
         </div>
 
         {/* ================= WALLET ACCOUNTS ================= */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+        <div className="mb-4">
           <h2 className="text-gray-700 text-sm md:text-md font-medium">
             Wallet Accounts
           </h2>
-          <Link 
-            to="/user/create-account"
-            className="flex items-center justify-center gap-2 border border-gray-300 bg-white px-3 py-1 rounded-md hover:bg-gray-50 transition text-sm sm:text-md"
-          >
-            <AiOutlinePlus /> Create Account
-          </Link>
         </div>
 
         {/* Wallet Card */}
@@ -1217,6 +1232,12 @@ function Dashboard() {
             {/* Buttons (stacked like screenshot) */}
             <div className="flex flex-col gap-3">
               <button
+                onClick={() => {
+                  setWalletModalAction('deposit');
+                  setWalletModalStep(1);
+                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
+                  setWalletModalOpen(true);
+                }}
                 className="
         flex items-center gap-2 
         w-full px-4 py-3 
@@ -1230,6 +1251,12 @@ function Dashboard() {
               </button>
 
               <button
+                onClick={() => {
+                  setWalletModalAction('transfer');
+                  setWalletModalStep(1);
+                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
+                  setWalletModalOpen(true);
+                }}
                 className="
         flex items-center gap-2 
         w-full px-4 py-3 
@@ -1243,6 +1270,12 @@ function Dashboard() {
               </button>
 
               <button
+                onClick={() => {
+                  setWalletModalAction('withdraw');
+                  setWalletModalStep(1);
+                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
+                  setWalletModalOpen(true);
+                }}
                 className="
         flex items-center gap-2 
         w-full px-4 py-3 
@@ -1285,6 +1318,12 @@ function Dashboard() {
             <div className="flex items-center gap-3 min-w-max">
               {/* Deposit (highlighted) */}
               <button
+                onClick={() => {
+                  setWalletModalAction('deposit');
+                  setWalletModalStep(1);
+                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
+                  setWalletModalOpen(true);
+                }}
                 className="
         flex items-center gap-2 
         border rounded-md px-4 py-2 
@@ -1298,6 +1337,12 @@ function Dashboard() {
 
               {/* Transfer */}
               <button
+                onClick={() => {
+                  setWalletModalAction('transfer');
+                  setWalletModalStep(1);
+                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
+                  setWalletModalOpen(true);
+                }}
                 className="
         flex items-center gap-2 
         border rounded-md px-4 py-2 
@@ -1310,6 +1355,12 @@ function Dashboard() {
 
               {/* Withdraw */}
               <button
+                onClick={() => {
+                  setWalletModalAction('withdraw');
+                  setWalletModalStep(1);
+                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
+                  setWalletModalOpen(true);
+                }}
                 className="
         flex items-center gap-2 
         border rounded-md px-4 py-2 
@@ -1322,6 +1373,281 @@ function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Wallet Modal - 3 Step Flow */}
+        {walletModalOpen && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && walletModalStep === 3) {
+                setWalletModalOpen(false);
+                setWalletModalStep(1);
+                setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
+                navigate('/user/transfers');
+              }
+            }}
+          >
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              {/* Step Indicators */}
+              <div className="flex items-center justify-center gap-2 p-4 border-b">
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                  walletModalStep >= 1 ? 'bg-[#00A896] text-white' : 'bg-gray-200 text-gray-500'
+                }`}>
+                  1
+                </div>
+                <div className={`flex-1 h-0.5 ${
+                  walletModalStep >= 2 ? 'bg-[#00A896]' : 'bg-gray-200'
+                }`}></div>
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                  walletModalStep >= 2 ? 'bg-[#00A896] text-white' : 'bg-gray-200 text-gray-500'
+                }`}>
+                  2
+                </div>
+                <div className={`flex-1 h-0.5 ${
+                  walletModalStep >= 3 ? 'bg-[#00A896]' : 'bg-gray-200'
+                }`}></div>
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                  walletModalStep >= 3 ? 'bg-[#00A896] text-white' : 'bg-gray-200 text-gray-500'
+                }`}>
+                  3
+                </div>
+              </div>
+
+              {/* Step 1: Details */}
+              {walletModalStep === 1 && (
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    {walletModalAction === 'deposit' && 'Deposit to Wallet'}
+                    {walletModalAction === 'withdraw' && 'Withdraw from Wallet'}
+                    {walletModalAction === 'transfer' && 'Internal Transfer'}
+                  </h3>
+
+                  {walletModalAction === 'transfer' && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Transfer Direction
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            value="to-mt5"
+                            checked={walletFormData.direction === 'to-mt5'}
+                            onChange={(e) => setWalletFormData({ ...walletFormData, direction: e.target.value })}
+                            className="mr-2"
+                          />
+                          <span className="text-sm">Wallet → MT5</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            value="from-mt5"
+                            checked={walletFormData.direction === 'from-mt5'}
+                            onChange={(e) => setWalletFormData({ ...walletFormData, direction: e.target.value })}
+                            className="mr-2"
+                          />
+                          <span className="text-sm">MT5 → Wallet</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  {walletModalAction === 'transfer' && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        MT5 Account
+                      </label>
+                      <select
+                        value={walletFormData.mt5Account}
+                        onChange={(e) => setWalletFormData({ ...walletFormData, mt5Account: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00A896]"
+                        required
+                      >
+                        <option value="">Select MT5 Account</option>
+                        {accounts.map((acc) => (
+                          <option key={acc.id} value={acc.account_number}>
+                            {acc.account_number} ({acc.platform} {acc.account_type})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Amount (USD)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      value={walletFormData.amount}
+                      onChange={(e) => setWalletFormData({ ...walletFormData, amount: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00A896]"
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setWalletModalOpen(false)}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (walletFormData.amount && (walletModalAction !== 'transfer' || walletFormData.mt5Account)) {
+                          setWalletModalStep(2);
+                        }
+                      }}
+                      disabled={!walletFormData.amount || (walletModalAction === 'transfer' && !walletFormData.mt5Account)}
+                      className="flex-1 px-4 py-2 bg-[#00A896] text-white rounded-md hover:bg-[#008B7A] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Confirmation */}
+              {walletModalStep === 2 && (
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Confirm Transaction</h3>
+
+                  <div className="bg-gray-50 rounded-lg p-4 mb-6 space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Type:</span>
+                      <span className="font-semibold text-gray-900 capitalize">
+                        {walletModalAction === 'deposit' && 'Deposit'}
+                        {walletModalAction === 'withdraw' && 'Withdraw'}
+                        {walletModalAction === 'transfer' && `Transfer ${walletFormData.direction === 'to-mt5' ? 'Wallet → MT5' : 'MT5 → Wallet'}`}
+                      </span>
+                    </div>
+                    {walletModalAction === 'transfer' && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">MT5 Account:</span>
+                        <span className="font-semibold text-gray-900">{walletFormData.mt5Account}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Amount:</span>
+                      <span className="font-semibold text-gray-900">${Number(walletFormData.amount).toFixed(2)}</span>
+                    </div>
+                    {wallet && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Current Balance:</span>
+                        <span className="font-semibold text-gray-900">${Number(wallet.balance).toFixed(3)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setWalletModalStep(1)}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setWalletSubmitting(true);
+                        try {
+                          const token = authService.getToken();
+                          let response;
+                          
+                          if (walletModalAction === 'deposit') {
+                            response = await fetch(`${API_BASE_URL}/wallet/deposit`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                              },
+                              body: JSON.stringify({ amount: parseFloat(walletFormData.amount) })
+                            });
+                          } else if (walletModalAction === 'withdraw') {
+                            response = await fetch(`${API_BASE_URL}/wallet/withdraw`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                              },
+                              body: JSON.stringify({ amount: parseFloat(walletFormData.amount) })
+                            });
+                          } else if (walletModalAction === 'transfer') {
+                            const endpoint = walletFormData.direction === 'to-mt5' 
+                              ? '/wallet/transfer-to-mt5'
+                              : '/wallet/transfer-from-mt5';
+                            response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                              },
+                              body: JSON.stringify({
+                                mt5Account: walletFormData.mt5Account,
+                                amount: parseFloat(walletFormData.amount)
+                              })
+                            });
+                          }
+
+                          const data = await response.json();
+                          if (data.success) {
+                            setWalletModalStep(3);
+                            // Refresh wallet balance
+                            const walletRes = await fetch(`${API_BASE_URL}/wallet`, {
+                              headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            const walletData = await walletRes.json();
+                            if (walletData.success) setWallet(walletData.data);
+                          } else {
+                            alert(data.message || 'Transaction failed');
+                            setWalletSubmitting(false);
+                          }
+                        } catch (error) {
+                          console.error('Transaction error:', error);
+                          alert('Transaction failed. Please try again.');
+                          setWalletSubmitting(false);
+                        }
+                      }}
+                      disabled={walletSubmitting}
+                      className="flex-1 px-4 py-2 bg-[#00A896] text-white rounded-md hover:bg-[#008B7A] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {walletSubmitting ? 'Processing...' : 'Confirm'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Confirmed */}
+              {walletModalStep === 3 && (
+                <div className="p-6 text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Transaction Confirmed</h3>
+                  <p className="text-gray-600 mb-6">
+                    Your {walletModalAction} of ${Number(walletFormData.amount).toFixed(2)} has been processed successfully.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setWalletModalOpen(false);
+                      setWalletModalStep(1);
+                      setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
+                      navigate('/user/transfers');
+                    }}
+                    className="w-full px-4 py-2 bg-[#00A896] text-white rounded-md hover:bg-[#008B7A] transition"
+                  >
+                    View Transfers
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
