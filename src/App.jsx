@@ -22,6 +22,7 @@ import UserProtectedRoute from './components/ProtectedRoute'
 // User Pages
 import Dashboard from './user/pages/Dashboard'
 import Deposits from './user/pages/Deposits'
+import DepositRequest from './user/pages/DepositRequest'
 import Verification from './user/pages/Verification'
 import CreateAccount from './user/pages/CreateAccount'
 import DebitCard from './user/pages/withdrawals/DebitCard'
@@ -82,6 +83,7 @@ function App() {
           <Route path="verification" element={<Verification />} />
           <Route path="create-account" element={<CreateAccount />} />
           <Route path="deposits" element={<Deposits />} />
+          <Route path="deposits/:gatewayId" element={<DepositRequest />} />
           <Route path="deposits/google-pay" element={<GooglePay />} />
           <Route path="deposits/apple-pay" element={<ApplePay />} />
           <Route path="deposits/debit-card" element={<DebitCardDeposit />} />

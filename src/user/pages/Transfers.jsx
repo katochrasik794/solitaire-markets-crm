@@ -11,12 +11,15 @@ function Transfers() {
 
   const [wallet, setWallet] = useState(null)
   const [mt5Accounts, setMt5Accounts] = useState([])
-  const [mt5Balances, setMt5Balances] = useState({}) // { account_number: balance }
+  const [mt5Balances, setMt5Balances] = useState({}) // { account_number: { balance, equity, margin, credit, leverage } }
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [syncingBalances, setSyncingBalances] = useState(false)
 
   // Datatable state
   const [allTransactions, setAllTransactions] = useState([])
+  const [internalTransfers, setInternalTransfers] = useState([])
+  const [loadingInternalTransfers, setLoadingInternalTransfers] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('')
   const [filterSource, setFilterSource] = useState('')
@@ -28,6 +31,51 @@ function Transfers() {
   const [pageSize, setPageSize] = useState(10)
 
   const [toast, setToast] = useState(null)
+
+  // Fetch balance for a specific MT5 account from API
+  const fetchAccountBalance = async (accountNumber) => {
+    try {
+      const token = authService.getToken()
+      if (!token) return null
+
+      const response = await fetch(`${API_BASE_URL}/accounts/${accountNumber}/balance`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+      if (data.success && data.data) {
+        return data.data
+      }
+    } catch (error) {
+      console.error(`Error fetching balance for account ${accountNumber}:`, error)
+    }
+    return null
+  }
+
+  // Fetch all MT5 account balances
+  const fetchAllAccountBalances = async (accountList) => {
+    const balances = {}
+    const promises = accountList.map(async (acc) => {
+      const accountNumber = acc.account_number
+      const balanceData = await fetchAccountBalance(accountNumber)
+      if (balanceData) {
+        balances[accountNumber] = balanceData
+      } else {
+        // Fallback to database balance if API fails
+        balances[accountNumber] = {
+          balance: acc.balance || 0,
+          equity: acc.equity || 0,
+          margin: acc.margin || 0,
+          credit: acc.credit || 0,
+          leverage: acc.leverage || 2000
+        }
+      }
+    })
+    await Promise.all(promises)
+    setMt5Balances(balances)
+  }
 
   // Load wallet + MT5 accounts + all transactions for client-side filtering
   useEffect(() => {
@@ -56,22 +104,28 @@ function Transfers() {
           )
           setMt5Accounts(mt5)
           
-          // Fetch balances for MT5 accounts (placeholder for now - would need MT5 API call)
-          const balances = {}
-          mt5.forEach(acc => {
-            balances[acc.account_number] = acc.balance || 0 // Use balance if available, else 0
-          })
-          setMt5Balances(balances)
+          // Fetch real-time balances for MT5 accounts from API
+          if (mt5.length > 0) {
+            await fetchAllAccountBalances(mt5)
+          }
         }
 
         const txData = await txRes.json()
         if (txData.success && txData.data) {
           setAllTransactions(txData.data.items || [])
         }
+
+        // Fetch internal transfers
+        const internalRes = await fetch(`${API_BASE_URL}/wallet/internal-transfers?limit=1000&offset=0`, { headers })
+        const internalData = await internalRes.json()
+        if (internalData.success && internalData.data) {
+          setInternalTransfers(internalData.data.items || [])
+        }
       } catch (err) {
         console.error('Load transfers page error:', err)
       } finally {
         setLoading(false)
+        setLoadingInternalTransfers(false)
       }
     }
 
@@ -267,11 +321,35 @@ function Transfers() {
         type: 'success',
       })
 
-      // Refresh wallet and transactions
+      // Refresh wallet, balances, and transactions
       const walletRes = await fetch(`${API_BASE_URL}/wallet`, { headers })
       const walletData = await walletRes.json()
       if (walletData.success) setWallet(walletData.data)
+
+      // Refresh accounts and balances
+      const accountsRes = await fetch(`${API_BASE_URL}/accounts`, { headers })
+      const accountsData = await accountsRes.json()
+      if (accountsData.success) {
+        const all = Array.isArray(accountsData.data) ? accountsData.data : []
+        const mt5 = all.filter(
+          (acc) => (acc.platform || '').toUpperCase() === 'MT5'
+        )
+        setMt5Accounts(mt5)
+        
+        // Fetch fresh balances for all MT5 accounts
+        if (mt5.length > 0) {
+          await fetchAllAccountBalances(mt5)
+        }
+      }
+
       await reloadTransactions()
+
+      // Reload internal transfers
+      const internalRes = await fetch(`${API_BASE_URL}/wallet/internal-transfers?limit=1000&offset=0`, { headers })
+      const internalData = await internalRes.json()
+      if (internalData.success && internalData.data) {
+        setInternalTransfers(internalData.data.items || [])
+      }
 
       // Reset form
       setFromAccount('')
@@ -316,9 +394,56 @@ function Transfers() {
     if (fromAccount === 'wallet') {
       return wallet ? Number(wallet.balance) : 0
     } else if (fromAccount) {
-      return mt5Balances[fromAccount] || 0
+      const balanceData = mt5Balances[fromAccount]
+      return balanceData ? Number(balanceData.balance || 0) : 0
     }
     return 0
+  }
+
+  // Handle sync balances
+  const handleSyncBalances = async () => {
+    setSyncingBalances(true)
+    try {
+      const token = authService.getToken()
+      if (!token) return
+
+      const headers = { Authorization: `Bearer ${token}` }
+
+      // Refresh accounts list first
+      const accountsRes = await fetch(`${API_BASE_URL}/accounts`, { headers })
+      const accountsData = await accountsRes.json()
+      
+      if (accountsData.success) {
+        const all = Array.isArray(accountsData.data) ? accountsData.data : []
+        const mt5 = all.filter(
+          (acc) => (acc.platform || '').toUpperCase() === 'MT5'
+        )
+        setMt5Accounts(mt5)
+        
+        // Fetch fresh balances for all MT5 accounts
+        if (mt5.length > 0) {
+          await fetchAllAccountBalances(mt5)
+        }
+      }
+
+      // Also refresh wallet
+      const walletRes = await fetch(`${API_BASE_URL}/wallet`, { headers })
+      const walletData = await walletRes.json()
+      if (walletData.success) setWallet(walletData.data)
+
+      setToast({
+        message: 'Balances refreshed successfully',
+        type: 'success'
+      })
+    } catch (err) {
+      console.error('Sync balances error:', err)
+      setToast({
+        message: 'Failed to refresh balances',
+        type: 'error'
+      })
+    } finally {
+      setSyncingBalances(false)
+    }
   }
 
   const availableBalance = getAvailableBalance()
@@ -348,48 +473,93 @@ function Transfers() {
 
         {/* Transfer Form */}
         <div className="w-full pb-4 md:pb-6">
-          <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 md:p-8 border border-gray-200 shadow-sm">
+          <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl p-6 md:p-8" style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05)' }}>
             {loading ? (
               <div className="text-center text-gray-500 py-8">Loading...</div>
             ) : (
               <form className="space-y-6" onSubmit={handleSubmit}>
+                {/* Sync Balance Button */}
+                <div className="flex justify-end mb-2">
+                  <button
+                    type="button"
+                    onClick={handleSyncBalances}
+                    disabled={syncingBalances}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                  >
+                    {syncingBalances ? (
+                      <>
+                        <svg className="w-4 h-4 text-gray-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span className="text-sm text-gray-700">Refreshing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-4 h-4 text-gray-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                          />
+                        </svg>
+                        <span className="text-sm text-gray-700 font-medium">Refresh Balance</span>
+                      </>
+                    )}
+                  </button>
+                </div>
                 {/* Side-by-side Account Selection */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* From Account - Left */}
-                  <div className="bg-white rounded-lg p-5 border-2 border-gray-200 shadow-sm">
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-6" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
                     <label
-                      className="block mb-3 text-sm font-semibold text-gray-700"
+                      className="block mb-4 text-sm font-semibold text-gray-700"
                       style={{
                         fontFamily: 'Roboto, sans-serif',
                       }}
                     >
                       From Account
                     </label>
-                    <div className="relative mb-3">
+                    <div className="relative mb-4">
                       <select
                         value={fromAccount}
                         onChange={(e) => {
                           setFromAccount(e.target.value)
                           setAmount('') // Reset amount when account changes
                         }}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white appearance-none focus:ring-2 focus:ring-[#00A896] focus:border-[#00A896] outline-none transition-all"
-                        style={{ fontFamily: 'Roboto, sans-serif', fontSize: '15px' }}
+                        className="w-full px-5 py-4 rounded-2xl bg-white appearance-none focus:ring-2 focus:ring-[#00A896] focus:ring-offset-2 outline-none transition-all text-gray-800"
+                        style={{ 
+                          fontFamily: 'Roboto, sans-serif', 
+                          fontSize: '15px',
+                          boxShadow: '0 4px 15px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9)'
+                        }}
                       >
                         <option value="">Choose an account</option>
                         {wallet && toAccount !== 'wallet' && (
                           <option value="wallet">
-                            {wallet.wallet_number} (Wallet - {wallet.currency})
+                            {wallet.wallet_number} | {Number(wallet.balance || 0).toFixed(2)}{wallet.currency}
                           </option>
                         )}
                         {mt5Accounts
                           .filter((acc) => acc.account_number !== toAccount)
-                          .map((acc) => (
-                            <option key={acc.id} value={acc.account_number}>
-                              {acc.account_number} (MT5 - {acc.account_type} - {acc.currency})
-                            </option>
-                          ))}
+                          .map((acc) => {
+                            const balanceData = mt5Balances[acc.account_number]
+                            const balance = balanceData ? Number(balanceData.balance || 0) : (acc.balance || 0)
+                            return (
+                              <option key={acc.id} value={acc.account_number}>
+                                {acc.account_number} | {Number(balance).toFixed(2)}{acc.currency || 'USD'}
+                              </option>
+                            )
+                          })}
                       </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                         <svg
                           className="w-5 h-5 text-gray-400"
                           fill="none"
@@ -407,9 +577,9 @@ function Transfers() {
                     </div>
                     {/* Balance Display */}
                     {fromAccount && (
-                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                        <div className="text-xs text-gray-500 mb-1">Available Balance</div>
-                        <div className="text-xl font-bold text-gray-900">
+                      <div className="bg-gradient-to-r from-[#00A896]/10 to-[#00A896]/5 rounded-2xl p-4" style={{ boxShadow: '0 4px 15px rgba(0,168,150,0.15), 0 0 0 1px rgba(0,168,150,0.1), inset 0 1px 0 rgba(255,255,255,0.6)' }}>
+                        <div className="text-xs text-gray-500 mb-1 font-medium">Available Balance</div>
+                        <div className="text-2xl font-bold text-gray-900">
                           ${availableBalance.toFixed(2)}
                         </div>
                       </div>
@@ -417,40 +587,48 @@ function Transfers() {
                   </div>
 
                   {/* To Account - Right */}
-                  <div className="bg-white rounded-lg p-5 border-2 border-gray-200 shadow-sm">
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-6" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
                     <label
-                      className="block mb-3 text-sm font-semibold text-gray-700"
+                      className="block mb-4 text-sm font-semibold text-gray-700"
                       style={{
                         fontFamily: 'Roboto, sans-serif',
                       }}
                     >
                       To Account
                     </label>
-                    <div className="relative mb-3">
+                    <div className="relative mb-4">
                       <select
                         value={toAccount}
                         onChange={(e) => {
                           setToAccount(e.target.value)
                           setAmount('') // Reset amount when account changes
                         }}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white appearance-none focus:ring-2 focus:ring-[#00A896] focus:border-[#00A896] outline-none transition-all"
-                        style={{ fontFamily: 'Roboto, sans-serif', fontSize: '15px' }}
+                        className="w-full px-5 py-4 rounded-2xl bg-white appearance-none focus:ring-2 focus:ring-[#00A896] focus:ring-offset-2 outline-none transition-all text-gray-800"
+                        style={{ 
+                          fontFamily: 'Roboto, sans-serif', 
+                          fontSize: '15px',
+                          boxShadow: '0 4px 15px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9)'
+                        }}
                       >
                         <option value="">Choose an account</option>
                         {wallet && fromAccount !== 'wallet' && (
                           <option value="wallet">
-                            {wallet.wallet_number} (Wallet - {wallet.currency})
+                            {wallet.wallet_number} | {Number(wallet.balance || 0).toFixed(2)}{wallet.currency}
                           </option>
                         )}
                         {mt5Accounts
                           .filter((acc) => acc.account_number !== fromAccount)
-                          .map((acc) => (
-                            <option key={acc.id} value={acc.account_number}>
-                              {acc.account_number} (MT5 - {acc.account_type} - {acc.currency})
-                            </option>
-                          ))}
+                          .map((acc) => {
+                            const balanceData = mt5Balances[acc.account_number]
+                            const balance = balanceData ? Number(balanceData.balance || 0) : (acc.balance || 0)
+                            return (
+                              <option key={acc.id} value={acc.account_number}>
+                                {acc.account_number} | {Number(balance).toFixed(2)}{acc.currency || 'USD'}
+                              </option>
+                            )
+                          })}
                       </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                         <svg
                           className="w-5 h-5 text-gray-400"
                           fill="none"
@@ -468,12 +646,15 @@ function Transfers() {
                     </div>
                     {/* Balance Display */}
                     {toAccount && (
-                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                        <div className="text-xs text-gray-500 mb-1">Current Balance</div>
-                        <div className="text-xl font-bold text-gray-900">
+                      <div className="bg-gradient-to-r from-[#00A896]/10 to-[#00A896]/5 rounded-2xl p-4" style={{ boxShadow: '0 4px 15px rgba(0,168,150,0.15), 0 0 0 1px rgba(0,168,150,0.1), inset 0 1px 0 rgba(255,255,255,0.6)' }}>
+                        <div className="text-xs text-gray-500 mb-1 font-medium">Current Balance</div>
+                        <div className="text-2xl font-bold text-gray-900">
                           ${toAccount === 'wallet' 
                             ? (wallet ? Number(wallet.balance).toFixed(2) : '0.00')
-                            : (mt5Balances[toAccount] || 0).toFixed(2)}
+                            : (() => {
+                                const balanceData = mt5Balances[toAccount]
+                                return balanceData ? Number(balanceData.balance || 0).toFixed(2) : '0.00'
+                              })()}
                         </div>
                       </div>
                     )}
@@ -481,9 +662,9 @@ function Transfers() {
                 </div>
 
                 {/* Transfer Amount with Range Slider */}
-                <div className="bg-white rounded-lg p-5 border-2 border-gray-200 shadow-sm">
+                <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-6" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
                   <label
-                    className="block mb-3 text-sm font-semibold text-gray-700"
+                    className="block mb-4 text-sm font-semibold text-gray-700"
                     style={{
                       fontFamily: 'Roboto, sans-serif',
                     }}
@@ -492,7 +673,7 @@ function Transfers() {
                   </label>
                   
                   {/* Amount Input */}
-                  <div className="mb-4">
+                  <div className="mb-5">
                     <input
                       type="number"
                       value={amount}
@@ -503,8 +684,11 @@ function Transfers() {
                         }
                       }}
                       placeholder="0.00"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-[#00A896] focus:border-[#00A896] outline-none text-lg font-semibold"
-                      style={{ fontFamily: 'Roboto, sans-serif' }}
+                      className="w-full px-5 py-4 rounded-2xl bg-white focus:ring-2 focus:ring-[#00A896] focus:ring-offset-2 outline-none text-xl font-bold text-gray-900 transition-all"
+                      style={{ 
+                        fontFamily: 'Roboto, sans-serif',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9)'
+                      }}
                       min="0"
                       max={availableBalance}
                       step="0.01"
@@ -513,8 +697,8 @@ function Transfers() {
 
                   {/* Range Slider */}
                   {fromAccount && availableBalance > 0 && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs text-gray-500">
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-xs text-gray-500 font-medium">
                         <span>$0.00</span>
                         <span>${availableBalance.toFixed(2)}</span>
                       </div>
@@ -526,61 +710,76 @@ function Transfers() {
                           step="0.01"
                           value={amount || 0}
                           onChange={(e) => setAmount(e.target.value)}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          className="w-full h-3 rounded-full appearance-none cursor-pointer"
                           style={{
                             background: availableBalance > 0 
                               ? `linear-gradient(to right, #00A896 0%, #00A896 ${((Number(amount) || 0) / availableBalance) * 100}%, #e5e7eb ${((Number(amount) || 0) / availableBalance) * 100}%, #e5e7eb 100%)`
-                              : '#e5e7eb'
+                              : '#e5e7eb',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.1)'
                           }}
                         />
                         <style>{`
                           input[type="range"]::-webkit-slider-thumb {
                             appearance: none;
-                            width: 20px;
-                            height: 20px;
+                            width: 24px;
+                            height: 24px;
                             border-radius: 50%;
                             background: #00A896;
                             cursor: pointer;
-                            border: 2px solid white;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                            border: 3px solid white;
+                            box-shadow: 0 4px 12px rgba(0,168,150,0.4), 0 0 0 1px rgba(0,168,150,0.2), inset 0 1px 2px rgba(0,0,0,0.1);
+                            transition: all 0.2s;
+                          }
+                          input[type="range"]::-webkit-slider-thumb:hover {
+                            transform: scale(1.1);
+                            box-shadow: 0 6px 16px rgba(0,168,150,0.5), 0 0 0 1px rgba(0,168,150,0.3), inset 0 1px 2px rgba(0,0,0,0.1);
                           }
                           input[type="range"]::-moz-range-thumb {
-                            width: 20px;
-                            height: 20px;
+                            width: 24px;
+                            height: 24px;
                             border-radius: 50%;
                             background: #00A896;
                             cursor: pointer;
-                            border: 2px solid white;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                            border: 3px solid white;
+                            box-shadow: 0 4px 12px rgba(0,168,150,0.4), 0 0 0 1px rgba(0,168,150,0.2), inset 0 1px 2px rgba(0,0,0,0.1);
+                            transition: all 0.2s;
+                          }
+                          input[type="range"]::-moz-range-thumb:hover {
+                            transform: scale(1.1);
+                            box-shadow: 0 6px 16px rgba(0,168,150,0.5), 0 0 0 1px rgba(0,168,150,0.3), inset 0 1px 2px rgba(0,0,0,0.1);
                           }
                         `}</style>
                       </div>
-                      <div className="flex justify-between text-xs text-gray-400">
+                      <div className="flex justify-between text-xs">
                         <button
                           type="button"
                           onClick={() => setAmount((availableBalance * 0.25).toFixed(2))}
-                          className="hover:text-[#00A896] transition"
+                          className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-[#00A896] hover:text-white text-gray-600 font-medium transition-all"
+                          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
                         >
                           25%
                         </button>
                         <button
                           type="button"
                           onClick={() => setAmount((availableBalance * 0.5).toFixed(2))}
-                          className="hover:text-[#00A896] transition"
+                          className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-[#00A896] hover:text-white text-gray-600 font-medium transition-all"
+                          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
                         >
                           50%
                         </button>
                         <button
                           type="button"
                           onClick={() => setAmount((availableBalance * 0.75).toFixed(2))}
-                          className="hover:text-[#00A896] transition"
+                          className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-[#00A896] hover:text-white text-gray-600 font-medium transition-all"
+                          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
                         >
                           75%
                         </button>
                         <button
                           type="button"
                           onClick={() => setAmount(availableBalance.toFixed(2))}
-                          className="hover:text-[#00A896] transition"
+                          className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-[#00A896] hover:text-white text-gray-600 font-medium transition-all"
+                          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
                         >
                           100%
                         </button>
@@ -589,29 +788,32 @@ function Transfers() {
                   )}
                 </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={submitting || !fromAccount || !toAccount || !amount || Number(amount) <= 0 || Number(amount) > availableBalance}
-                  className="w-full bg-gradient-to-r from-[#e6c200] to-[#d4b000] hover:from-[#d4b000] hover:to-[#c2a000] text-gray-900 font-bold py-4 px-6 rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-[1.02] active:scale-[0.98]"
-                  style={{
-                    fontFamily: 'Roboto, sans-serif',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                  }}
-                >
-                  {submitting ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Processing...
-                    </span>
-                  ) : (
-                    'Transfer Funds'
-                  )}
-                </button>
+                {/* Submit Button - Compact */}
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={submitting || !fromAccount || !toAccount || !amount || Number(amount) <= 0 || Number(amount) > availableBalance}
+                    className="bg-gradient-to-r from-[#e6c200] to-[#d4b000] hover:from-[#d4b000] hover:to-[#c2a000] text-gray-900 font-bold py-3 px-12 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
+                    style={{
+                      fontFamily: 'Roboto, sans-serif',
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      boxShadow: '0 8px 25px rgba(230,194,0,0.4), 0 0 0 1px rgba(212,176,0,0.2), inset 0 1px 0 rgba(255,255,255,0.6)'
+                    }}
+                  >
+                    {submitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                      </span>
+                    ) : (
+                      'Transfer Funds'
+                    )}
+                  </button>
+                </div>
               </form>
             )}
           </div>
@@ -925,6 +1127,137 @@ function Transfers() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Internal Transfers Table */}
+        <div className="w-full pb-8 md:pb-10">
+          <h2
+            className="text-left mt-6 mb-3"
+            style={{
+              fontFamily: 'Roboto, sans-serif',
+              fontSize: '16px',
+              color: '#000000',
+              fontWeight: '500',
+            }}
+          >
+            Internal Transfer Transactions
+          </h2>
+
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            {loadingInternalTransfers ? (
+              <div className="p-8 text-center text-gray-500">Loading transfers...</div>
+            ) : internalTransfers.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">No internal transfers found</div>
+            ) : (
+              <>
+                {/* Desktop table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="min-w-full border-collapse">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                          Date & Time
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                          From
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                          To
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                          Amount
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                          Status
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                          Reference
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {internalTransfers.map((transfer) => (
+                        <tr key={transfer.id} className="border-t border-gray-100 hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-700">
+                            {formatDateTime(transfer.created_at)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-700">
+                            <span className="capitalize font-medium">{transfer.from_type}</span>
+                            <br />
+                            <span className="text-gray-500 text-xs">{transfer.from_account}</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-700">
+                            <span className="capitalize font-medium">{transfer.to_type}</span>
+                            <br />
+                            <span className="text-gray-500 text-xs">{transfer.to_account}</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">
+                            ${Number(transfer.amount).toFixed(2)} {transfer.currency}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                transfer.status === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : transfer.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              {transfer.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {transfer.reference || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile cards */}
+                <div className="md:hidden divide-y divide-gray-100">
+                  {internalTransfers.map((transfer) => (
+                    <div key={transfer.id} className="p-4 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            <span className="capitalize">{transfer.from_type}</span> → <span className="capitalize">{transfer.to_type}</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {transfer.from_account} → {transfer.to_account}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-semibold text-gray-900">
+                            ${Number(transfer.amount).toFixed(2)}
+                          </div>
+                          <span
+                            className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${
+                              transfer.status === 'completed'
+                                ? 'bg-green-100 text-green-800'
+                                : transfer.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            {transfer.status}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {formatDateTime(transfer.created_at)}
+                      </div>
+                      {transfer.reference && (
+                        <div className="text-xs text-gray-500">{transfer.reference}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

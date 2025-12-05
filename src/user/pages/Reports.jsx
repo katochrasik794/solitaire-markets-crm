@@ -1,18 +1,68 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import authService from '../../services/auth.js'
+
+const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 function Reports() {
   const [selectedReport, setSelectedReport] = useState('')
   const [openInNewTab, setOpenInNewTab] = useState(true)
+  const [transactions, setTransactions] = useState([])
+  const [loading, setLoading] = useState(false)
 
   const reportOptions = [
     { value: '', label: 'Please select a report' },
-    { value: 'account-statement-mt4', label: 'Account Statement - MT4' },
     { value: 'account-statement-mt5', label: 'Account Statement - MT5' },
-    { value: 'daily-summary-mt4', label: 'Daily Account Summary - MT4' },
-    { value: 'daily-summary-mt5', label: 'Daily Account Summary - MT5' },
-    { value: 'daily-summary-wallet', label: 'Daily Account Summary - Wallet' },
     { value: 'transaction-history', label: 'Transaction History' }
   ]
+
+  useEffect(() => {
+    if (selectedReport === 'transaction-history') {
+      fetchTransactionHistory()
+    } else {
+      setTransactions([])
+    }
+  }, [selectedReport])
+
+  const fetchTransactionHistory = async () => {
+    try {
+      setLoading(true)
+      const token = authService.getToken()
+      const response = await fetch(`${API_BASE_URL}/reports/transaction-history?limit=100`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setTransactions(data.data.transactions || [])
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching transaction history:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-'
+    const date = new Date(dateString)
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+  }
+
+  const formatAmount = (amount, currency = 'USD') => {
+    return `${currency} ${parseFloat(amount || 0).toFixed(2)}`
+  }
 
   return (
     <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
@@ -66,6 +116,80 @@ function Reports() {
               </label>
             </div>
           </div>
+
+          {/* Transaction History Table */}
+          {selectedReport === 'transaction-history' && (
+            <div className="mt-6">
+              {loading ? (
+                <div className="text-center py-8 text-gray-500">Loading transaction history...</div>
+              ) : transactions.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No transactions found</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse bg-white rounded-lg shadow-sm">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Date</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Type</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Description</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Account</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {transactions.map((tx) => (
+                        <tr key={tx.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-900">{formatDate(tx.createdAt)}</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              tx.type === 'deposit' 
+                                ? 'bg-blue-100 text-blue-800' 
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {tx.type === 'deposit' ? 'Deposit' : 'Account Created'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{tx.description}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {tx.amount ? formatAmount(tx.amount, tx.currency) : '-'}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {tx.status ? (
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                tx.status === 'approved' 
+                                  ? 'bg-green-100 text-green-800'
+                                  : tx.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {tx.status}
+                              </span>
+                            ) : (
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                Completed
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {tx.mt5AccountId ? (
+                              <span className="text-purple-600">MT5: {tx.mt5AccountId}</span>
+                            ) : tx.walletNumber ? (
+                              <span className="text-blue-600">Wallet: {tx.walletNumber}</span>
+                            ) : tx.accountNumber ? (
+                              <span className="text-green-600">MT5: {tx.accountNumber}</span>
+                            ) : (
+                              '-'
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         </div>
       </div>

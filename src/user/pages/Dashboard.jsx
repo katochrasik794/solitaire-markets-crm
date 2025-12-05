@@ -19,6 +19,8 @@ function Dashboard() {
   const [showKycBanner, setShowKycBanner] = useState(true);
   const [accounts, setAccounts] = useState([]);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
+  const [accountBalances, setAccountBalances] = useState({}); // { accountNumber: { leverage, equity, balance, margin, credit } }
+  const [syncingAccount, setSyncingAccount] = useState(null); // accountNumber being synced
   const [recentActivities, setRecentActivities] = useState([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
   const [activityModalOpen, setActivityModalOpen] = useState(false);
@@ -38,6 +40,41 @@ function Dashboard() {
     direction: 'to-mt5' // 'to-mt5' or 'from-mt5'
   });
   const [walletSubmitting, setWalletSubmitting] = useState(false);
+
+  // Fetch balance for a specific account from MT5 API
+  const fetchAccountBalance = async (accountNumber) => {
+    try {
+      const token = authService.getToken();
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/accounts/${accountNumber}/balance`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        setAccountBalances(prev => ({
+          ...prev,
+          [accountNumber]: data.data
+        }));
+        return data.data;
+      }
+    } catch (error) {
+      console.error(`Error fetching balance for account ${accountNumber}:`, error);
+    }
+    return null;
+  };
+
+  // Fetch all account balances
+  const fetchAllAccountBalances = async (accountList) => {
+    const promises = accountList.map(acc => {
+      const accountNumber = acc.account_number;
+      return fetchAccountBalance(accountNumber);
+    });
+    await Promise.all(promises);
+  };
 
   // Fetch accounts from API
   useEffect(() => {
@@ -63,6 +100,11 @@ function Dashboard() {
             return platform === 'MT5' && !isDemo && (status === '' || status === 'active');
           });
           setAccounts(live);
+          
+          // Fetch balance for all accounts
+          if (live.length > 0) {
+            await fetchAllAccountBalances(live);
+          }
         }
       } catch (error) {
         console.error('Error fetching accounts:', error);
@@ -597,7 +639,7 @@ function Dashboard() {
                                   className="text-gray-400 hover:text-gray-600"
                                   title="Copy"
                                   onClick={() => {
-                                    navigator.clipboard.writeText(account.api_account_number || account.account_number);
+                                    navigator.clipboard.writeText(account.account.account_number);
                                   }}
                                 >
                                   <svg
@@ -623,7 +665,7 @@ function Dashboard() {
                                     color: "#374151",
                                   }}
                                 >
-                                  {account.api_account_number || account.account_number}
+                                  {account.account.account_number}
                                 </span>
                                 <button className="text-gray-400 hover:text-gray-600 relative">
                                   <svg
@@ -681,7 +723,11 @@ function Dashboard() {
                             color: "#374151",
                           }}
                         >
-                          1:{account.leverage || 2000}
+                          1:{(() => {
+                            const accountNumber = account.account.account_number;
+                            const balance = accountBalances[accountNumber];
+                            return balance?.leverage || account.leverage || 2000;
+                          })()}
                         </td>
                         <td
                           className="px-4 py-2 text-center text-gray-800"
@@ -692,7 +738,11 @@ function Dashboard() {
                             color: "#374151",
                           }}
                         >
-                          0.00
+                          {(() => {
+                            const accountNumber = account.account.account_number;
+                            const balance = accountBalances[accountNumber];
+                            return balance?.equity !== undefined ? parseFloat(balance.equity).toFixed(2) : (account.equity ? parseFloat(account.equity).toFixed(2) : '0.00');
+                          })()}
                         </td>
                         <td
                           className="px-4 py-2 text-center text-gray-800"
@@ -703,7 +753,11 @@ function Dashboard() {
                             color: "#374151",
                           }}
                         >
-                          0.0000
+                          {(() => {
+                            const accountNumber = account.account.account_number;
+                            const balance = accountBalances[accountNumber];
+                            return balance?.balance !== undefined ? parseFloat(balance.balance).toFixed(4) : (account.balance ? parseFloat(account.balance).toFixed(4) : '0.0000');
+                          })()}
                         </td>
                         <td
                           className="px-4 py-2 text-center text-gray-800"
@@ -714,7 +768,11 @@ function Dashboard() {
                             color: "#374151",
                           }}
                         >
-                          0.00
+                          {(() => {
+                            const accountNumber = account.account.account_number;
+                            const balance = accountBalances[accountNumber];
+                            return balance?.margin !== undefined ? parseFloat(balance.margin).toFixed(2) : (account.margin ? parseFloat(account.margin).toFixed(2) : '0.00');
+                          })()}
                         </td>
                         <td
                           className="px-4 py-2 text-center text-gray-800"
@@ -725,7 +783,11 @@ function Dashboard() {
                             color: "#374151",
                           }}
                         >
-                          0.00
+                          {(() => {
+                            const accountNumber = account.account.account_number;
+                            const balance = accountBalances[accountNumber];
+                            return balance?.credit !== undefined ? parseFloat(balance.credit).toFixed(2) : (account.credit ? parseFloat(account.credit).toFixed(2) : '0.00');
+                          })()}
                         </td>
                         {/* Platforms column */}
                         <td className="px-4 py-2 text-center">
@@ -794,20 +856,58 @@ function Dashboard() {
                         {/* Options column - extra actions */}
                         <td className="px-4 py-2 text-center">
                           <div className="flex items-center justify-center gap-2">
-                            <button className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center">
-                              <svg
-                                className="w-4 h-4 text-gray-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                />
-                              </svg>
+                            <button 
+                              onClick={async () => {
+                                const accountNumber = account.account.account_number;
+                                setSyncingAccount(accountNumber);
+                                try {
+                                  await fetchAccountBalance(accountNumber);
+                                  // Also refresh accounts list to get updated balance from DB
+                                  const token = authService.getToken();
+                                  const response = await fetch(`${API_BASE_URL}/accounts`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                  });
+                                  const data = await response.json();
+                                  if (data.success) {
+                                    const all = Array.isArray(data.data) ? data.data : [];
+                                    const live = all.filter((acc) => {
+                                      const platform = (acc.platform || '').toUpperCase();
+                                      const status = (acc.account_status || '').toLowerCase();
+                                      const isDemo = !!acc.is_demo;
+                                      return platform === 'MT5' && !isDemo && (status === '' || status === 'active');
+                                    });
+                                    setAccounts(live);
+                                  }
+                                } catch (error) {
+                                  console.error('Error syncing account:', error);
+                                } finally {
+                                  setSyncingAccount(null);
+                                }
+                              }}
+                              disabled={syncingAccount === (account.account.account_number)}
+                              className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Sync Balance"
+                            >
+                              {syncingAccount === (account.account.account_number) ? (
+                                <svg className="w-4 h-4 text-gray-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              ) : (
+                                <svg
+                                  className="w-4 h-4 text-gray-600"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                  />
+                                </svg>
+                              )}
                             </button>
                             <button className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center">
                               <svg
@@ -872,7 +972,14 @@ function Dashboard() {
                           color: "#374151",
                         }}
                       >
-                        0.00
+                        {(() => {
+                          const totalEquity = accounts.reduce((sum, acc) => {
+                            const accountNumber = acc.account_number;
+                            const balance = accountBalances[accountNumber];
+                            return sum + (balance?.equity || parseFloat(acc.equity || 0));
+                          }, 0);
+                          return totalEquity.toFixed(2);
+                        })()}
                       </td>
                       <td
                         className="px-4 py-2 text-center text-gray-800 font-semibold"
@@ -883,7 +990,14 @@ function Dashboard() {
                           color: "#374151",
                         }}
                       >
-                        0.00
+                        {(() => {
+                          const totalBalance = accounts.reduce((sum, acc) => {
+                            const accountNumber = acc.account_number;
+                            const balance = accountBalances[accountNumber];
+                            return sum + (balance?.balance || parseFloat(acc.balance || 0));
+                          }, 0);
+                          return totalBalance.toFixed(4);
+                        })()}
                       </td>
                       <td
                         className="px-4 py-2 text-center text-gray-800 font-semibold"
@@ -894,7 +1008,14 @@ function Dashboard() {
                           color: "#374151",
                         }}
                       >
-                        0.00
+                        {(() => {
+                          const totalMargin = accounts.reduce((sum, acc) => {
+                            const accountNumber = acc.account_number;
+                            const balance = accountBalances[accountNumber];
+                            return sum + (balance?.margin || parseFloat(acc.margin || 0));
+                          }, 0);
+                          return totalMargin.toFixed(2);
+                        })()}
                       </td>
                       <td
                         className="px-4 py-2 text-center text-gray-800 font-semibold"
@@ -905,7 +1026,14 @@ function Dashboard() {
                           color: "#374151",
                         }}
                       >
-                        0.00
+                        {(() => {
+                          const totalCredit = accounts.reduce((sum, acc) => {
+                            const accountNumber = acc.account_number;
+                            const balance = accountBalances[accountNumber];
+                            return sum + (balance?.credit || parseFloat(acc.credit || 0));
+                          }, 0);
+                          return totalCredit.toFixed(2);
+                        })()}
                       </td>
                       <td className="px-4 py-2 text-center"></td>
                       <td className="px-4 py-2 text-center"></td>
@@ -945,7 +1073,7 @@ function Dashboard() {
                         {account.currency || 'USD'}
                       </span>
                       <span className="text-gray-800 font-semibold text-sm">
-                        {account.api_account_number || account.account_number}
+                        {account.account.account_number}
                       </span>
                     </div>
                     <button className="text-gray-400 hover:text-gray-600">

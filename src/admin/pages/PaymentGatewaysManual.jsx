@@ -16,11 +16,12 @@ import {
   DollarSign,
   Smartphone,
   Banknote,
-  Building2
+  Building2,
+  Star
 } from "lucide-react";
 import ProTable from "../components/ProTable.jsx";
 
-const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+const BASE = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const GATEWAY_TYPES = [
   { value: 'crypto', label: 'Cryptocurrency', icon: DollarSign, color: 'bg-orange-100 text-orange-800' },
@@ -36,6 +37,7 @@ export default function PaymentGatewaysManual() {
   const [showForm, setShowForm] = useState(false);
   const [editingGateway, setEditingGateway] = useState(null);
   const [showQR, setShowQR] = useState({});
+  const [viewingImage, setViewingImage] = useState(null); // { type: 'icon' | 'qr', url: string }
   const [formData, setFormData] = useState({
     type: "upi",
     name: "",
@@ -62,17 +64,32 @@ export default function PaymentGatewaysManual() {
     // load countries for bank gateway eligibility
     (async () => {
       try {
-        const r = await fetch(`${BASE}/admin/countries`);
+        const token = localStorage.getItem('adminToken');
+        const r = await fetch(`${BASE}/admin/countries`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
         const j = await r.json();
         const items = Array.isArray(j?.countries) ? j.countries : (Array.isArray(j) ? j : []);
         setCountries(items);
-      } catch {}
+      } catch (err) {
+        console.error('Failed to load countries:', err);
+      }
     })();
   }, []);
 
   const fetchGateways = async () => {
     try {
+      setError('');
       const token = localStorage.getItem('adminToken');
+      if (!token) {
+        setError('Authentication required');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(`${BASE}/admin/manual-gateways`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -82,12 +99,17 @@ export default function PaymentGatewaysManual() {
       
       if (response.ok) {
         const data = await response.json();
-        setGateways(data.gateways || []);
+        setGateways(Array.isArray(data.gateways) ? data.gateways : []);
+        setError('');
       } else {
-        setError('Failed to fetch manual gateways');
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.error || errorData.message || 'Failed to fetch manual gateways');
+        setGateways([]);
       }
     } catch (err) {
-      setError('Failed to fetch manual gateways');
+      console.error('Fetch gateways error:', err);
+      setError('Failed to fetch manual gateways. Please check your connection.');
+      setGateways([]);
     } finally {
       setLoading(false);
     }
@@ -225,6 +247,74 @@ export default function PaymentGatewaysManual() {
     }
   };
 
+  const handleToggleStatus = async (gateway) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      
+      const response = await fetch(`${BASE}/admin/manual-gateways/${gateway.id}/toggle-status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setGateways(gateways.map(g => g.id === gateway.id ? data.gateway : g));
+        setError("");
+        Swal.fire({ 
+          icon: 'success', 
+          title: `Gateway ${data.gateway.is_active ? 'activated' : 'deactivated'}`, 
+          timer: 1200, 
+          showConfirmButton: false 
+        });
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        const msg = errorData.error || 'Failed to update gateway status';
+        setError(msg);
+        Swal.fire({ icon: 'error', title: 'Update failed', text: msg });
+      }
+    } catch (err) {
+      setError('Failed to update gateway status');
+      Swal.fire({ icon: 'error', title: 'Update failed', text: err.message || String(err) });
+    }
+  };
+
+  const handleToggleRecommended = async (gateway) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      
+      const response = await fetch(`${BASE}/admin/manual-gateways/${gateway.id}/toggle-recommended`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setGateways(gateways.map(g => g.id === gateway.id ? data.gateway : g));
+        setError("");
+        Swal.fire({ 
+          icon: 'success', 
+          title: `Gateway ${data.gateway.is_recommended ? 'marked as recommended' : 'removed from recommended'}`, 
+          timer: 1200, 
+          showConfirmButton: false 
+        });
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        const msg = errorData.error || 'Failed to update gateway recommended status';
+        setError(msg);
+        Swal.fire({ icon: 'error', title: 'Update failed', text: msg });
+      }
+    } catch (err) {
+      setError('Failed to update gateway recommended status');
+      Swal.fire({ icon: 'error', title: 'Update failed', text: err.message || String(err) });
+    }
+  };
+
   const toggleQRVisibility = (id) => {
     setShowQR(prev => ({
       ...prev,
@@ -233,7 +323,27 @@ export default function PaymentGatewaysManual() {
   };
 
   const getTypeInfo = (type) => {
-    return GATEWAY_TYPES.find(t => t.value === type) || GATEWAY_TYPES[0];
+    // Map backend types to frontend types
+    const typeMap = {
+      'upi': 'upi',
+      'UPI': 'upi',
+      'wire': 'wire',
+      'Bank_Transfer': 'wire',
+      'bank_transfer': 'wire',
+      'crypto': 'crypto',
+      'USDT_TRC20': 'crypto',
+      'USDT_ERC20': 'crypto',
+      'USDT_BEP20': 'crypto',
+      'Bitcoin': 'crypto',
+      'Ethereum': 'crypto',
+      'Other_Crypto': 'crypto',
+      'local': 'local',
+      'Other': 'local',
+      'other': 'local'
+    };
+    
+    const mappedType = typeMap[type] || type;
+    return GATEWAY_TYPES.find(t => t.value === mappedType) || GATEWAY_TYPES[0];
   };
 
   const getStatusInfo = (isActive) => {
@@ -242,14 +352,19 @@ export default function PaymentGatewaysManual() {
       : { label: 'Inactive', color: 'bg-red-100 text-red-800', icon: AlertCircle };
   };
 
-  // Resolve file URLs coming from backend (which may be relative like /kyc_proofs/xxx)
+  // Resolve file URLs coming from backend (which may be relative like /uploads/gateways/xxx)
   const fileUrl = (u) => {
     if (!u) return '';
     if (/^https?:\/\//i.test(u)) return u;
-    // Ensure no double slashes when BASE already ends with '/'
-    const base = BASE.replace(/\/$/, '');
+    
+    // Remove /api from BASE to get the server root URL
+    // BASE is like "http://localhost:5000/api"
+    // We need "http://localhost:5000" for static files
+    const serverBase = BASE.replace(/\/api\/?$/, '');
+    
+    // Path should already start with /uploads/...
     const path = String(u).startsWith('/') ? u : `/${u}`;
-    return `${base}${path}`;
+    return `${serverBase}${path}`;
   };
 
   if (loading) {
@@ -559,18 +674,37 @@ export default function PaymentGatewaysManual() {
                   },
                   { key: 'name', label: 'Name' },
                   { key: 'icon', label: 'Icon', render: (v) => (
-                      v ? <img src={fileUrl(v)} alt="icon" className="h-8 w-8 rounded-full object-cover mx-auto" />
-                        : <div className="h-8 w-8 rounded-full bg-gray-100 grid place-items-center mx-auto"><CreditCard className="h-4 w-4 text-gray-400" /></div>
+                      v ? (
+                        <img 
+                          src={fileUrl(v)} 
+                          alt="icon" 
+                          className="h-8 w-8 rounded-full object-cover mx-auto"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling?.remove();
+                            const fallback = document.createElement('div');
+                            fallback.className = 'h-8 w-8 rounded-full bg-gray-100 grid place-items-center mx-auto';
+                            fallback.innerHTML = '<svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>';
+                            e.target.parentNode?.appendChild(fallback);
+                          }}
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-gray-100 grid place-items-center mx-auto">
+                          <CreditCard className="h-4 w-4 text-gray-400" />
+                        </div>
+                      )
                     )
                   },
-                  { key: 'qr', label: 'QR', render: (v, row) => (
+                  { key: 'qr', label: 'QR', render: (v) => (
                       v ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <img src={fileUrl(v)} alt="QR" className="h-8 w-8 rounded object-cover" />
-                          <button onClick={() => toggleQRVisibility(row.actions.id)} className="text-gray-400 hover:text-gray-600">
-                            {showQR[row.actions.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
-                        </div>
+                        <img 
+                          src={fileUrl(v)} 
+                          alt="QR" 
+                          className="h-8 w-8 rounded object-cover mx-auto"
+                          onError={(e) => {
+                            e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"%3E%3Cpath fill="%23ccc" d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/%3E%3C/svg%3E';
+                          }}
+                        />
                       ) : <span className="text-gray-400 text-sm">No QR</span>
                     )
                   },
@@ -603,16 +737,86 @@ export default function PaymentGatewaysManual() {
                       return <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full ${info.color}`}><Icon className="h-3 w-3" /> {info.label}</span>;
                     }
                   },
-                  { key: 'actions', label: 'Actions', sortable: false, render: (_v, row) => (
-                      <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => handleEdit(row.actions)} className="p-1.5 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded-lg" title="Edit Gateway">
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button onClick={() => handleDelete(row.actions.id)} className="p-1.5 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg" title="Delete Gateway">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )
+                  { key: 'actions', label: 'Actions', sortable: false, render: (_v, row) => {
+                      const gateway = row.actions;
+                      return (
+                        <div className="flex items-center justify-center gap-1.5">
+                          {gateway.icon_url && (
+                            <div className="flex flex-col items-center gap-0.5">
+                              <button 
+                                onClick={() => setViewingImage({ type: 'icon', url: fileUrl(gateway.icon_url) })} 
+                                className="p-1.5 w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-900 hover:bg-blue-50 border border-blue-200 rounded" 
+                                title="View Icon"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </button>
+                              <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">View</span>
+                            </div>
+                          )}
+                          {gateway.qr_code_url && (
+                            <div className="flex flex-col items-center gap-0.5">
+                              <button 
+                                onClick={() => setViewingImage({ type: 'qr', url: fileUrl(gateway.qr_code_url) })} 
+                                className="p-1.5 w-8 h-8 flex items-center justify-center text-purple-600 hover:text-purple-900 hover:bg-purple-50 border border-purple-200 rounded" 
+                                title="View QR Code"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </button>
+                              <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">QR</span>
+                            </div>
+                          )}
+                          <div className="flex flex-col items-center gap-0.5">
+                            <button onClick={() => handleEdit(gateway)} className="p-1.5 w-8 h-8 flex items-center justify-center text-orange-600 hover:text-orange-900 hover:bg-orange-50 border border-orange-200 rounded" title="Edit Gateway">
+                              <Edit className="h-3 w-3" />
+                            </button>
+                            <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">Edit</span>
+                          </div>
+                          <div className="flex flex-col items-center gap-0.5">
+                            <button onClick={() => handleDelete(gateway.id)} className="p-1.5 w-8 h-8 flex items-center justify-center text-red-600 hover:text-red-900 hover:bg-red-50 border border-red-200 rounded" title="Delete Gateway">
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                            <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">Delete</span>
+                          </div>
+                          {/* Recommended Toggle */}
+                          <div className="flex flex-col items-center gap-0.5">
+                            <button
+                              onClick={() => handleToggleRecommended(gateway)}
+                              className={`p-1.5 w-8 h-8 flex items-center justify-center border rounded transition-all ${
+                                gateway.is_recommended
+                                  ? 'text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 border-yellow-200 bg-yellow-50'
+                                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 border-gray-200'
+                              }`}
+                              title={gateway.is_recommended ? 'Remove from Recommended' : 'Mark as Recommended'}
+                            >
+                              <Star className={`h-3 w-3 ${gateway.is_recommended ? 'fill-current' : ''}`} />
+                            </button>
+                            <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">Star</span>
+                          </div>
+                          {/* Toggle Switch with Label - Moved to end */}
+                          <div className="flex flex-col items-center gap-0.5">
+                            <button
+                              onClick={() => handleToggleStatus(gateway)}
+                              className={`relative inline-flex h-5 w-7 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-1 focus:ring-offset-1 shadow-sm ${
+                                gateway.is_active
+                                  ? 'bg-gradient-to-r from-green-400 to-green-600 focus:ring-green-400 shadow-green-200'
+                                  : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-300 shadow-gray-200'
+                              }`}
+                              role="switch"
+                              aria-checked={gateway.is_active}
+                            >
+                              <span
+                                className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-all duration-300 ease-in-out shadow-md ${
+                                  gateway.is_active ? 'translate-x-3.5' : 'translate-x-0.5'
+                                }`}
+                              />
+                            </button>
+                            <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">
+                              {gateway.is_active ? 'Enable' : 'Disable'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
                   },
                 ]}
                 filters={{ searchKeys: ['name','type','country_code','vpa_address','crypto_address','bank_name','account_name','account_number'] }}
@@ -621,6 +825,48 @@ export default function PaymentGatewaysManual() {
             </div>
           )}
         </div>
+
+        {/* Image Viewing Modal */}
+        {viewingImage && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+            onClick={() => setViewingImage(null)}
+          >
+            <div className="bg-white rounded-lg max-w-2xl max-h-[90vh] overflow-auto relative">
+              <button
+                onClick={() => setViewingImage(null)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10 bg-white rounded-full p-2 shadow-lg"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4 capitalize">
+                  {viewingImage.type === 'icon' ? 'Gateway Icon' : 'QR Code'}
+                </h3>
+                <div className="flex justify-center">
+                  <img 
+                    src={viewingImage.url} 
+                    alt={viewingImage.type === 'icon' ? 'Gateway Icon' : 'QR Code'}
+                    className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                    onError={(e) => {
+                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 24 24"%3E%3Cpath fill="%23ccc" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/%3E%3C/svg%3E';
+                    }}
+                  />
+                </div>
+                <div className="mt-4 text-center">
+                  <a 
+                    href={viewingImage.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-purple-600 hover:text-purple-700 underline text-sm"
+                  >
+                    Open in new tab
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

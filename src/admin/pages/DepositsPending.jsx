@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ProTable from "../components/ProTable.jsx";
 import Modal from "../components/Modal.jsx";
-import { CheckCircle, XCircle, Eye } from "lucide-react";
+import { CheckCircle, XCircle, Eye, Loader2 } from "lucide-react";
 
 function fmtDate(v) {
   if (!v) return "-";
@@ -24,8 +24,10 @@ export default function DepositsPending() {
   const [rejectReason, setRejectReason] = useState("");
   const [rejecting, setRejecting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [toast, setToast] = useState(null);
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     let stop = false;
@@ -40,23 +42,37 @@ export default function DepositsPending() {
         if (stop) return;
         if (!data?.ok) throw new Error(data?.error || "Failed to load");
         const items = Array.isArray(data.items) ? data.items : [];
-        setRows(items.map(d => ({
-          id: d.id,
-          userId: d.userId,
-          userEmail: d.User?.email || "-",
-          userName: d.User?.name || "-",
-          mt5AccountId: d.MT5Account?.accountId || "-",
-          amount: d.amount,
-          currency: d.currency,
-          method: d.method,
-          paymentMethod: d.paymentMethod,
-          bankDetails: d.bankDetails,
-          cryptoAddress: d.cryptoAddress,
-          depositAddress: d.depositAddress,
-          status: d.status,
-          createdAt: d.createdAt,
-          updatedAt: d.updatedAt,
-        })));
+        console.log('Deposits data received:', items);
+        setRows(items.map(d => {
+          const walletId = d.walletId ? parseInt(d.walletId) : null;
+          console.log('Mapping deposit:', {
+            id: d.id,
+            depositTo: d.depositTo,
+            walletId: d.walletId,
+            walletIdParsed: walletId,
+            walletNumber: d.walletNumber
+          });
+          return {
+            id: d.id,
+            userId: d.userId,
+            userEmail: d.User?.email || "-",
+            userName: d.User?.name || "-",
+            mt5AccountId: d.mt5AccountId || d.MT5Account?.accountId || "-",
+            walletId: walletId,
+            walletNumber: d.walletNumber || null,
+            depositTo: d.depositTo || 'wallet',
+            amount: d.amount,
+            currency: d.currency,
+            method: d.method,
+            paymentMethod: d.paymentMethod,
+            bankDetails: d.bankDetails,
+            cryptoAddress: d.cryptoAddress,
+            depositAddress: d.depositAddress,
+            status: d.status,
+            createdAt: d.createdAt,
+            updatedAt: d.updatedAt,
+          };
+        }));
       })
       .catch(e => setError(e.message || String(e)))
       .finally(() => !stop && setLoading(false));
@@ -69,7 +85,19 @@ export default function DepositsPending() {
     { key: "__index", label: "Sr No", sortable: false },
     { key: "userEmail", label: "User Email" },
     { key: "userName", label: "User Name" },
-    { key: "mt5AccountId", label: "MT5 Account ID" },
+    { key: "mt5AccountId", label: "MT5 Account ID", render: (v) => v && v !== "-" ? v : "-" },
+    { 
+      key: "depositTo", 
+      label: "Deposit To", 
+      render: (v, row) => {
+        if (row.depositTo === 'wallet' && row.walletNumber) {
+          return <span className="text-blue-600 font-medium">Deposit in wallet {row.walletNumber}</span>;
+        } else if (row.depositTo === 'mt5' && row.mt5AccountId && row.mt5AccountId !== "-") {
+          return <span className="text-purple-600 font-medium">Deposit in MT5 ID {row.mt5AccountId}</span>;
+        }
+        return <span className="text-gray-400">-</span>;
+      }
+    },
     { key: "amount", label: "Amount", render: (v) => fmtAmount(v) },
     { key: "currency", label: "Currency" },
     // Combine payment method and bank details compactly under "Payment Method"
@@ -109,7 +137,7 @@ export default function DepositsPending() {
         <button
           onClick={() => setConfirmApprove(row)}
           disabled={approving || rejecting}
-          className="h-8 w-8 grid place-items-center rounded-md border border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50"
+          className="h-8 w-8 grid place-items-center rounded-md border border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
           title="Approve Deposit"
         >
           <CheckCircle size={16} />
@@ -117,14 +145,14 @@ export default function DepositsPending() {
         <button
           onClick={() => { setConfirmReject(row); setRejectReason(""); }}
           disabled={approving || rejecting}
-          className="h-8 w-8 grid place-items-center rounded-md border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-50"
+          className="h-8 w-8 grid place-items-center rounded-md border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
           title="Reject Deposit"
         >
           <XCircle size={16} />
         </button>
       </div>
     ) },
-  ], []);
+  ], [approving, rejecting]);
 
   const filters = useMemo(() => ({
     searchKeys: ["userEmail", "userName", "mt5AccountId", "paymentMethod"],
@@ -132,6 +160,7 @@ export default function DepositsPending() {
 
   async function onApprove(row) {
     setApproving(true);
+    setErrorMessage("");
     try {
       // Approve the deposit (this will handle MT5 balance addition internally)
       const r = await fetch(`${BASE}/admin/deposits/${row.id}/approve`, {
@@ -143,10 +172,11 @@ export default function DepositsPending() {
       
       setRows(list => list.filter(it => it.id !== row.id));
       setConfirmApprove(null);
-      setSuccessMessage(data.message || 'Deposit approved successfully.');
-      setTimeout(() => setSuccessMessage(""), 5000);
+      setToast({ type: 'success', message: data.message || 'Deposit approved successfully.' });
+      setTimeout(() => setToast(null), 5000);
     } catch (e) {
-      alert(e.message || String(e));
+      setToast({ type: 'error', message: e.message || String(e) });
+      setTimeout(() => setToast(null), 5000);
     } finally {
       setApproving(false);
     }
@@ -154,6 +184,7 @@ export default function DepositsPending() {
 
   async function onReject(row) {
     setRejecting(true);
+    setErrorMessage("");
     try {
       const r = await fetch(`${BASE}/admin/deposits/${row.id}/reject`, {
         method: 'POST',
@@ -168,10 +199,11 @@ export default function DepositsPending() {
       setRows(list => list.filter(it => it.id !== row.id));
       setConfirmReject(null);
       setRejectReason("");
-      setSuccessMessage(data.message || 'Deposit rejected successfully.');
-      setTimeout(() => setSuccessMessage(""), 5000);
+      setToast({ type: 'success', message: data.message || 'Deposit rejected successfully.' });
+      setTimeout(() => setToast(null), 5000);
     } catch (e) {
-      alert(e.message || String(e));
+      setToast({ type: 'error', message: e.message || String(e) });
+      setTimeout(() => setToast(null), 5000);
     } finally {
       setRejecting(false);
     }
@@ -192,17 +224,24 @@ export default function DepositsPending() {
       />
 
       {/* Approve Confirm */}
-      <Modal open={!!confirmApprove} onClose={() => setConfirmApprove(null)} title="Approve Deposit">
+      <Modal open={!!confirmApprove} onClose={() => { if (!approving) setConfirmApprove(null); }} title="Approve Deposit">
         {confirmApprove && (
           <div className="space-y-4">
             <p>Do you want to approve the deposit of <b>{fmtAmount(confirmApprove.amount)}</b> for <b>{confirmApprove.userEmail}</b>?</p>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setConfirmApprove(null)} className="px-4 h-10 rounded-md border">Cancel</button>
+              <button 
+                onClick={() => setConfirmApprove(null)} 
+                disabled={approving}
+                className="px-4 h-10 rounded-md border disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
               <button
                 onClick={() => onApprove(confirmApprove)}
                 disabled={approving}
-                className="px-4 h-10 rounded-md bg-green-600 text-white disabled:bg-gray-400"
+                className="px-4 h-10 rounded-md bg-green-600 text-white disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
               >
+                {approving && <Loader2 className="w-4 h-4 animate-spin" />}
                 {approving ? "Approving..." : "Approve"}
               </button>
             </div>
@@ -210,10 +249,25 @@ export default function DepositsPending() {
         )}
       </Modal>
 
-      {/* Success Message */}
-      {successMessage && (
-        <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          {successMessage}
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-in slide-in-from-top-5 ${
+          toast.type === 'success' 
+            ? 'bg-green-100 border border-green-400 text-green-800' 
+            : 'bg-red-100 border border-red-400 text-red-800'
+        }`}>
+          {toast.type === 'success' ? (
+            <CheckCircle className="w-5 h-5 text-green-600" />
+          ) : (
+            <XCircle className="w-5 h-5 text-red-600" />
+          )}
+          <span className="font-medium">{toast.message}</span>
+          <button
+            onClick={() => setToast(null)}
+            className="ml-2 text-gray-500 hover:text-gray-700"
+          >
+            <XCircle className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -234,12 +288,19 @@ export default function DepositsPending() {
               />
             </div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setConfirmReject(null)} disabled={rejecting} className="px-4 h-10 rounded-md border disabled:opacity-50">Cancel</button>
+              <button 
+                onClick={() => setConfirmReject(null)} 
+                disabled={rejecting} 
+                className="px-4 h-10 rounded-md border disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
               <button
                 onClick={() => onReject(confirmReject)}
                 disabled={rejecting}
-                className="px-4 h-10 rounded-md bg-red-600 text-white disabled:bg-gray-400"
+                className="px-4 h-10 rounded-md bg-red-600 text-white disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
               >
+                {rejecting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {rejecting ? "Rejecting..." : "Reject"}
               </button>
             </div>

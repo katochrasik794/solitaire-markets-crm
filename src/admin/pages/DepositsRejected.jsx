@@ -17,9 +17,7 @@ export default function DepositsRejected() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL
-    || import.meta.env.VITE_API_BASE_URL
-    || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     let stop = false;
@@ -34,22 +32,28 @@ export default function DepositsRejected() {
         if (stop) return;
         if (!data?.ok) throw new Error(data?.error || "Failed to load");
         const items = Array.isArray(data.items) ? data.items : [];
-        setRows(items.map(d => ({
-          id: d.id,
-          userId: d.userId,
-          userEmail: d.User?.email || "-",
-          userName: d.User?.name || "-",
-          mt5AccountId: d.MT5Account?.accountId || "-",
-          amount: d.amount,
-          currency: d.currency,
-          method: d.method,
-          paymentMethod: d.paymentMethod,
-          status: d.status,
-          rejectionReason: d.rejectionReason,
-          rejectedAt: d.rejectedAt,
-          createdAt: d.createdAt,
-          updatedAt: d.updatedAt,
-        })));
+        setRows(items.map(d => {
+          const walletId = d.walletId ? parseInt(d.walletId) : null;
+          return {
+            id: d.id,
+            userId: d.userId,
+            userEmail: d.User?.email || "-",
+            userName: d.User?.name || "-",
+            mt5AccountId: d.mt5AccountId || d.MT5Account?.accountId || "-",
+            walletId: walletId,
+            walletNumber: d.walletNumber || null,
+            depositTo: d.depositTo || 'wallet',
+            amount: d.amount,
+            currency: d.currency,
+            method: d.method,
+            paymentMethod: d.paymentMethod,
+            status: d.status,
+            rejectionReason: d.rejectionReason,
+            rejectedAt: d.rejectedAt,
+            createdAt: d.createdAt,
+            updatedAt: d.updatedAt,
+          };
+        }));
       })
       .catch(e => setError(e.message || String(e)))
       .finally(() => !stop && setLoading(false));
@@ -60,7 +64,19 @@ export default function DepositsRejected() {
     { key: "__index", label: "Sr No", sortable: false },
     { key: "userEmail", label: "User Email" },
     { key: "userName", label: "User Name" },
-    { key: "mt5AccountId", label: "MT5 Account ID" },
+    { key: "mt5AccountId", label: "MT5 Account ID", render: (v) => v && v !== "-" ? v : "-" },
+    { 
+      key: "depositTo", 
+      label: "Deposit To", 
+      render: (v, row) => {
+        if (row.depositTo === 'wallet' && row.walletNumber) {
+          return <span className="text-blue-600 font-medium">Deposit in wallet {row.walletNumber}</span>;
+        } else if (row.depositTo === 'mt5' && row.mt5AccountId && row.mt5AccountId !== "-") {
+          return <span className="text-purple-600 font-medium">Deposit in MT5 ID {row.mt5AccountId}</span>;
+        }
+        return <span className="text-gray-400">-</span>;
+      }
+    },
     { key: "amount", label: "Amount", render: (v) => fmtAmount(v) },
     { key: "currency", label: "Currency" },
     { key: "method", label: "Method" },
