@@ -639,7 +639,7 @@ function Dashboard() {
                                   className="text-gray-400 hover:text-gray-600"
                                   title="Copy"
                                   onClick={() => {
-                                    navigator.clipboard.writeText(account.account.account_number);
+                                    navigator.clipboard.writeText(account.account_number);
                                   }}
                                 >
                                   <svg
@@ -665,7 +665,7 @@ function Dashboard() {
                                     color: "#374151",
                                   }}
                                 >
-                                  {account.account.account_number}
+                                  {account.account_number}
                                 </span>
                                 <button className="text-gray-400 hover:text-gray-600 relative">
                                   <svg
@@ -724,7 +724,7 @@ function Dashboard() {
                           }}
                         >
                           1:{(() => {
-                            const accountNumber = account.account.account_number;
+                            const accountNumber = account.account_number;
                             const balance = accountBalances[accountNumber];
                             return balance?.leverage || account.leverage || 2000;
                           })()}
@@ -739,7 +739,7 @@ function Dashboard() {
                           }}
                         >
                           {(() => {
-                            const accountNumber = account.account.account_number;
+                            const accountNumber = account.account_number;
                             const balance = accountBalances[accountNumber];
                             return balance?.equity !== undefined ? parseFloat(balance.equity).toFixed(2) : (account.equity ? parseFloat(account.equity).toFixed(2) : '0.00');
                           })()}
@@ -754,7 +754,7 @@ function Dashboard() {
                           }}
                         >
                           {(() => {
-                            const accountNumber = account.account.account_number;
+                            const accountNumber = account.account_number;
                             const balance = accountBalances[accountNumber];
                             return balance?.balance !== undefined ? parseFloat(balance.balance).toFixed(4) : (account.balance ? parseFloat(account.balance).toFixed(4) : '0.0000');
                           })()}
@@ -769,7 +769,7 @@ function Dashboard() {
                           }}
                         >
                           {(() => {
-                            const accountNumber = account.account.account_number;
+                            const accountNumber = account.account_number;
                             const balance = accountBalances[accountNumber];
                             return balance?.margin !== undefined ? parseFloat(balance.margin).toFixed(2) : (account.margin ? parseFloat(account.margin).toFixed(2) : '0.00');
                           })()}
@@ -784,7 +784,7 @@ function Dashboard() {
                           }}
                         >
                           {(() => {
-                            const accountNumber = account.account.account_number;
+                            const accountNumber = account.account_number;
                             const balance = accountBalances[accountNumber];
                             return balance?.credit !== undefined ? parseFloat(balance.credit).toFixed(2) : (account.credit ? parseFloat(account.credit).toFixed(2) : '0.00');
                           })()}
@@ -858,7 +858,7 @@ function Dashboard() {
                           <div className="flex items-center justify-center gap-2">
                             <button 
                               onClick={async () => {
-                                const accountNumber = account.account.account_number;
+                                const accountNumber = account.account_number;
                                 setSyncingAccount(accountNumber);
                                 try {
                                   await fetchAccountBalance(accountNumber);
@@ -884,11 +884,11 @@ function Dashboard() {
                                   setSyncingAccount(null);
                                 }
                               }}
-                              disabled={syncingAccount === (account.account.account_number)}
+                              disabled={syncingAccount === account.account_number}
                               className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Sync Balance"
                             >
-                              {syncingAccount === (account.account.account_number) ? (
+                              {syncingAccount === account.account_number ? (
                                 <svg className="w-4 h-4 text-gray-600 animate-spin" fill="none" viewBox="0 0 24 24">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -1073,7 +1073,7 @@ function Dashboard() {
                         {account.currency || 'USD'}
                       </span>
                       <span className="text-gray-800 font-semibold text-sm">
-                        {account.account.account_number}
+                        {account.account_number}
                       </span>
                     </div>
                     <button className="text-gray-400 hover:text-gray-600">
