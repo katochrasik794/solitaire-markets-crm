@@ -149,10 +149,10 @@ export default function BulkLogs() {
       key: "status",
       label: "Status",
       render: (v, row, BadgeComp) => {
-        let tone = 'gray';
+      let tone = 'gray';
         if (v === 'Approved' || v === 'Opened' || v === 'Active') tone = 'green';
         else if (v === 'Rejected' || v === 'Suspended') tone = 'red';
-        else if (v === 'Pending') tone = 'amber';
+      else if (v === 'Pending') tone = 'amber';
         return <BadgeComp tone={tone}>{v}</BadgeComp>;
       }
     },
