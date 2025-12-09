@@ -45,6 +45,7 @@ import GooglePay from './user/pages/deposits/GooglePay'
 import ApplePay from './user/pages/deposits/ApplePay'
 import DebitCardDeposit from './user/pages/deposits/DebitCard'
 import USDTTRC20 from './user/pages/deposits/USDTTRC20'
+import CregisUSDTTRC20 from './user/pages/deposits/CregisUSDTTRC20'
 import Bitcoin from './user/pages/deposits/Bitcoin'
 import USDTERC20 from './user/pages/deposits/USDTERC20'
 import USDTBEP20 from './user/pages/deposits/USDTBEP20'
@@ -88,6 +89,7 @@ function App() {
           <Route path="deposits/apple-pay" element={<ApplePay />} />
           <Route path="deposits/debit-card" element={<DebitCardDeposit />} />
           <Route path="deposits/usdt-trc20" element={<USDTTRC20 />} />
+          <Route path="deposits/cregis-usdt-trc20" element={<CregisUSDTTRC20 />} />
           <Route path="deposits/bitcoin" element={<Bitcoin />} />
           <Route path="deposits/usdt-erc20" element={<USDTERC20 />} />
           <Route path="deposits/usdt-bep20" element={<USDTBEP20 />} />
