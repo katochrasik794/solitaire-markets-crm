@@ -123,29 +123,35 @@ function Deposits() {
                 Cryptocurrencies
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Static USDT TRC20 Card */}
-                <div
-                  onClick={() => navigate('/user/deposits/cregis-usdt-trc20')}
-                  className="bg-gray-200 rounded-lg p-2.5 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer flex items-center justify-between"
-                >
-                  <div className="flex items-center flex-1">
-                    <div className="w-14 h-14 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden bg-transparent">
-                      <img src="/tether.svg" alt="USDT TRC20" className="w-full h-full object-contain" />
+                {/* Static USDT TRC20 Card - Use logo from gateways if available */}
+                {(() => {
+                  const usdtGateway = gateways.find(g => g.name?.toLowerCase().includes('usdt') && g.name?.toLowerCase().includes('trc20'));
+                  const logoUrl = usdtGateway?.icon_url || '/tether.svg';
+                  return (
+                    <div
+                      onClick={() => navigate('/user/deposits/cregis-usdt-trc20')}
+                      className="bg-gray-200 rounded-lg p-2.5 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer flex items-center justify-between"
+                    >
+                      <div className="flex items-center flex-1">
+                        <div className="w-14 h-14 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden bg-transparent">
+                          <img src={logoUrl} alt="USDT TRC20" className="w-full h-full object-contain" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="mb-0.5" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '400' }}>
+                            USDT TRC20
+                          </h3>
+                          <p className="text-gray-600 mb-0.5" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
+                            Fee: 0% Time: Instant
+                          </p>
+                          <p className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
+                            Currencies: USDT
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-black ml-3 flex-shrink-0" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="mb-0.5" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', color: '#000000', fontWeight: '400' }}>
-                        USDT TRC20
-                      </h3>
-                      <p className="text-gray-600 mb-0.5" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
-                        Fee: 0% Time: Instant
-                      </p>
-                      <p className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
-                        Currencies: USDT
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-black ml-3 flex-shrink-0" />
-                </div>
+                  );
+                })()}
                 {/* Other crypto gateways */}
                 {cryptoGateways.map(renderGatewayCard)}
               </div>

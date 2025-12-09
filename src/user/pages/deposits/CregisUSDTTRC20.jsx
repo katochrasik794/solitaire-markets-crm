@@ -24,10 +24,48 @@ function CregisUSDTTRC20() {
   const [wallet, setWallet] = useState(null);
   const [paymentData, setPaymentData] = useState(null);
   const [depositId, setDepositId] = useState(null);
+  const [accountBalances, setAccountBalances] = useState({}); // { accountNumber: { balance, equity, margin, credit, leverage } }
+  const [syncingBalance, setSyncingBalance] = useState(null); // accountNumber being synced
+  const [logoUrl, setLogoUrl] = useState('/tether.svg'); // Default logo
 
   useEffect(() => {
     fetchAccounts();
+    fetchLogo();
   }, []);
+
+  const fetchLogo = async () => {
+    try {
+      const token = authService.getToken();
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/deposits/gateways`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.gateways) {
+          // Find USDT TRC20 gateway logo
+          const usdtGateway = data.gateways.find(g => 
+            g.name?.toLowerCase().includes('usdt') && 
+            (g.name?.toLowerCase().includes('trc20') || g.type === 'crypto')
+          );
+          if (usdtGateway?.icon_url) {
+            setLogoUrl(usdtGateway.icon_url);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching logo:', error);
+    }
+  };
+
+  // Fetch balance when MT5 account is selected
+  useEffect(() => {
+    if (formData.deposit_to === 'mt5' && formData.mt5_account_id) {
+      fetchAccountBalance(formData.mt5_account_id);
+    }
+  }, [formData.deposit_to, formData.mt5_account_id]);
 
   useEffect(() => {
     if (step === 3 && depositId && paymentData) {
@@ -51,6 +89,44 @@ function CregisUSDTTRC20() {
       };
     }
   }, [step, depositId, paymentData]);
+
+  // Fetch balance for a specific account from MT5 API
+  const fetchAccountBalance = async (accountNumber) => {
+    try {
+      const token = authService.getToken();
+      if (!token) return;
+
+      setSyncingBalance(accountNumber);
+      const response = await fetch(`${API_BASE_URL}/accounts/${accountNumber}/balance`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        setAccountBalances(prev => ({
+          ...prev,
+          [accountNumber]: data.data
+        }));
+        return data.data;
+      }
+    } catch (error) {
+      console.error(`Error fetching balance for account ${accountNumber}:`, error);
+    } finally {
+      setSyncingBalance(null);
+    }
+    return null;
+  };
+
+  // Fetch all account balances
+  const fetchAllAccountBalances = async (accountList) => {
+    const promises = accountList.map(acc => {
+      const accountNumber = acc.account_number;
+      return fetchAccountBalance(accountNumber);
+    });
+    await Promise.all(promises);
+  };
 
   const fetchAccounts = async () => {
     try {
@@ -86,6 +162,11 @@ function CregisUSDTTRC20() {
             return platform === 'MT5' && !isDemo && (status === '' || status === 'active');
           });
           setMt5Accounts(live);
+          
+          // Fetch balances for all accounts
+          if (live.length > 0) {
+            await fetchAllAccountBalances(live);
+          }
           
           // Auto-select first account if available
           if (live.length > 0 && !formData.mt5_account_id) {
@@ -220,7 +301,7 @@ function CregisUSDTTRC20() {
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">
-            <img src="/tether.svg" alt="USDT TRC20" className="w-12 h-12 rounded-lg" />
+            <img src={logoUrl} alt="USDT TRC20" className="w-12 h-12 rounded-lg" />
             <h1 className="text-2xl font-semibold">USDT TRC20 Deposit</h1>
           </div>
 
@@ -294,30 +375,112 @@ function CregisUSDTTRC20() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      MT5 Account
-                    </label>
-                    <select
-                      value={formData.deposit_to === 'mt5' ? formData.mt5_account_id : ''}
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          setFormData({ ...formData, deposit_to: 'mt5', mt5_account_id: e.target.value });
-                        } else {
-                          setFormData({ ...formData, deposit_to: 'wallet', mt5_account_id: '' });
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        MT5 Account
+                      </label>
+                      {formData.deposit_to === 'mt5' && formData.mt5_account_id && (
+                        <button
+                          type="button"
+                          onClick={() => fetchAccountBalance(formData.mt5_account_id)}
+                          disabled={syncingBalance === formData.mt5_account_id}
+                          className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 disabled:opacity-50"
+                          title="Refresh balance"
+                        >
+                          {syncingBalance === formData.mt5_account_id ? (
+                            <>
+                              <Loader className="w-3 h-3 animate-spin" />
+                              <span>Syncing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Clock className="w-3 h-3" />
+                              <span>Refresh Balance</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    <div
+                      onClick={() => {
+                        if (formData.deposit_to !== 'mt5') {
+                          setFormData({ ...formData, deposit_to: 'mt5' });
                         }
                       }}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all bg-white"
+                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        formData.deposit_to === 'mt5'
+                          ? 'border-purple-500 bg-purple-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
                     >
-                      <option value="">Select MT5 Account</option>
-                      {mt5Accounts.map((account) => (
-                        <option key={account.id} value={account.account_number}>
-                          {account.account_number} | {account.account_type || 'Standard'} | Balance: {account.currency || 'USD'} {parseFloat(account.balance || 0).toFixed(2)}
-                        </option>
-                      ))}
-                    </select>
-                    {mt5Accounts.length === 0 && (
-                      <p className="mt-2 text-sm text-gray-500 italic">No MT5 accounts available</p>
-                    )}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          formData.deposit_to === 'mt5'
+                            ? 'border-purple-500 bg-purple-500'
+                            : 'border-gray-300'
+                        }`}>
+                          {formData.deposit_to === 'mt5' && (
+                            <div className="w-2 h-2 rounded-full bg-white"></div>
+                          )}
+                        </div>
+                        <div className="font-medium text-gray-900">MT5 Account</div>
+                      </div>
+                      <select
+                        value={formData.deposit_to === 'mt5' ? formData.mt5_account_id : ''}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            setFormData({ ...formData, deposit_to: 'mt5', mt5_account_id: e.target.value });
+                            // Fetch balance for selected account
+                            fetchAccountBalance(e.target.value);
+                          } else {
+                            setFormData({ ...formData, deposit_to: 'wallet', mt5_account_id: '' });
+                          }
+                        }}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all bg-white"
+                      >
+                        <option value="">Select MT5 Account</option>
+                        {mt5Accounts.map((account) => {
+                          const balance = accountBalances[account.account_number];
+                          const displayBalance = balance ? parseFloat(balance.balance || 0).toFixed(2) : parseFloat(account.balance || 0).toFixed(2);
+                          const currency = account.currency || 'USD';
+                          return (
+                            <option key={account.id} value={account.account_number}>
+                              {account.account_number} | {account.account_type || 'standard'} | Balance: {currency} {displayBalance}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      {formData.deposit_to === 'mt5' && formData.mt5_account_id && accountBalances[formData.mt5_account_id] && (() => {
+                        const selectedAccount = mt5Accounts.find(acc => acc.account_number === formData.mt5_account_id);
+                        const balance = accountBalances[formData.mt5_account_id];
+                        const currency = balance.currency || selectedAccount?.currency || 'USD';
+                        return (
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg text-sm">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <span className="text-gray-600">Balance:</span>
+                                <span className="ml-2 font-medium">{currency} {parseFloat(balance.balance || 0).toFixed(2)}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Equity:</span>
+                                <span className="ml-2 font-medium">{currency} {parseFloat(balance.equity || 0).toFixed(2)}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Leverage:</span>
+                                <span className="ml-2 font-medium">{balance.leverage || selectedAccount?.leverage || 'N/A'}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Margin:</span>
+                                <span className="ml-2 font-medium">{currency} {parseFloat(balance.margin || 0).toFixed(2)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      {mt5Accounts.length === 0 && (
+                        <p className="mt-2 text-sm text-gray-500 italic">No MT5 accounts available</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
