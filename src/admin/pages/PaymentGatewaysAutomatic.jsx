@@ -29,7 +29,10 @@ export default function PaymentGatewaysAutomatic() {
     deposit_wallet_address: "",
     api_key: "",
     secret_key: "",
-    gateway_type: "crypto",
+    project_id: "", // For Cregis
+    gateway_url: "", // For Cregis
+    webhook_secret: "", // For Cregis
+    gateway_type: "Cryptocurrency",
     is_active: true,
     description: ""
   });
@@ -67,8 +70,8 @@ export default function PaymentGatewaysAutomatic() {
     try {
       const token = localStorage.getItem('adminToken');
       const url = editingGateway 
-        ? `${BASE}/admin/payment-gateways/${editingGateway.id}`
-        : `${BASE}/admin/payment-gateways`;
+        ? `${BASE}/api/admin/payment-gateways/${editingGateway.id}`
+        : `${BASE}/api/admin/payment-gateways`;
       
       const method = editingGateway ? 'PUT' : 'POST';
       
@@ -95,9 +98,13 @@ export default function PaymentGatewaysAutomatic() {
           deposit_wallet_address: "",
           api_key: "",
           secret_key: "",
-          gateway_type: "crypto",
+          project_id: "",
+          gateway_url: "",
+          webhook_secret: "",
+          gateway_type: "Cryptocurrency",
           is_active: true,
-          description: ""
+          description: "",
+          display_order: 0
         });
         setError("");
       } else {
@@ -112,13 +119,17 @@ export default function PaymentGatewaysAutomatic() {
   const handleEdit = (gateway) => {
     setEditingGateway(gateway);
     setFormData({
-      wallet_name: gateway.wallet_name,
-      deposit_wallet_address: gateway.deposit_wallet_address,
-      api_key: gateway.api_key,
-      secret_key: gateway.secret_key,
-      gateway_type: gateway.gateway_type,
-      is_active: gateway.is_active,
-      description: gateway.description || ""
+      wallet_name: gateway.wallet_name || "",
+      deposit_wallet_address: gateway.deposit_wallet_address || "",
+      api_key: gateway.api_key || "",
+      secret_key: gateway.secret_key || "",
+      project_id: gateway.project_id || "",
+      gateway_url: gateway.gateway_url || "",
+      webhook_secret: gateway.webhook_secret || "",
+      gateway_type: gateway.gateway_type || "Cryptocurrency",
+      is_active: gateway.is_active !== undefined ? gateway.is_active : true,
+      description: gateway.description || "",
+      display_order: gateway.display_order || 0
     });
     setShowForm(true);
   };
@@ -128,7 +139,7 @@ export default function PaymentGatewaysAutomatic() {
     
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${BASE}/admin/payment-gateways/${id}`, {
+      const response = await fetch(`${BASE}/api/admin/payment-gateways/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -213,7 +224,11 @@ export default function PaymentGatewaysAutomatic() {
                     deposit_wallet_address: "",
                     api_key: "",
                     secret_key: "",
-                    gateway_type: "crypto",
+                    gateway_type: "Cryptocurrency",
+                    project_id: "",
+                    gateway_url: "",
+                    webhook_secret: "",
+                    display_order: 0,
                     is_active: true,
                     description: ""
                   });
@@ -250,25 +265,23 @@ export default function PaymentGatewaysAutomatic() {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
                   >
-                    <option value="crypto">Cryptocurrency</option>
-                    <option value="fiat">Fiat Currency</option>
-                    <option value="bank">Bank Transfer</option>
-                    <option value="card">Card Payment</option>
+                    <option value="Cryptocurrency">Cryptocurrency</option>
+                    <option value="Fiat">Fiat Currency</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Deposit Wallet Address *
+                  Deposit Wallet Address
                 </label>
                 <input
                   type="text"
                   value={formData.deposit_wallet_address}
                   onChange={(e) => setFormData({...formData, deposit_wallet_address: e.target.value})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="e.g., 0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6"
-                  required
+                  placeholder="e.g., 0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6 (Optional)"
                 />
               </div>
 
@@ -339,7 +352,11 @@ export default function PaymentGatewaysAutomatic() {
                       deposit_wallet_address: "",
                       api_key: "",
                       secret_key: "",
-                      gateway_type: "crypto",
+                      gateway_type: "Cryptocurrency",
+                      project_id: "",
+                      gateway_url: "",
+                      webhook_secret: "",
+                      display_order: 0,
                       is_active: true,
                       description: ""
                     });
@@ -388,13 +405,19 @@ export default function PaymentGatewaysAutomatic() {
                     <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Gateway
                     </th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Wallet Address
                     </th>
                     <th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      API Key
+                      Project ID
+                    </th>
+                    <th className="hidden xl:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Gateway URL
                     </th>
                     <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      API Key
+                    </th>
+                    <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Type
                     </th>
                     <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -423,19 +446,43 @@ export default function PaymentGatewaysAutomatic() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 sm:px-6 py-4">
+                        <td className="hidden lg:table-cell px-3 sm:px-6 py-4">
                           <div className="text-xs sm:text-sm text-gray-900 font-mono">
-                            {gateway.deposit_wallet_address.length > 20 
-                              ? `${gateway.deposit_wallet_address.substring(0, 20)}...`
-                              : gateway.deposit_wallet_address
+                            {gateway.deposit_wallet_address 
+                              ? (gateway.deposit_wallet_address.length > 20 
+                                  ? `${gateway.deposit_wallet_address.substring(0, 20)}...`
+                                  : gateway.deposit_wallet_address)
+                              : <span className="text-gray-400 italic">Not set</span>
                             }
                           </div>
                         </td>
                         <td className="hidden sm:table-cell px-3 sm:px-6 py-4">
+                          <div className="text-xs sm:text-sm text-gray-900 font-mono">
+                            {gateway.project_id 
+                              ? (gateway.project_id.length > 15 
+                                  ? `${gateway.project_id.substring(0, 15)}...`
+                                  : gateway.project_id)
+                              : <span className="text-gray-400 italic">Not set</span>
+                            }
+                          </div>
+                        </td>
+                        <td className="hidden xl:table-cell px-3 sm:px-6 py-4">
+                          <div className="text-xs sm:text-sm text-gray-900 font-mono">
+                            {gateway.gateway_url 
+                              ? (gateway.gateway_url.length > 25 
+                                  ? `${gateway.gateway_url.substring(0, 25)}...`
+                                  : gateway.gateway_url)
+                              : <span className="text-gray-400 italic">Not set</span>
+                            }
+                          </div>
+                        </td>
+                        <td className="hidden md:table-cell px-3 sm:px-6 py-4">
                           <div className="flex items-center gap-2">
                             <span className="text-xs sm:text-sm text-gray-900 font-mono">
                               {showApiKey[gateway.id] 
-                                ? gateway.api_key 
+                                ? (gateway.api_key?.length > 20 
+                                    ? `${gateway.api_key.substring(0, 20)}...`
+                                    : gateway.api_key)
                                 : '••••••••••••••••'
                               }
                             </span>
@@ -447,7 +494,7 @@ export default function PaymentGatewaysAutomatic() {
                             </button>
                           </div>
                         </td>
-                        <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap">
+                        <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                             {gateway.gateway_type}
                           </span>
