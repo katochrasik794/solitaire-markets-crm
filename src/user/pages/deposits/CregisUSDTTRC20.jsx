@@ -27,6 +27,8 @@ function CregisUSDTTRC20() {
   const [accountBalances, setAccountBalances] = useState({}); // { accountNumber: { balance, equity, margin, credit, leverage } }
   const [syncingBalance, setSyncingBalance] = useState(null); // accountNumber being synced
   const [logoUrl, setLogoUrl] = useState('/tether.svg'); // Default logo
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
 
   useEffect(() => {
     fetchAccounts();
@@ -67,6 +69,34 @@ function CregisUSDTTRC20() {
     }
   }, [formData.deposit_to, formData.mt5_account_id]);
 
+  // Cancel deposit request
+  const handleCancelDeposit = async (reason = 'user') => {
+    if (!depositId) return;
+
+    try {
+      const token = authService.getToken();
+      const response = await fetch(`${API_BASE_URL}/deposits/${depositId}/cancel`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          console.log(`Deposit #${depositId} cancelled: ${reason}`);
+          if (reason === 'expired') {
+            setPaymentStatus('expired');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error cancelling deposit:', error);
+    }
+  };
+
   useEffect(() => {
     if (step === 3 && depositId && paymentData) {
       // Start countdown timer
@@ -74,6 +104,8 @@ function CregisUSDTTRC20() {
         setTimeLeft((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
+            // Timer expired - cancel the deposit
+            handleCancelDeposit('expired');
             return 0;
           }
           return prev - 1;
@@ -83,12 +115,51 @@ function CregisUSDTTRC20() {
       // Start polling for payment status
       startStatusPolling();
 
+      // Handle browser close/refresh warning
+      const handleBeforeUnload = (e) => {
+        if (paymentStatus === 'pending' || paymentStatus === 'new') {
+          e.preventDefault();
+          e.returnValue = 'Closing this window will cancel the transaction. Are you sure?';
+          return e.returnValue;
+        }
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
       return () => {
         clearInterval(timer);
         setPolling(false);
+        window.removeEventListener('beforeunload', handleBeforeUnload);
       };
     }
-  }, [step, depositId, paymentData]);
+  }, [step, depositId, paymentData, paymentStatus]);
+
+  // Handle navigation away during payment
+  const handleNavigation = (targetPath) => {
+    if (step === 3 && depositId && (paymentStatus === 'pending' || paymentStatus === 'new')) {
+      setPendingNavigation(targetPath);
+      setShowCancelModal(true);
+      return false;
+    }
+    return true;
+  };
+
+  // Confirm cancel and navigate
+  const handleConfirmCancel = async () => {
+    await handleCancelDeposit('user');
+    setShowCancelModal(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+    } else {
+      navigate('/user/deposits');
+    }
+  };
+
+  // Cancel the cancel action
+  const handleCancelCancel = () => {
+    setShowCancelModal(false);
+    setPendingNavigation(null);
+  };
 
   // Fetch balance for a specific account from MT5 API
   const fetchAccountBalance = async (accountNumber) => {
@@ -291,7 +362,13 @@ function CregisUSDTTRC20() {
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate('/user/deposits')}
+          onClick={() => {
+            if (step === 3 && depositId && (paymentStatus === 'pending' || paymentStatus === 'new')) {
+              handleNavigation('/user/deposits');
+            } else {
+              navigate('/user/deposits');
+            }
+          }}
           className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -663,6 +740,53 @@ function CregisUSDTTRC20() {
           )}
         </div>
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4">Cancel Transaction?</h3>
+            <p className="text-gray-600 mb-6">
+              Closing this window will cancel the transaction. Are you sure you want to proceed?
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={handleCancelCancel}
+                className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+              >
+                Continue Payment
+              </button>
+              <button
+                onClick={handleConfirmCancel}
+                className="flex-1 bg-red-600 text-white py-3 rounded-xl font-medium hover:bg-red-700 transition-colors"
+              >
+                Cancel Transaction
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expired Payment Message */}
+      {paymentStatus === 'expired' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4 text-red-600">Payment Expired</h3>
+            <p className="text-gray-600 mb-6">
+              The payment time has expired. The transaction has been cancelled.
+            </p>
+            <button
+              onClick={() => {
+                setPaymentStatus('pending');
+                navigate('/user/deposits');
+              }}
+              className="w-full bg-purple-600 text-white py-3 rounded-xl font-medium hover:bg-purple-700 transition-colors"
+            >
+              Back to Deposits
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
