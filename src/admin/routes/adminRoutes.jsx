@@ -107,19 +107,6 @@ export default [
   { path: "ib/map",                 element: <EmptyState title="Map IBs" subtitle="Attach clients to IBs" /> },
   { path: "ib/commission-logs",     element: <EmptyState title="Commission Logs" subtitle="Earnings history" /> },
 
-  /* -------------------------- PAMM MANAGEMENT ------------------------- */
-  { path: "pamm",               element: <EmptyState title="PAMM Management" subtitle="Overview" /> },
-  { path: "pamm/settings",      element: <EmptyState title="PAMM Settings" subtitle="Pools, fees, rules" /> },
-  { path: "pamm/requests",      element: <EmptyState title="PAMM Requests" subtitle="Pending manager requests" /> },
-  { path: "pamm/deposits",      element: <EmptyState title="PAMM Deposits" subtitle="Investor deposits" /> },
-  { path: "pamm/investors",     element: <EmptyState title="PAMM Investors" subtitle="Investor list & allocations" /> },
-  { path: "pamm/performance",   element: <EmptyState title="PAMM Performance" subtitle="Pool performance & metrics" /> },
-
-  /* ------------------------- COPIER MANAGEMENT ------------------------ */
-  { path: "copier",             element: <EmptyState title="Copier Management" subtitle="Overview" /> },
-  { path: "copier/masters",     element: <EmptyState title="Copy Masters" subtitle="Catalog & stats" /> },
-  { path: "copier/requests",    element: <EmptyState title="Copy Requests" subtitle="Onboarding & limits" /> },
-
   /* --------------------------- MT5 MANAGEMENT ------------------------- */
   { path: "mt5",            element: <EmptyState title="MT5 Management" subtitle="Manager tools" /> },
   { path: "mt5/users",      element: <MT5Users /> },

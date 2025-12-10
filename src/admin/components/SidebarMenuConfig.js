@@ -297,37 +297,6 @@ export const ADMIN_MENU = [
     ],
   },
   {
-    label: "PAMM MANAGEMENT",
-    items: [
-      {
-        icon: Layers,
-        label: "PAMM Management",
-        to: "pamm",
-        children: [
-          { label: "PAMM Settings", to: "pamm/settings" },
-          { label: "PAMM Requests", to: "pamm/requests" },
-          { label: "PAMM Deposits", to: "pamm/deposits" },
-          { label: "PAMM Investors", to: "pamm/investors" },
-          { label: "PAMM Performance", to: "pamm/performance" },
-        ],
-      },
-    ],
-  },
-  {
-    label: "COPIER MANAGEMENT",
-    items: [
-      {
-        icon: Copy,
-        label: "Copier Management",
-        to: "copier",
-        children: [
-          { label: "Copy Masters", to: "copier/masters" },
-          { label: "Copy Requests", to: "copier/requests" },
-        ],
-      },
-    ],
-  },
-  {
     label: "COUNTRY PARTNER ADMIN",
     items: [
       { icon: Users, label: "Assign Country Partner", to: "assign-country-partner" },
