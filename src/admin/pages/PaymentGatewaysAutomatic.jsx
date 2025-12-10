@@ -285,6 +285,37 @@ export default function PaymentGatewaysAutomatic() {
                 />
               </div>
 
+              {/* Project ID and Gateway URL - matching table columns */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Project ID *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.project_id}
+                    onChange={(e) => setFormData({...formData, project_id: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="e.g., 1445920661479424"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Gateway URL *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.gateway_url}
+                    onChange={(e) => setFormData({...formData, gateway_url: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="e.g., https://t-fumzndoo.cregis.io"
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -312,6 +343,37 @@ export default function PaymentGatewaysAutomatic() {
                     placeholder="Enter secret key"
                     required
                   />
+                </div>
+              </div>
+
+              {/* Webhook Secret and Display Order */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Webhook Secret
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.webhook_secret}
+                    onChange={(e) => setFormData({...formData, webhook_secret: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Enter webhook secret (optional)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Display Order
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.display_order}
+                    onChange={(e) => setFormData({...formData, display_order: parseInt(e.target.value) || 0})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="0"
+                    min="0"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
                 </div>
               </div>
 

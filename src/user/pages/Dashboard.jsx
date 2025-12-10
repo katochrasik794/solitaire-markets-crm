@@ -1359,13 +1359,8 @@ function Dashboard() {
 
             {/* Buttons (stacked like screenshot) */}
             <div className="flex flex-col gap-3">
-              <button
-                onClick={() => {
-                  setWalletModalAction('deposit');
-                  setWalletModalStep(1);
-                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
-                  setWalletModalOpen(true);
-                }}
+              <Link
+                to="/user/deposits"
                 className="
         flex items-center gap-2 
         w-full px-4 py-3 
@@ -1376,15 +1371,10 @@ function Dashboard() {
               >
                 <RiLoginBoxLine className="text-teal-600 w-5 h-5" />
                 <span className="text-gray-900">Deposit</span>
-              </button>
+              </Link>
 
-              <button
-                onClick={() => {
-                  setWalletModalAction('transfer');
-                  setWalletModalStep(1);
-                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
-                  setWalletModalOpen(true);
-                }}
+              <Link
+                to="/user/transfers"
                 className="
         flex items-center gap-2 
         w-full px-4 py-3 
@@ -1395,15 +1385,10 @@ function Dashboard() {
               >
                 <RiArrowLeftRightLine className="text-gray-600 w-5 h-5" />
                 <span className="text-gray-700">Transfer</span>
-              </button>
+              </Link>
 
-              <button
-                onClick={() => {
-                  setWalletModalAction('withdraw');
-                  setWalletModalStep(1);
-                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
-                  setWalletModalOpen(true);
-                }}
+              <Link
+                to="/user/withdrawals"
                 className="
         flex items-center gap-2 
         w-full px-4 py-3 
@@ -1414,7 +1399,7 @@ function Dashboard() {
               >
                 <RiLogoutBoxLine className="text-gray-600 w-5 h-5" />
                 <span className="text-gray-700">Withdraw</span>
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -1445,13 +1430,8 @@ function Dashboard() {
             {/* Right: Buttons (matches screenshot EXACTLY) */}
             <div className="flex items-center gap-3 min-w-max">
               {/* Deposit (highlighted) */}
-              <button
-                onClick={() => {
-                  setWalletModalAction('deposit');
-                  setWalletModalStep(1);
-                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
-                  setWalletModalOpen(true);
-                }}
+              <Link
+                to="/user/deposits"
                 className="
         flex items-center gap-2 
         border rounded-md px-4 py-2 
@@ -1461,16 +1441,11 @@ function Dashboard() {
               >
                 <RiLoginBoxLine className="text-teal-600" />
                 <span className="text-gray-900">Deposit</span>
-              </button>
+              </Link>
 
               {/* Transfer */}
-              <button
-                onClick={() => {
-                  setWalletModalAction('transfer');
-                  setWalletModalStep(1);
-                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
-                  setWalletModalOpen(true);
-                }}
+              <Link
+                to="/user/transfers"
                 className="
         flex items-center gap-2 
         border rounded-md px-4 py-2 
@@ -1479,16 +1454,11 @@ function Dashboard() {
               >
                 <RiArrowLeftRightLine className="text-gray-600" />
                 <span className="text-gray-600">Transfer</span>
-              </button>
+              </Link>
 
               {/* Withdraw */}
-              <button
-                onClick={() => {
-                  setWalletModalAction('withdraw');
-                  setWalletModalStep(1);
-                  setWalletFormData({ amount: '', mt5Account: '', direction: 'to-mt5' });
-                  setWalletModalOpen(true);
-                }}
+              <Link
+                to="/user/withdrawals"
                 className="
         flex items-center gap-2 
         border rounded-md px-4 py-2 
@@ -1497,7 +1467,7 @@ function Dashboard() {
               >
                 <RiLogoutBoxLine className="text-gray-600" />
                 <span className="text-gray-600">Withdraw</span>
-              </button>
+              </Link>
             </div>
           </div>
         </div>

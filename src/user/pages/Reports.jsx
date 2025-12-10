@@ -342,7 +342,8 @@ function Reports() {
                     { value: 'completed', label: 'Completed' },
                     { value: 'approved', label: 'Approved' },
                     { value: 'pending', label: 'Pending' },
-                    { value: 'rejected', label: 'Rejected' }
+                    { value: 'rejected', label: 'Rejected' },
+                    { value: 'cancelled', label: 'Cancelled' }
                   ]},
                   { key: 'dateFrom', label: 'From Date', type: 'date', range: 'from' },
                   { key: 'dateTo', label: 'To Date', type: 'date', range: 'to' }
@@ -405,6 +406,8 @@ function Reports() {
                           ? 'bg-green-100 text-green-800'
                           : value === 'pending'
                           ? 'bg-yellow-100 text-yellow-800'
+                          : value === 'cancelled'
+                          ? 'bg-gray-100 text-gray-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
                         {value || 'Completed'}
@@ -449,7 +452,8 @@ function Reports() {
                     { value: 'approved', label: 'Approved' },
                     { value: 'pending', label: 'Pending' },
                     { value: 'rejected', label: 'Rejected' },
-                    { value: 'completed', label: 'Completed' }
+                    { value: 'completed', label: 'Completed' },
+                    { value: 'cancelled', label: 'Cancelled' }
                   ]},
                   { key: 'dateFrom', label: 'From Date', type: 'date', range: 'from' },
                   { key: 'dateTo', label: 'To Date', type: 'date', range: 'to' }
