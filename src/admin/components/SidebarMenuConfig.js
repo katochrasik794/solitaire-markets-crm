@@ -166,7 +166,6 @@ export const ADMIN_MENU = [
       { icon: ShieldCheck, label: "KYC Verifications", to: "kyc" },
       { icon: Send, label: "Send Emails", to: "send-emails" },
       { icon: FileText, label: "Email Templates", to: "email-templates" },
-      { icon: Boxes, label: "Client Groups", to: "add-group" },
       { icon: ClipboardList, label: "Activity Logs", to: "activity-logs" },
     ],
   },
@@ -236,7 +235,6 @@ export const ADMIN_MENU = [
         ],
       },
       { icon: CreditCard, label: "Payment Details", to: "payment-details" },
-      { icon: QrCode, label: "Wallet QR Upload", to: "wallet-qr" },
       { icon: Database, label: "Bulk Operations Log", to: "bulk-logs" },
     ],
   },
@@ -330,14 +328,6 @@ export const ADMIN_MENU = [
     ],
   },
   {
-    label: "FUNDS & INVESTMENTS",
-    items: [
-      { icon: Wallet, label: "Fund Investments", to: "fund-investments" },
-      { icon: Wallet, label: "Manage Investments", to: "manage-investments" },
-      { icon: Wallet, label: "Fund Wallets", to: "fund-wallets" },
-    ],
-  },
-  {
     label: "COUNTRY PARTNER ADMIN",
     items: [
       { icon: Users, label: "Assign Country Partner", to: "assign-country-partner" },
@@ -348,7 +338,6 @@ export const ADMIN_MENU = [
     label: "SYSTEM",
     items: [
       { icon: ServerCog, label: "MT5 Connection", to: "mt5-connection" },
-      { icon: Mail, label: "SMTP Connection", to: "smtp-connection" },
       { icon: Settings, label: "System Settings", to: "settings" },
       { icon: ShieldCheck, label: "Roles", to: "roles" },
       { icon: KeySquare, label: "Assign Roles", to: "assign-roles" },

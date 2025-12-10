@@ -38,22 +38,22 @@ function Verification() {
           return
         }
 
-        const statusResponse = await fetch(`${API_BASE_URL}/kyc/status`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-
-        if (statusResponse.ok) {
-          const statusData = await statusResponse.json()
-          if (statusData.success && statusData.data) {
-            setKycStatus(statusData.data.status)
-            
-            // If already approved, redirect to dashboard
-            if (statusData.data.status === 'approved') {
-              navigate('/user/dashboard')
-              return
+          const statusResponse = await fetch(`${API_BASE_URL}/kyc/status`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
             }
+          })
+
+          if (statusResponse.ok) {
+            const statusData = await statusResponse.json()
+            if (statusData.success && statusData.data) {
+              setKycStatus(statusData.data.status)
+              
+            // If already approved, redirect to dashboard
+              if (statusData.data.status === 'approved') {
+              navigate('/user/dashboard')
+                return
+              }
 
             // If pending, show pending message
             if (statusData.data.status === 'pending') {
@@ -83,9 +83,9 @@ function Verification() {
               }
             }
           }
-        }
-      } catch (err) {
-        console.error('Error checking KYC status:', err)
+          }
+        } catch (err) {
+          console.error('Error checking KYC status:', err)
       }
     }
 
@@ -123,13 +123,17 @@ function Verification() {
         }
       }
       throw new Error('Failed to get new access token')
-    } catch (err) {
+      } catch (err) {
       console.error('Error getting new access token:', err)
       throw err
     }
   }
 
   // Launch Sumsub WebSDK
+  /**
+   * @param accessToken - access token that you generated
+   * on the backend with levelName: id-only
+   */
   const launchWebSdk = (accessToken) => {
     if (!containerRef.current) {
       console.warn('Sumsub container not ready')
@@ -147,14 +151,14 @@ function Verification() {
         sumsubInstanceRef.current = null
       }
 
-      const snsWebSdkInstance = snsWebSdk
+      let snsWebSdkInstance = snsWebSdk
         .init(
-          accessToken,
+        accessToken,
           // token update callback, must return Promise
           () => getNewAccessToken()
         )
         .withConf({
-          // language of WebSDK texts and comments (ISO 639-1 format)
+          //language of WebSDK texts and comments (ISO 639-1 format)
           lang: 'en',
         })
         .on('onError', (error) => {
@@ -170,37 +174,37 @@ function Verification() {
           
           // Handle applicant submitted
           if (type === 'idCheck.onApplicantSubmitted') {
-            setKycStatus('pending')
-            setToast({
-              message: 'Verification submitted successfully! Your documents are under review.',
-              type: 'success'
-            })
-            // Check status after a delay
-            setTimeout(() => {
+        setKycStatus('pending')
+        setToast({
+          message: 'Verification submitted successfully! Your documents are under review.',
+          type: 'success'
+        })
+        // Check status after a delay
+        setTimeout(() => {
               checkVerificationStatus()
-            }, 2000)
+        }, 2000)
           }
 
           // Handle review completed
           if (type === 'idCheck.onReviewCompleted') {
             const reviewResult = payload.reviewResult
             if (reviewResult === 'GREEN') {
-              setKycStatus('approved')
-              setToast({
+          setKycStatus('approved')
+          setToast({
                 message: 'Verification approved! Redirecting to dashboard...',
-                type: 'success'
-              })
+            type: 'success'
+          })
               // Update database and redirect after a short delay
               setTimeout(() => {
                 updateKYCStatus('approved')
                 navigate('/user/dashboard')
               }, 2000)
             } else if (reviewResult === 'RED') {
-              setKycStatus('rejected')
-              setToast({
-                message: `Verification rejected: ${payload.reviewComment || 'Please try again.'}`,
-                type: 'error'
-              })
+          setKycStatus('rejected')
+          setToast({
+            message: `Verification rejected: ${payload.reviewComment || 'Please try again.'}`,
+            type: 'error'
+          })
               updateKYCStatus('rejected')
             }
           }
@@ -212,7 +216,8 @@ function Verification() {
         })
         .build()
 
-      // Launch the WebSDK by providing the container element
+      // you are ready to go:
+      // just launch the WebSDK by providing the container element for it
       snsWebSdkInstance.launch('#sumsub-websdk-container')
       sumsubInstanceRef.current = snsWebSdkInstance
     } catch (err) {
@@ -232,9 +237,9 @@ function Verification() {
       if (!token) return
 
       const response = await fetch(`${API_BASE_URL}/kyc/sumsub/status?refresh=true`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
       })
 
       if (response.ok) {
@@ -299,7 +304,7 @@ function Verification() {
         }
       })
 
-      const data = await response.json()
+        const data = await response.json()
 
       if (response.ok && data.success && data.data) {
         setSumsubAccessToken(data.data.accessToken)
@@ -352,8 +357,8 @@ function Verification() {
       }
 
       const response = await fetch(`${API_BASE_URL}/kyc/profile`, {
-        method: 'POST',
-        headers: {
+          method: 'POST',
+          headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
@@ -423,9 +428,9 @@ function Verification() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {loading && <AuthLoader message="Initializing verification..." />}
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        {loading && <AuthLoader message="Initializing verification..." />}
       {submitting && <AuthLoader message="Submitting profile..." />}
       {toast && (
         <Toast

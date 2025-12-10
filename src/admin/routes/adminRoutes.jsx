@@ -84,7 +84,6 @@ export default [
   { path: "users/kyc-pending",         element: <UsersKycPending /> },
   { path: "users/with-balance",        element: <UsersWithBalance /> },
   { path: "kyc",                       element: <KycList /> },
-  { path: "add-group",                 element: <EmptyState title="Client Groups" subtitle="Manage client groups" /> },
   { path: "activity-logs",             element: <ActivityLogs /> },
 
   /* --------------------------- BOOK MGMT ------------------------------ */
@@ -159,17 +158,10 @@ export default [
   { path: "support/closed",  element: <SupportTicketsList status="closed" /> },
   { path: "support/tickets/:id", element: <SupportTicketView /> },
 
-  { path: "wallet-qr",          element: <EmptyState title="Wallet QR Upload" subtitle="Upload deposit QR codes" /> },
   { path: "bulk-logs",          element: <BulkLogs /> },
-
-   /* ----------------------- FUNDS & INVESTMENTS ------------------------ */
-  { path: "fund-investments",    element: <EmptyState title="Fund Investments" subtitle="Incoming funds overview" /> },
-  { path: "manage-investments",  element: <EmptyState title="Manage Investments" subtitle="Allocate / redeem" /> },
-  { path: "fund-wallets",        element: <EmptyState title="Fund Wallets" subtitle="Corporate wallets" /> },
 
   /* ------------------------------ SYSTEM ------------------------------ */
   { path: "mt5-connection",      element: <EmptyState title="MT5 Connection" subtitle="Manager API credentials" /> },
-  { path: "smtp-connection",     element: <EmptyState title="SMTP Connection" subtitle="Email server settings" /> },
   { path: "settings",            element: <EmptyState title="System Settings" subtitle="Branding, storage, integrations" /> },
   { path: "roles",               element: <EmptyState title="Roles" subtitle="Create & manage roles" /> },
   { path: "prize-lots",          element: <EmptyState title="Manage Prize Lots" subtitle="Promo lots" /> },

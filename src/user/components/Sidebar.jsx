@@ -4,15 +4,11 @@ import { useState, useEffect } from 'react'
 function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
   const [openSubmenus, setOpenSubmenus] = useState({
-    withdrawals: false,
     analysis: false
   })
 
   // Auto-open submenus when on a submenu page
   useEffect(() => {
-    if (location.pathname.startsWith('/user/withdrawals/')) {
-      setOpenSubmenus(prev => ({ ...prev, withdrawals: true }))
-    }
     if (location.pathname.startsWith('/user/analysis/')) {
       setOpenSubmenus(prev => ({ ...prev, analysis: true }))
     }
@@ -94,78 +90,21 @@ function Sidebar({ isOpen, onClose }) {
           </Link>
 
           {/* Withdrawals */}
-          <div>
-            <button
-              onClick={() => toggleSubmenu('withdrawals')}
-              className={`w-full flex items-center justify-between px-4 py-3 transition-colors relative ${
-                isSubmenuActive(['/withdrawals', '/withdrawals/debit-card', '/withdrawals/skrill', '/withdrawals/neteller', '/withdrawals/crypto'])
-                  ? 'text-[#e6c200]'
-                  : 'text-gray-700 hover:bg-yellow-50 hover:text-[#ffd700]'
-              }`}
-              style={isSubmenuActive(['/withdrawals', '/withdrawals/debit-card', '/withdrawals/skrill', '/withdrawals/neteller', '/withdrawals/crypto']) ? { borderLeft: '4px solid #e6c200' } : {}}
-            >
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={isSubmenuActive(['/withdrawals', '/withdrawals/debit-card', '/withdrawals/skrill', '/withdrawals/neteller', '/withdrawals/crypto']) ? { color: '#e6c200' } : { color: '#374151' }}>
-                  <rect x="4" y="6" width="16" height="12" rx="2" strokeWidth="2"/>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18V12m0 0l-3 3m3-3l3 3" />
-                </svg>
-                <span style={{ fontSize: '14px', fontWeight: '400', fontFamily: 'Roboto, sans-serif', color: isSubmenuActive(['/withdrawals', '/withdrawals/debit-card', '/withdrawals/skrill', '/withdrawals/neteller', '/withdrawals/crypto']) ? '#e6c200' : '#374151' }}>Withdrawals</span>
-              </div>
-              <svg
-                className={`w-4 h-4 flex-shrink-0 transition-transform ${openSubmenus.withdrawals ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                style={{ color: isSubmenuActive(['/withdrawals', '/withdrawals/debit-card', '/withdrawals/skrill', '/withdrawals/neteller', '/withdrawals/crypto']) ? '#e6c200' : '#374151' }}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {openSubmenus.withdrawals && (
-              <div className="ml-8 mt-1 space-y-1">
-                <Link
-                  to="/user/withdrawals/debit-card"
-                  className={`block px-4 py-2 rounded-lg transition-colors ${
-                    isActive('/withdrawals/debit-card')
-                      ? 'bg-yellow-50 text-[#e6c200]'
-                      : 'text-gray-600 hover:bg-yellow-50 hover:text-[#ffd700]'
-                  }`}
-                >
-                  <span style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>Debit / Credit Card</span>
-                </Link>
-                <Link
-                  to="/user/withdrawals/skrill"
-                  className={`block px-4 py-2 rounded-lg transition-colors ${
-                    isActive('/withdrawals/skrill')
-                      ? 'bg-yellow-50 text-[#e6c200]'
-                      : 'text-gray-600 hover:bg-yellow-50 hover:text-[#ffd700]'
-                  }`}
-                >
-                  <span style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>Skrill</span>
-                </Link>
-                <Link
-                  to="/user/withdrawals/neteller"
-                  className={`block px-4 py-2 rounded-lg transition-colors ${
-                    isActive('/withdrawals/neteller')
-                      ? 'bg-yellow-50 text-[#e6c200]'
-                      : 'text-gray-600 hover:bg-yellow-50 hover:text-[#ffd700]'
-                  }`}
-                >
-                  <span style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>Neteller</span>
-                </Link>
-                <Link
-                  to="/user/withdrawals/crypto"
-                  className={`block px-4 py-2 rounded-lg transition-colors ${
-                    isActive('/withdrawals/crypto')
-                      ? 'bg-yellow-50 text-[#e6c200]'
-                      : 'text-gray-600 hover:bg-yellow-50 hover:text-[#ffd700]'
-                  }`}
-                >
-                  <span style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>Crypto</span>
-                </Link>
-              </div>
-            )}
-          </div>
+          <Link
+            to="/user/withdrawals"
+            className={`flex items-center px-4 py-3 transition-colors relative ${
+              isActive('/withdrawals') || isActive('/withdrawals/crypto')
+                ? 'text-[#e6c200]'
+                : 'text-gray-700 hover:bg-yellow-50 hover:text-[#ffd700]'
+            }`}
+            style={isActive('/withdrawals') || isActive('/withdrawals/crypto') ? { borderLeft: '4px solid #e6c200' } : {}}
+          >
+            <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={isActive('/withdrawals') || isActive('/withdrawals/crypto') ? { color: '#e6c200' } : { color: '#374151' }}>
+              <rect x="4" y="6" width="16" height="12" rx="2" strokeWidth="2"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18V12m0 0l-3 3m3-3l3 3" />
+            </svg>
+            <span style={{ fontSize: '14px', fontWeight: '400', fontFamily: 'Roboto, sans-serif', color: isActive('/withdrawals') || isActive('/withdrawals/crypto') ? '#e6c200' : '#374151' }}>Withdrawals</span>
+          </Link>
 
           {/* Transfers */}
           <Link

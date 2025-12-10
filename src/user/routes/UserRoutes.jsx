@@ -13,9 +13,6 @@ import ReferAFriend from '../pages/ReferAFriend'
 import Legal from '../pages/Legal'
 
 // Withdrawal Pages
-import DebitCard from '../pages/withdrawals/DebitCard'
-import Skrill from '../pages/withdrawals/Skrill'
-import Neteller from '../pages/withdrawals/Neteller'
 import Crypto from '../pages/withdrawals/Crypto'
 
 // Deposit Pages
@@ -56,10 +53,7 @@ const userRoutes = [
   { path: 'deposits/ethereum', element: <Ethereum /> },
   { path: 'deposits/bank-transfer', element: <BankTransfer /> },
   { path: 'deposits/other-crypto', element: <OtherCrypto /> },
-  { path: 'withdrawals', element: <Navigate to="/user/withdrawals/debit-card" replace /> },
-  { path: 'withdrawals/debit-card', element: <DebitCard /> },
-  { path: 'withdrawals/skrill', element: <Skrill /> },
-  { path: 'withdrawals/neteller', element: <Neteller /> },
+  { path: 'withdrawals', element: <Navigate to="/user/withdrawals/crypto" replace /> },
   { path: 'withdrawals/crypto', element: <Crypto /> },
   { path: 'transfers', element: <Transfers /> },
   { path: 'reports', element: <Reports /> },
