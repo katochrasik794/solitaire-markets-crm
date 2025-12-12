@@ -11,6 +11,7 @@ import Reports from '../pages/Reports'
 import Platforms from '../pages/Platforms'
 import ReferAFriend from '../pages/ReferAFriend'
 import Legal from '../pages/Legal'
+import Support from '../pages/Support'
 
 // Withdrawal Pages
 import Crypto from '../pages/withdrawals/Crypto'
@@ -64,7 +65,8 @@ const userRoutes = [
   { path: 'analysis/research-terminal', element: <ResearchTerminal /> },
   { path: 'platforms', element: <Platforms /> },
   { path: 'refer-a-friend', element: <ReferAFriend /> },
-  { path: 'legal', element: <Legal /> }
+  { path: 'legal', element: <Legal /> },
+  { path: 'support', element: <Support /> }
 ]
 
 // Function to render routes

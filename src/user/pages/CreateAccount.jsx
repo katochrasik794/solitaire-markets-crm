@@ -15,7 +15,7 @@ function CreateAccount() {
   const [showMasterPassword, setShowMasterPassword] = useState(false)
   const [mt5Groups, setMt5Groups] = useState([])
   const [loadingGroups, setLoadingGroups] = useState(true)
-  
+
   const [formData, setFormData] = useState({
     platform: 'MT5',
     mt5GroupId: '',
@@ -29,6 +29,8 @@ function CreateAccount() {
 
   const [createdAccount, setCreatedAccount] = useState(null)
   const [selectedGroup, setSelectedGroup] = useState(null)
+
+  const [mode, setMode] = useState('live') // 'live' | 'demo'
 
   // Fetch active MT5 groups on component mount
   useEffect(() => {
@@ -50,11 +52,6 @@ function CreateAccount() {
 
         if (data.success && data.data.length > 0) {
           setMt5Groups(data.data)
-          // Auto-select first group if available
-          if (data.data[0]) {
-            setFormData(prev => ({ ...prev, mt5GroupId: data.data[0].id.toString() }))
-            setSelectedGroup(data.data[0])
-          }
         } else {
           setToast({
             message: 'No active MT5 groups available. Please contact support.',
@@ -75,13 +72,37 @@ function CreateAccount() {
     fetchMt5Groups()
   }, [navigate])
 
+  // Filter groups based on mode
+  const filteredGroups = mt5Groups.filter(g => {
+    // TEMPORARY: Show all groups for now as requested
+    return true
+    // const name = (g.dedicated_name || g.group_name || '').toLowerCase()
+    // return mode === 'demo' ? name.includes('demo') : !name.includes('demo')
+  })
+
+  // Auto-select first group when mode changes or groups load
+  useEffect(() => {
+    if (filteredGroups.length > 0) {
+      // Check if current selection is still valid in this mode
+      const currentValid = filteredGroups.find(g => g.id.toString() === formData.mt5GroupId)
+      if (!currentValid) {
+        setFormData(prev => ({ ...prev, mt5GroupId: filteredGroups[0].id.toString() }))
+        setSelectedGroup(filteredGroups[0])
+      }
+    } else {
+      // No groups for this mode
+      setFormData(prev => ({ ...prev, mt5GroupId: '' }))
+      setSelectedGroup(null)
+    }
+  }, [mode, mt5Groups]) // Intentionally not including filteredGroups to avoid loop, dependent on mode/mt5Groups
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
     let newFormData = {
       ...formData,
       [name]: type === 'checkbox' ? checked : value
     }
-    
+
     // If MT5 group changed, update selected group
     if (name === 'mt5GroupId') {
       const group = mt5Groups.find(g => g.id.toString() === value)
@@ -89,7 +110,7 @@ function CreateAccount() {
       // Also update formData with the group ID as string
       newFormData.mt5GroupId = value
     }
-    
+
     // If swap free is checked, limit leverage to 500
     if (name === 'isSwapFree' && checked) {
       const currentLeverage = parseInt(newFormData.leverage)
@@ -97,7 +118,7 @@ function CreateAccount() {
         newFormData.leverage = 500
       }
     }
-    
+
     // If leverage is changed and swap free is enabled, limit to 500
     if (name === 'leverage' && newFormData.isSwapFree) {
       const leverageValue = parseInt(value)
@@ -105,7 +126,7 @@ function CreateAccount() {
         newFormData.leverage = 500
       }
     }
-    
+
     setFormData(newFormData)
   }
 
@@ -136,7 +157,8 @@ function CreateAccount() {
             isCopyAccount: formData.isCopyAccount,
             reasonForAccount: formData.reasonForAccount,
             masterPassword: formData.masterPassword,
-            portalPassword: formData.portalPassword
+            portalPassword: formData.portalPassword,
+            isDemo: mode === 'demo'
           })
         }),
         new Promise(resolve => setTimeout(resolve, 3000))
@@ -200,8 +222,32 @@ function CreateAccount() {
         {currentStep === 1 && (
           <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
-              Create a new live account
+              Create a new {mode === 'demo' ? 'demo' : 'live'} account
             </h1>
+
+            {/* Account Type Tabs */}
+            <div className="flex p-1 bg-gray-100 rounded-lg mb-6 w-fit">
+              <button
+                type="button"
+                onClick={() => setMode('live')}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${mode === 'live'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-900'
+                  }`}
+              >
+                Live Account
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('demo')}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${mode === 'demo'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-900'
+                  }`}
+              >
+                Demo Account
+              </button>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Platform Selection */}
@@ -219,15 +265,14 @@ function CreateAccount() {
                       onChange={handleChange}
                       className="sr-only"
                     />
-                    <div className={`border-2 rounded-lg p-1 transition-all ${
-                      formData.platform === 'MT5'
-                        ? 'border-[#e6c200] bg-[#e6c200] bg-opacity-5'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}>
+                    <div className={`border-2 rounded-lg p-1 transition-all ${formData.platform === 'MT5'
+                      ? 'border-[#e6c200] bg-[#e6c200] bg-opacity-5'
+                      : 'border-gray-200 hover:border-gray-300'
+                      }`}>
                       <div className="flex items-center gap-4">
-                        <img 
-                          src="/mt_5.png" 
-                          alt="MetaTrader 5" 
+                        <img
+                          src="/mt_5.png"
+                          alt="MetaTrader 5"
                           className="w-40 h-40 object-contain flex-shrink-0"
                         />
                         <span className="text-sm font-medium text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
@@ -254,7 +299,12 @@ function CreateAccount() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {mt5Groups.map((group) => (
+                    {filteredGroups.length === 0 && (
+                      <div className="col-span-full text-center py-4 text-gray-500">
+                        No {mode} groups available currently.
+                      </div>
+                    )}
+                    {filteredGroups.map((group) => (
                       <label key={group.id} className="cursor-pointer">
                         <input
                           type="radio"
@@ -264,15 +314,13 @@ function CreateAccount() {
                           onChange={handleChange}
                           className="sr-only"
                         />
-                        <div className={`border-2 rounded-lg p-4 transition-all ${
-                          formData.mt5GroupId === group.id.toString()
-                            ? 'border-[#e6c200] bg-[#e6c200] bg-opacity-5'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}>
+                        <div className={`border-2 rounded-lg p-4 transition-all ${formData.mt5GroupId === group.id.toString()
+                          ? 'border-[#e6c200] bg-[#e6c200] bg-opacity-5'
+                          : 'border-gray-200 hover:border-gray-300'
+                          }`}>
                           <div className="flex items-center gap-3 mb-3">
-                            <div className={`w-4 h-4 rounded-full ${
-                              formData.mt5GroupId === group.id.toString() ? 'bg-[#e6c200]' : 'bg-gray-300'
-                            }`}></div>
+                            <div className={`w-4 h-4 rounded-full ${formData.mt5GroupId === group.id.toString() ? 'bg-[#e6c200]' : 'bg-gray-300'
+                              }`}></div>
                             <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
                               <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
