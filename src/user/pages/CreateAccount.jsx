@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import authService from '../../services/auth.js'
 import AuthLoader from '../../components/AuthLoader.jsx'
 import Toast from '../../components/Toast.jsx'
@@ -30,7 +30,11 @@ function CreateAccount() {
   const [createdAccount, setCreatedAccount] = useState(null)
   const [selectedGroup, setSelectedGroup] = useState(null)
 
-  const [mode, setMode] = useState('live') // 'live' | 'demo'
+  const location = useLocation()
+  const [mode, setMode] = useState(() => {
+    const searchParams = new URLSearchParams(location.search)
+    return searchParams.get('mode') === 'demo' ? 'demo' : 'live'
+  }) // 'live' | 'demo'
 
   // Fetch active MT5 groups on component mount
   useEffect(() => {
