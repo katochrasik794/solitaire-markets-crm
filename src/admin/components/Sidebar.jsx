@@ -9,9 +9,8 @@ import { ChevronDown } from "lucide-react";
 function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark }) {
   return (
     <div className="mt-6">
-      <div className={`px-4 text-xs font-semibold tracking-wider ${
-        isDark ? 'text-slate-300/70' : 'text-gray-500'
-      }`}>
+      <div className={`px-4 text-xs font-semibold tracking-wider ${isDark ? 'text-slate-300/70' : 'text-gray-500'
+        }`}>
         {title}
       </div>
 
@@ -23,10 +22,10 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
           const withinChild = hasChildren && it.children.some((c) => pathname.startsWith(c.to));
           const isOpen = openMap?.[it.to || it.label] ?? withinChild;
 
-          const parentBase = isDark ? "text-slate-200 hover:bg-yellow-800/30 hover:text-black" : "text-gray-700 hover:bg-yellow-800/30 hover:text-black";
-          const parentActive = isDark ? "bg-yellow-800/40 text-black shadow-sm" : "bg-yellow-800/40 text-black shadow-sm";
-          const childBase = isDark ? "text-slate-300 hover:bg-yellow-800/25 hover:text-black" : "text-gray-600 hover:bg-yellow-800/25 hover:text-black";
-          const childActive = isDark ? "bg-yellow-800/35 text-black" : "bg-yellow-800/35 text-black";
+          const parentBase = isDark ? "text-slate-200 hover:bg-neutral-800/20 hover:text-white" : "text-dark-base hover:bg-brand-500/10 hover:text-dark-base";
+          const parentActive = isDark ? "bg-neutral-800/40 text-white shadow-sm" : "bg-brand-50 text-dark-base shadow-sm ring-1 ring-black/5";
+          const childBase = isDark ? "text-slate-300 hover:bg-neutral-800/15 hover:text-white" : "text-dark-base/70 hover:bg-brand-500/10 hover:text-dark-base";
+          const childActive = isDark ? "bg-neutral-800/25 text-white" : "bg-brand-500/20 text-dark-base font-medium";
           const dotCls = isDark ? "bg-white/60" : "bg-gray-600";
 
           if (hasChildren) {
@@ -35,13 +34,11 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
                 <button
                   type="button"
                   onClick={() => onToggle(it.to || it.label)}
-                  className={`w-full flex items-center justify-between rounded-xl px-3 py-2 transition-all duration-200 relative group ${
-                    isOpen || active ? parentActive : parentBase
-                  }`}
+                  className={`w-full flex items-center justify-between rounded-xl px-3 py-2 transition-all duration-200 relative group ${isOpen || active ? parentActive : parentBase
+                    }`}
                 >
-                  <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-[#ffd700] transition-all duration-200 ${
-                    isOpen || active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                  }`} />
+                  <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-brand-500 transition-all duration-200 ${isOpen || active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                    }`} />
                   <span className="flex items-center gap-2 min-w-0">
                     {it.icon ? <it.icon size={16} className="shrink-0" /> : <span className={`h-2 w-2 rounded-full ${dotCls} shrink-0`} />}
                     <span className="font-medium truncate text-sm">{it.label}</span>
@@ -53,9 +50,8 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
                 </button>
 
                 <div
-                  className={`pl-6 pr-1 transition-all duration-600 grid ${
-                    isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                  }`}
+                  className={`pl-6 pr-1 transition-all duration-600 grid ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
                 >
                   <div className="overflow-hidden my-1 space-y-1">
                     {it.children.map((child) => (
@@ -64,16 +60,14 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
                         to={child.to}
                         onClick={onNavigate}
                         className={({ isActive }) =>
-                          `flex items-center gap-2 rounded-lg px-2 py-1 text-xs transition-all duration-200 relative group ${
-                            isActive ? childActive : childBase
+                          `flex items-center gap-2 rounded-lg px-2 py-1 text-xs transition-all duration-200 relative group ${isActive ? childActive : childBase
                           }`
                         }
                       >
                         {({ isActive }) => (
                           <>
-                            <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-[#ffd700] transition-all duration-200 ${
-                              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                            }`} />
+                            <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-brand-500 transition-all duration-200 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                              }`} />
                             {child.icon ? (
                               <child.icon size={14} className="shrink-0 opacity-80" />
                             ) : (
@@ -96,16 +90,14 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
               to={it.to}
               onClick={onNavigate}
               className={({ isActive }) =>
-                `w-full flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 relative group ${
-                  active || isActive ? parentActive : parentBase
+                `w-full flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 relative group ${active || isActive ? parentActive : parentBase
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-[#ffd700] transition-all duration-200 ${
-                    active || isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                  }`} />
+                  <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-brand-500 transition-all duration-200 ${active || isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                    }`} />
                   {it.icon ? <it.icon size={16} className="shrink-0" /> : <span className={`h-2 w-2 rounded-full ${dotCls} shrink-0`} />}
                   <span className="font-medium truncate text-sm">{it.label}</span>
                 </>
@@ -135,7 +127,7 @@ export default function Sidebar({
   adminRole = "superadmin",
   pathname = "/",
   open = false,
-  onClose = () => {},
+  onClose = () => { },
   className = "",
 }) {
   const { admin } = useAuth();
@@ -154,7 +146,7 @@ export default function Sidebar({
     }
 
     const isCountryAdmin = adminInfo?.isCountryAdmin || admin?.isCountryAdmin || adminInfo?.admin_role === 'country_admin' || admin?.admin_role === 'country_admin';
-    
+
     // If country admin, use features from adminInfo or fetch from API
     if (isCountryAdmin) {
       // Helper function to normalize feature paths to match sidebar filter logic
@@ -172,14 +164,14 @@ export default function Sidebar({
           return f;
         }).filter(f => f && f.length > 0);
       };
-      
+
       // First try to use features from adminInfo (stored after login)
       if (Array.isArray(adminInfo?.features) && adminInfo.features.length > 0) {
         const normalized = normalizeFeatures(adminInfo.features);
         setCustomFeatures(normalized);
         return;
       }
-      
+
       // If not in adminInfo, fetch from API
       const abort = new AbortController();
       const token = localStorage.getItem('adminToken');
@@ -218,7 +210,7 @@ export default function Sidebar({
         const feats = match?.permissions?.features;
         if (Array.isArray(feats)) setCustomFeatures(feats);
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => abort.abort();
   }, [adminRole, admin, BASE]);
 
@@ -235,14 +227,14 @@ export default function Sidebar({
   const filterMenuByFeatures = useMemo(() => {
     return (features) => {
       if (!Array.isArray(features) || features.length === 0) return [];
-      
+
       // Helper to check if a path matches any feature
       // Features can be stored as full paths (e.g., "users/all") or just the last part (e.g., "all")
       const matchesFeature = (path, featureList) => {
         if (!path) return false;
         const pathStr = path.toString();
         const lastPart = pathStr.split('/').pop() || pathStr;
-        
+
         // Check if feature list includes the full path or just the last part
         return featureList.some(f => {
           const featStr = f.toString();
@@ -251,14 +243,14 @@ export default function Sidebar({
           return featStr === pathStr || featLastPart === lastPart || featStr === lastPart || featLastPart === pathStr;
         });
       };
-      
+
       return ADMIN_MENU.map(section => ({
         ...section,
         items: section.items.filter(item => {
           const path = item.to || '';
           // Always include logout button for all roles
           if (path === 'logout' || path.endsWith('/logout')) return true;
-          
+
           // Hide superadmin-only items from country admins
           if (isCountryAdmin) {
             // Hide "Assign Country Partner" and "Assigned Country Admins" from country admins
@@ -269,33 +261,33 @@ export default function Sidebar({
             }
             // Keep "Assign Roles" visible to country admins (they can distribute roles)
           }
-        
-        // Check if this item or any of its children match
-        if (matchesFeature(path, features)) return true;
-        // If it has children, check if any child matches
-        if (Array.isArray(item.children) && item.children.length > 0) {
-          return item.children.some(child => matchesFeature(child.to || '', features));
+
+          // Check if this item or any of its children match
+          if (matchesFeature(path, features)) return true;
+          // If it has children, check if any child matches
+          if (Array.isArray(item.children) && item.children.length > 0) {
+            return item.children.some(child => matchesFeature(child.to || '', features));
+          }
+          return false;
+        }).map(it => ({
+          ...it,
+          children: Array.isArray(it.children) ? it.children.filter(child => {
+            const childPath = child.to || '';
+            // Check if child path matches, or if parent path matches (to show parent with children)
+            return matchesFeature(childPath, features) || matchesFeature(it.to || '', features);
+          }) : it.children
+        }))
+      })).filter(section => {
+        // Always include SYSTEM section if it has logout
+        if (section.label === 'SYSTEM') {
+          const hasLogout = section.items.some(item => {
+            const path = item.to || '';
+            return path === 'logout' || path.endsWith('/logout');
+          });
+          if (hasLogout) return true;
         }
-        return false;
-      }).map(it => ({
-        ...it,
-        children: Array.isArray(it.children) ? it.children.filter(child => {
-          const childPath = child.to || '';
-          // Check if child path matches, or if parent path matches (to show parent with children)
-          return matchesFeature(childPath, features) || matchesFeature(it.to || '', features);
-        }) : it.children
-      }))
-    })).filter(section => {
-      // Always include SYSTEM section if it has logout
-      if (section.label === 'SYSTEM') {
-        const hasLogout = section.items.some(item => {
-          const path = item.to || '';
-          return path === 'logout' || path.endsWith('/logout');
-        });
-        if (hasLogout) return true;
-      }
-      return section.items.length > 0;
-    });
+        return section.items.length > 0;
+      });
     };
   }, [isCountryAdmin, admin]);
 
@@ -309,17 +301,17 @@ export default function Sidebar({
       // Ignore parse errors
     }
     const isCountryAdmin = adminInfo?.isCountryAdmin || admin?.isCountryAdmin || adminInfo?.admin_role === 'country_admin' || admin?.admin_role === 'country_admin';
-    
+
     // If user is not an admin and not a country admin, show user menu
     if (role !== "admin" && !isCountryAdmin && adminRole !== "admin" && adminRole !== "superadmin") {
       return USER_MENU;
     }
-    
+
     // For country admins with restricted features, filter the menu
     if (isCountryAdmin && Array.isArray(customFeatures) && customFeatures.length > 0) {
       return filterMenuByFeatures(customFeatures);
     }
-    
+
     // For all other admins (superadmin, regular admin, or any admin user), show full menu
     return ADMIN_MENU;
   }, [role, adminRole, customFeatures, filterMenuByFeatures, admin]);
@@ -349,11 +341,11 @@ export default function Sidebar({
   };
 
   const lightStyle = {
-    background: "#f3f4f6" // gray-100
+    background: "#F1F6EC" // neutral-50
   };
-  
+
   const backgroundStyle = lightStyle;
-  const textTheme = "text-gray-900";
+  const textTheme = "text-dark-base font-sans";
 
   return (
     <>
@@ -371,8 +363,8 @@ export default function Sidebar({
           style={{ ...backgroundStyle, width: "70vw", maxWidth: 380 }}
           className={`fixed left-0 top-0 bottom-0 transform transition-transform overflow-y-auto overflow-x-hidden
                       sidebar ${textTheme} shadow-xl ${open ? "translate-x-0" : "-translate-x-full"}
-                      scrollbar-thin scrollbar-thumb-yellow-700/50 scrollbar-track-gray-900/30
-                      hover:scrollbar-thumb-yellow-600/70`}
+                      scrollbar-thin scrollbar-thumb-brand-500/50 scrollbar-track-neutral-900/10
+                      hover:scrollbar-thumb-brand-500/70`}
         >
           <Header role={role} />
           <nav className="pb-8">
@@ -396,9 +388,9 @@ export default function Sidebar({
       <aside
         style={{ ...backgroundStyle }}
         className={`hidden lg:block fixed left-0 top-0 bottom-0 w-[320px] shrink-0 overflow-y-auto overflow-x-hidden
-                    sidebar ${textTheme} shadow-xl ${className}
-                    scrollbar-thin scrollbar-thumb-yellow-700/50 scrollbar-track-gray-900/30
-                    hover:scrollbar-thumb-yellow-600/70`}
+                    sidebar ${textTheme} shadow-xl ${className} border-r border-gray-200
+                    scrollbar-thin scrollbar-thumb-brand-500/50 scrollbar-track-neutral-900/10
+                    hover:scrollbar-thumb-brand-500/70`}
       >
         <Header role={role} />
         <nav className="pb-8">
@@ -410,7 +402,7 @@ export default function Sidebar({
               pathname={pathname}
               openMap={openMap}
               onToggle={toggle}
-              onNavigate={() => {}}
+              onNavigate={() => { }}
               isDark={isDark}
             />
           ))}

@@ -44,7 +44,7 @@ function Register() {
         setCountriesLoading(true)
         const response = await fetch(`${API_BASE_URL}/countries?active_only=true`)
         const data = await response.json()
-        
+
         if (data.success && data.data) {
           setCountries(data.data)
           // Set default phone code if countries are loaded
@@ -93,7 +93,7 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    
+
     // Basic validation
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
       setError('Please fill in all required fields')
@@ -126,7 +126,7 @@ function Register() {
         authService.register(registrationData),
         new Promise(resolve => setTimeout(resolve, 3000))
       ])
-      
+
       if (result.success) {
         // Auto-login after successful registration
         navigate('/user/dashboard')
@@ -145,27 +145,26 @@ function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-neutral-50 flex flex-col font-sans">
       {/* Loading Animation */}
       {loading && <AuthLoader message="Creating your account..." />}
       {/* Header */}
       <div className="w-full flex justify-between items-center px-6 py-4">
         {/* Logo */}
         <div>
-          <img 
-            src="/logo.svg" 
-            alt="Logo" 
+          <img
+            src="/logo.svg"
+            alt="Logo"
             className="h-20 w-auto mr-10"
             style={{ filter: 'none' }}
           />
         </div>
-        
+
         {/* Language Selector */}
         <div className="relative">
           <button
             onClick={() => setLanguageOpen(!languageOpen)}
-            className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-            style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+            className="flex items-center gap-2 text-dark-base/70 hover:text-dark-base font-sans text-sm font-normal"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -175,17 +174,15 @@ function Register() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          
+
           {languageOpen && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
               <div className="py-2">
                 {languages.map((lang, index) => (
                   <button
                     key={index}
-                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
-                      lang === 'English' ? 'text-[#ffd700]' : 'text-gray-700'
-                    }`}
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                    className={`w-full text-left px-4 py-2 hover:bg-neutral-100 font-sans text-sm font-normal ${lang === 'English' ? 'text-brand-600' : 'text-dark-base/70'
+                      }`}
                     onClick={() => setLanguageOpen(false)}
                   >
                     {lang}
@@ -201,7 +198,7 @@ function Register() {
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-2xl">
           {/* Title */}
-          <h1 className="text-3xl font-bold text-gray-900 text-center mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
+          <h1 className="text-3xl font-bold text-dark-base text-center mb-6 font-heading">
             Registration
           </h1>
 
@@ -210,47 +207,45 @@ function Register() {
             <div className="bg-white rounded-lg shadow-lg p-8">
               {countriesLoading ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>Loading countries...</p>
+                  <p className="text-dark-base/60 font-sans">Loading countries...</p>
                 </div>
               ) : (
-              <form onSubmit={handleCountrySubmit}>
-                <div>
-                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    What is your country / region of residence?
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent appearance-none"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                <form onSubmit={handleCountrySubmit}>
+                  <div>
+                    <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
+                      What is your country / region of residence?
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none font-sans text-sm"
                         disabled={countriesLoading}
-                    >
-                      <option value="">Select Country / Region of Residence</option>
-                      {countries.map((countryOption) => (
+                      >
+                        <option value="">Select Country / Region of Residence</option>
+                        {countries.map((countryOption) => (
                           <option key={countryOption.id} value={countryOption.name}>
                             {countryOption.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                      disabled={countriesLoading || !country}
-                      className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-3 rounded-lg transition-colors font-semibold uppercase mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
-                >
-                  CONTINUE
-                </button>
-              </form>
-                )}
+                  <button
+                    type="submit"
+                    disabled={countriesLoading || !country}
+                    className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base border border-brand-500 py-3 rounded-lg transition-colors font-semibold uppercase mt-6 disabled:opacity-50 disabled:cursor-not-allowed font-sans text-sm"
+                  >
+                    CONTINUE
+                  </button>
+                </form>
+              )}
             </div>
           )}
 
@@ -269,19 +264,19 @@ function Register() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Selected Country Display - Read Only */}
                 <div>
-                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                     Country / Region of Residence
                   </label>
                   <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
-                    <p className="text-base font-normal text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    <p className="text-base font-normal text-dark-base font-sans">
                       {country}
-                  </p>
+                    </p>
                   </div>
                 </div>
 
                 {/* First Name */}
                 <div>
-                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                     First Name
                   </label>
                   <input
@@ -290,14 +285,13 @@ function Register() {
                     value={formData.firstName}
                     onChange={handleChange}
                     placeholder="As per your Passport / Government ID"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent font-sans text-sm"
                   />
                 </div>
 
                 {/* Last Name */}
                 <div>
-                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                     Last Name
                   </label>
                   <input
@@ -306,14 +300,13 @@ function Register() {
                     value={formData.lastName}
                     onChange={handleChange}
                     placeholder="As per your Passport / Government ID"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent font-sans text-sm"
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                     Email address
                   </label>
                   <input
@@ -321,21 +314,20 @@ function Register() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent font-sans text-sm"
                   />
                 </div>
 
                 {/* Phone Number */}
                 <div>
-                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                     Phone Number
                   </label>
                   <div className="flex gap-2">
                     {/* Phone Code - Read Only (from selected country) */}
                     <div className="flex-1">
                       <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
-                        <p className="text-base font-normal text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                        <p className="text-base font-normal text-dark-base font-sans">
                           {formData.phoneCode || 'N/A'}
                         </p>
                       </div>
@@ -347,28 +339,26 @@ function Register() {
                       value={formData.phoneNumber}
                       onChange={handleChange}
                       placeholder="Enter phone number"
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent font-sans text-sm"
                     />
                   </div>
                 </div>
 
                 {/* Password */}
                 <div>
-                  <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                     Create your account password
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type="text"
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Account Password"
                       required
                       disabled={loading}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent pr-10 disabled:bg-gray-100"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent pr-10 disabled:bg-gray-100 font-sans text-sm"
                     />
                     <button
                       type="button"
@@ -387,7 +377,7 @@ function Register() {
                       )}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  <p className="text-xs text-dark-base/50 mt-1 font-sans">
                     This password will be used to login to your MetaTrader trading account and the MySolitaire Markets Client Portal.
                   </p>
                 </div>
@@ -399,9 +389,9 @@ function Register() {
                       type="checkbox"
                       checked={usTaxChecked}
                       onChange={(e) => setUsTaxChecked(e.target.checked)}
-                      className="w-4 h-4 text-[#ffd700] border-gray-300 rounded focus:ring-[#ffd700] mt-1"
+                      className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 mt-1"
                     />
-                    <span className="ml-2 text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    <span className="ml-2 text-sm text-dark-base/70 font-sans">
                       I declare and confirm that I am not a citizen or resident of the US for tax purposes.
                     </span>
                   </label>
@@ -412,17 +402,16 @@ function Register() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-3 rounded-lg transition-colors font-semibold uppercase disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                  className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base border border-brand-500 py-3 rounded-lg transition-colors font-semibold uppercase disabled:opacity-50 disabled:cursor-not-allowed font-sans text-sm"
                 >
                   {loading ? 'Registering...' : 'CONTINUE'}
                 </button>
 
                 {/* Legal Text */}
-                <div className="text-xs text-gray-600 space-y-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <div className="text-xs text-dark-base/50 space-y-2 font-sans">
                   <p>
                     Based on the selected country of residence, you are registering with Solitaire Markets, regulated by the Seychelles FSA. By clicking Continue you confirm that you have read, understood, and agree with all the information in the{' '}
-                    <a href="#" className="text-blue-600 hover:text-blue-800 underline">Client Agreement</a>.
+                    <a href="#" className="text-brand-700 hover:text-brand-800 underline">Client Agreement</a>.
                   </p>
                   <p>
                     Solitaire Markets Brokerage (Seychelles) Limited is authorized by the Financial Services Authority of Seychelles under license number SD064 as a Securities Dealers Broker.
@@ -434,9 +423,9 @@ function Register() {
 
           {/* Login Link */}
           <div className="text-center mt-6">
-            <p className="text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <p className="text-sm text-dark-base/70 font-sans">
               Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+              <Link to="/login" className="text-brand-700 hover:text-brand-800 font-medium font-sans">
                 Log in
               </Link>
             </p>

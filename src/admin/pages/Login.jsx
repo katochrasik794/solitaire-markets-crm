@@ -27,7 +27,7 @@ function AdminLogin() {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffd700] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -42,7 +42,7 @@ function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    
+
     // Basic validation
     if (!email || !password) {
       setError('Please fill in all fields')
@@ -62,10 +62,10 @@ function AdminLogin() {
       if (!apiBase.endsWith('/api')) {
         apiBase = apiBase.endsWith('/') ? `${apiBase}api` : `${apiBase}/api`;
       }
-      
+
       const loginUrl = `${apiBase}/admin/login`;
       console.log('Admin login URL:', loginUrl); // Debug log
-      
+
       const [response] = await Promise.all([
         fetch(loginUrl, {
           method: 'POST',
@@ -76,7 +76,7 @@ function AdminLogin() {
         }),
         new Promise(resolve => setTimeout(resolve, 3000))
       ])
-      
+
       // Check if response is ok before parsing JSON
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `Server error: ${response.status}` }));
@@ -84,9 +84,9 @@ function AdminLogin() {
         setLoading(false)
         return
       }
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         // Store admin token and info
         login(data.data.admin || data.data, data.data.token)
@@ -103,10 +103,10 @@ function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-neutral-50 flex flex-col font-sans">
       {/* Loading Animation */}
       {loading && <AuthLoader message="Logging in..." />}
-      
+
       {/* Header */}
       <div className="w-full flex justify-between items-center px-6 py-4">
         <div className="w-32"></div> {/* Spacer for centering */}
@@ -119,28 +119,28 @@ function AdminLogin() {
           <div className="bg-white rounded-lg shadow-lg p-8">
             {/* Logo */}
             <div className="flex justify-center mb-6">
-              <img 
-                src="/logo.svg" 
-                alt="Logo" 
+              <img
+                src="/logo.svg"
+                alt="Logo"
                 className="h-20 w-auto mr-10"
                 style={{ filter: 'none' }}
               />
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl font-normal text-gray-900 text-center mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <h1 className="text-2xl font-normal text-dark-base text-center mb-2 font-heading">
               Admin Login
             </h1>
 
             {/* Description */}
-            <p className="text-sm text-gray-600 text-center mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <p className="text-sm text-dark-base/60 text-center mb-6 font-sans">
               Access the admin panel to manage users, accounts, and platform settings.
             </p>
 
             {/* Error Message */}
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <p className="text-sm text-red-800 font-sans">
                   {error}
                 </p>
               </div>
@@ -150,7 +150,7 @@ function AdminLogin() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email Field */}
               <div>
-                <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                   Email
                 </label>
                 <input
@@ -159,14 +159,13 @@ function AdminLogin() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent disabled:bg-gray-100"
-                  style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:bg-gray-100 font-sans text-sm"
                 />
               </div>
 
               {/* Password Field */}
               <div>
-                <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                   Password
                 </label>
                 <div className="relative">
@@ -176,8 +175,7 @@ function AdminLogin() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={loading}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent pr-10 disabled:bg-gray-100"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent pr-10 disabled:bg-gray-100 font-sans text-sm"
                   />
                   <button
                     type="button"
@@ -205,9 +203,9 @@ function AdminLogin() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-[#ffd700] border-gray-300 rounded focus:ring-[#ffd700]"
+                    className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500"
                   />
-                  <span className="ml-2 text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  <span className="ml-2 text-sm text-dark-base/70 font-sans">
                     Remember me
                   </span>
                 </label>
@@ -217,8 +215,7 @@ function AdminLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-2.5 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base border border-brand-500 py-2.5 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed font-sans text-sm"
               >
                 {loading ? 'Logging in...' : 'Continue'}
               </button>

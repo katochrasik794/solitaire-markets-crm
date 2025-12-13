@@ -28,7 +28,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    
+
     // Basic validation
     if (!email || !password) {
       setError('Please fill in all fields')
@@ -47,7 +47,7 @@ function Login() {
         authService.login(email, password),
         new Promise(resolve => setTimeout(resolve, 3000))
       ])
-      
+
       if (result.success) {
         navigate('/user/dashboard')
       }
@@ -58,19 +58,18 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-neutral-50 flex flex-col font-sans">
       {/* Loading Animation */}
       {loading && <AuthLoader message="Logging in..." />}
       {/* Header */}
       <div className="w-full flex justify-between items-center px-6 py-4">
         <div className="w-32"></div> {/* Spacer for centering */}
-        
+
         {/* Language Selector */}
         <div className="relative">
           <button
             onClick={() => setLanguageOpen(!languageOpen)}
-            className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-            style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+            className="flex items-center gap-2 text-dark-base/70 hover:text-dark-base font-sans text-sm font-normal"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -80,17 +79,15 @@ function Login() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          
+
           {languageOpen && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
               <div className="py-2">
                 {languages.map((lang, index) => (
                   <button
                     key={index}
-                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
-                      lang === 'English' ? 'text-[#ffd700]' : 'text-gray-700'
-                    }`}
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                    className={`w-full text-left px-4 py-2 hover:bg-neutral-100 font-sans text-sm font-normal ${lang === 'English' ? 'text-brand-600' : 'text-dark-base/70'
+                      }`}
                     onClick={() => setLanguageOpen(false)}
                   >
                     {lang}
@@ -109,21 +106,21 @@ function Login() {
           <div className="bg-white rounded-lg shadow-lg p-8">
             {/* Logo */}
             <div className="flex justify-center mb-6">
-              <img 
-                src="/logo.svg" 
-                alt="Logo" 
+              <img
+                src="/logo.svg"
+                alt="Logo"
                 className="h-20 w-auto mr-10"
                 style={{ filter: 'none' }}
               />
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl font-normal text-gray-900 text-center mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <h1 className="text-2xl font-normal text-dark-base text-center mb-2 font-heading">
               Login to Your Account
             </h1>
 
             {/* Description */}
-            <p className="text-sm text-gray-600 text-center mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <p className="text-sm text-dark-base/60 text-center mb-6 font-sans">
               Manage your accounts and access insightful reports and technical analysis among many more features.
             </p>
 
@@ -140,7 +137,7 @@ function Login() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email Field */}
               <div>
-                <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                   Email
                 </label>
                 <input
@@ -149,14 +146,13 @@ function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent disabled:bg-gray-100"
-                  style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:bg-gray-100 font-sans text-sm"
                 />
               </div>
 
               {/* Password Field */}
               <div>
-                <label className="block text-sm font-normal text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <label className="block text-sm font-normal text-dark-base/70 mb-2 font-sans">
                   Password
                 </label>
                 <div className="relative">
@@ -166,8 +162,7 @@ function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={loading}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffd700] focus:border-transparent pr-10 disabled:bg-gray-100"
-                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent pr-10 disabled:bg-gray-100 font-sans text-sm"
                   />
                   <button
                     type="button"
@@ -195,13 +190,13 @@ function Login() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-[#ffd700] border-gray-300 rounded focus:ring-[#ffd700]"
+                    className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500"
                   />
-                  <span className="ml-2 text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  <span className="ml-2 text-sm text-dark-base/70 font-sans">
                     Remember me
                   </span>
                 </label>
-                <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <Link to="/forgot-password" className="text-sm text-brand-700 hover:text-brand-800 font-sans">
                   Forgot password?
                 </Link>
               </div>
@@ -210,15 +205,14 @@ function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-2.5 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
+                className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base border border-brand-500 py-2.5 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed font-sans text-sm"
               >
                 {loading ? 'Logging in...' : 'Continue'}
               </button>
 
               {/* Sign in with different account */}
               <div className="text-center">
-                <a href="#" className="text-sm text-blue-600 hover:text-blue-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <a href="#" className="text-sm text-brand-700 hover:text-brand-800 font-sans">
                   Sign in with different account
                 </a>
               </div>
@@ -227,9 +221,9 @@ function Login() {
 
           {/* Create Account Link */}
           <div className="text-center mt-6">
-            <p className="text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <p className="text-sm text-dark-base/70 font-sans">
               Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium">
+              <Link to="/register" className="text-brand-700 hover:text-brand-800 font-medium font-sans">
                 Create Live Account
               </Link>
             </p>
