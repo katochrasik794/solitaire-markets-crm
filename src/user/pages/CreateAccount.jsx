@@ -78,10 +78,13 @@ function CreateAccount() {
 
   // Filter groups based on mode
   const filteredGroups = mt5Groups.filter(g => {
-    // TEMPORARY: Show all groups for now as requested
-    return true
-    // const name = (g.dedicated_name || g.group_name || '').toLowerCase()
-    // return mode === 'demo' ? name.includes('demo') : !name.includes('demo')
+    // Filter out groups that don't match the selected mode (Live vs Demo)
+    // We assume demo groups have "demo" in their name (case insensitive)
+    // Check group_name specifically as it contains the full path (e.g., demo\ECN15S)
+    const name = (g.group_name || '').toLowerCase()
+    const isDemoGroup = name.includes('demo')
+
+    return mode === 'demo' ? isDemoGroup : !isDemoGroup
   })
 
   // Auto-select first group when mode changes or groups load

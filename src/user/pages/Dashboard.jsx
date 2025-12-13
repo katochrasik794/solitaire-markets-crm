@@ -661,18 +661,7 @@ function Dashboard() {
           </div>
         )}
 
-        {/* ================= DEMO ACCOUNTS ================= */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-          <h2 className="text-gray-700 text-sm md:text-md font-medium">
-            Demo Accounts
-          </h2>
-          {/* Create Account for wallet is not needed; one wallet per user */}
-        </div>
 
-        {/* Demo Card */}
-        <div className="bg-white border border-gray-200 rounded-lg w-full py-8 sm:py-12 flex items-center justify-center text-gray-500 text-sm sm:text-base mb-8 sm:mb-12 text-center px-4">
-          Practice and master your trading skills.
-        </div>
 
         {/* ================= WALLET ACCOUNTS ================= */}
         <div className="mb-4">
