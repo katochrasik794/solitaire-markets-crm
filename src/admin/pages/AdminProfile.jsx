@@ -2,15 +2,15 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
-import { 
-  User, 
-  Mail, 
-  Shield, 
-  Clock, 
-  MapPin, 
-  Monitor, 
-  Globe, 
-  Key, 
+import {
+  User,
+  Mail,
+  Shield,
+  Clock,
+  MapPin,
+  Monitor,
+  Globe,
+  Key,
   Activity,
   Settings,
   Eye,
@@ -62,7 +62,7 @@ export default function AdminProfile() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           setError('Authentication failed. Please login again.');
@@ -71,7 +71,7 @@ export default function AdminProfile() {
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       if (data.ok) {
         setProfile(data.profile);
@@ -107,12 +107,12 @@ export default function AdminProfile() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         console.error('Login history fetch failed:', response.status);
         return;
       }
-      
+
       const data = await response.json();
       if (data.ok) {
         setLoginHistory(data.history || []);
@@ -124,7 +124,7 @@ export default function AdminProfile() {
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    
+
     if (editForm.newPassword && editForm.newPassword !== editForm.confirmPassword) {
       setError('New passwords do not match');
       return;
@@ -140,7 +140,7 @@ export default function AdminProfile() {
         },
         body: JSON.stringify(editForm)
       });
-      
+
       const data = await response.json();
       if (data.ok) {
         setProfile(data.profile);
@@ -162,13 +162,13 @@ export default function AdminProfile() {
       'admin': { label: 'Admin', color: 'bg-blue-100 text-blue-800', description: 'Standard admin access' },
       'moderator': { label: 'Moderator', color: 'bg-green-100 text-green-800', description: 'Limited admin access' },
       'support': { label: 'Support', color: 'bg-yellow-100 text-yellow-800', description: 'Customer support access' },
-      'analyst': { label: 'Analyst', color: 'bg-purple-100 text-purple-800', description: 'Analytics and reporting access' }
+      'analyst': { label: 'Analyst', color: 'bg-brand-100 text-brand-900', description: 'Analytics and reporting access' }
     };
     return roles[role] || roles['admin'];
   };
 
   const getStatusInfo = (isActive) => {
-    return isActive 
+    return isActive
       ? { label: 'Active', color: 'bg-green-100 text-green-800', icon: CheckCircle }
       : { label: 'Inactive', color: 'bg-red-100 text-red-800', icon: AlertCircle };
   };
@@ -176,7 +176,7 @@ export default function AdminProfile() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
       </div>
     );
   }
@@ -208,7 +208,7 @@ export default function AdminProfile() {
             </div>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="bg-purple-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
+              className="bg-brand-500 text-dark-base px-3 sm:px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
             >
               <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
               <span className="hidden sm:inline">{isEditing ? 'Cancel Edit' : 'Edit Profile'}</span>
@@ -247,8 +247,8 @@ export default function AdminProfile() {
                       <input
                         type="text"
                         value={editForm.username}
-                        onChange={(e) => setEditForm({...editForm, username: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         required
                       />
                     </div>
@@ -257,8 +257,8 @@ export default function AdminProfile() {
                       <input
                         type="email"
                         value={editForm.email}
-                        onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         required
                       />
                     </div>
@@ -273,8 +273,8 @@ export default function AdminProfile() {
                           <input
                             type={showPassword ? "text" : "password"}
                             value={editForm.currentPassword}
-                            onChange={(e) => setEditForm({...editForm, currentPassword: e.target.value})}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            onChange={(e) => setEditForm({ ...editForm, currentPassword: e.target.value })}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-brand-500"
                           />
                           <button
                             type="button"
@@ -290,8 +290,8 @@ export default function AdminProfile() {
                         <input
                           type="password"
                           value={editForm.newPassword}
-                          onChange={(e) => setEditForm({...editForm, newPassword: e.target.value})}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         />
                       </div>
                       <div>
@@ -299,8 +299,8 @@ export default function AdminProfile() {
                         <input
                           type="password"
                           value={editForm.confirmPassword}
-                          onChange={(e) => setEditForm({...editForm, confirmPassword: e.target.value})}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          onChange={(e) => setEditForm({ ...editForm, confirmPassword: e.target.value })}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         />
                       </div>
                     </div>
@@ -316,7 +316,7 @@ export default function AdminProfile() {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                      className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 flex items-center gap-2"
                     >
                       <Save className="h-4 w-4" />
                       Save Changes
@@ -380,7 +380,7 @@ export default function AdminProfile() {
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">Recent login activity and IP addresses</p>
               </div>
-              
+
               <div className="overflow-x-auto">
                 <table className="w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -431,9 +431,8 @@ export default function AdminProfile() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              login.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${login.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
                               {login.success ? 'Success' : 'Failed'}
                             </span>
                           </td>

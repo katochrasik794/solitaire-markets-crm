@@ -23,7 +23,7 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
           const isOpen = openMap?.[it.to || it.label] ?? withinChild;
 
           const parentBase = isDark ? "text-slate-200 hover:bg-neutral-800/20 hover:text-white" : "text-dark-base hover:bg-brand-500/10 hover:text-dark-base";
-          const parentActive = isDark ? "bg-neutral-800/40 text-white shadow-sm" : "bg-brand-50 text-dark-base shadow-sm ring-1 ring-black/5";
+          const parentActive = isDark ? "bg-neutral-800/40 text-white shadow-sm" : "bg-brand-500 text-dark-base shadow-sm ring-1 ring-black/5";
           const childBase = isDark ? "text-slate-300 hover:bg-neutral-800/15 hover:text-white" : "text-dark-base/70 hover:bg-brand-500/10 hover:text-dark-base";
           const childActive = isDark ? "bg-neutral-800/25 text-white" : "bg-brand-500/20 text-dark-base font-medium";
           const dotCls = isDark ? "bg-white/60" : "bg-gray-600";

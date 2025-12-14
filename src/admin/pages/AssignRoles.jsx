@@ -5,12 +5,12 @@ import { getAllFeatures, extractAllFeaturesFromMenu } from "../components/Sideba
 import Swal from "sweetalert2";
 
 const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
-import { 
-  Users, 
-  Shield, 
-  Plus, 
-  Save, 
-  X, 
+import {
+  Users,
+  Shield,
+  Plus,
+  Save,
+  X,
   Eye,
   UserCheck,
   Settings,
@@ -51,7 +51,7 @@ export default function AssignRoles() {
   const { admin } = useAuth();
   const [countryAdminFeatures, setCountryAdminFeatures] = useState(null);
   const [isCountryAdmin, setIsCountryAdmin] = useState(false);
-  
+
   // Add custom styles for dropdown
   const dropdownStyles = `
     .role-dropdown {
@@ -170,7 +170,7 @@ export default function AssignRoles() {
     }
     const isCountryAdminUser = adminInfo?.isCountryAdmin || admin?.isCountryAdmin || adminInfo?.admin_role === 'country_admin' || admin?.admin_role === 'country_admin';
     setIsCountryAdmin(isCountryAdminUser);
-    
+
     if (isCountryAdminUser) {
       // Fetch country admin features
       const token = localStorage.getItem('adminToken');
@@ -187,9 +187,9 @@ export default function AssignRoles() {
             setCountryAdminFeatures(normalizedFeatures);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
-    
+
     fetchAdmins();
     fetchRoles();
   }, [admin, BASE]);
@@ -203,7 +203,7 @@ export default function AssignRoles() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setAdmins(data.admins || []);
@@ -234,7 +234,7 @@ export default function AssignRoles() {
 
   const handleCreateAdmin = async (e) => {
     e.preventDefault();
-    
+
     try {
       // First, check if email exists in USER table
       const token = localStorage.getItem('adminToken');
@@ -246,7 +246,7 @@ export default function AssignRoles() {
         },
         body: JSON.stringify({ email: newAdmin.email })
       });
-      
+
       if (checkUserResponse.ok) {
         const checkData = await checkUserResponse.json();
         if (checkData.exists) {
@@ -259,7 +259,7 @@ export default function AssignRoles() {
           return;
         }
       }
-      
+
       // If email doesn't exist in USER table, proceed with admin creation
       const response = await fetch(`${BASE}/admin/admins`, {
         method: 'POST',
@@ -269,7 +269,7 @@ export default function AssignRoles() {
         },
         body: JSON.stringify(newAdmin)
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setAdmins([...admins, data.admin]);
@@ -282,7 +282,7 @@ export default function AssignRoles() {
           features: []
         });
         setError("");
-        
+
         // Show success message
         Swal.fire({
           icon: 'success',
@@ -294,7 +294,7 @@ export default function AssignRoles() {
       } else {
         const data = await response.json();
         const errorMessage = data.error || 'Failed to create admin';
-        
+
         // Check if it's an email already exists error
         if (errorMessage.toLowerCase().includes('email') && errorMessage.toLowerCase().includes('already')) {
           Swal.fire({
@@ -337,13 +337,13 @@ export default function AssignRoles() {
         },
         body: JSON.stringify({ admin_role: newRole })
       });
-      
+
       if (response.ok) {
-        setAdmins(admins.map(admin => 
+        setAdmins(admins.map(admin =>
           admin.id === adminId ? { ...admin, admin_role: newRole } : admin
         ));
         setError("");
-        
+
         // Show success message
         Swal.fire({
           icon: 'success',
@@ -406,7 +406,7 @@ export default function AssignRoles() {
 
   const handleSaveFeatures = async () => {
     if (!selectedAdmin) return;
-    
+
     // For superadmin, don't allow saving
     if (selectedAdmin.admin_role === 'superadmin') {
       Swal.fire({
@@ -422,7 +422,7 @@ export default function AssignRoles() {
       const token = localStorage.getItem('adminToken');
       // Check if role exists in DB, if not create it, if yes update it
       const existingRole = findCustomRole(selectedAdmin.admin_role);
-      
+
       if (existingRole) {
         // Update existing role
         const res = await fetch(`${BASE}/admin/roles/${existingRole.id}`, {
@@ -454,7 +454,7 @@ export default function AssignRoles() {
         await fetchRoles();
         Swal.fire({ icon: 'success', title: 'Role created and features saved', timer: 1500, showConfirmButton: false });
       }
-      
+
       setShowFeatureModal(false);
       setSelectedAdmin(null);
       setSelectedFeatures([]);
@@ -495,8 +495,8 @@ export default function AssignRoles() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          newPassword: passwordForm.newPassword 
+        body: JSON.stringify({
+          newPassword: passwordForm.newPassword
         })
       });
 
@@ -505,7 +505,7 @@ export default function AssignRoles() {
         setSelectedAdmin(null);
         setPasswordForm({ newPassword: '', confirmPassword: '' });
         setError("");
-        
+
         // Show success message
         Swal.fire({
           icon: 'success',
@@ -567,7 +567,7 @@ export default function AssignRoles() {
 
   const handleCreateRole = async (e) => {
     e.preventDefault();
-    
+
     if (!newRole.name.trim()) {
       setError('Role name is required');
       Swal.fire({
@@ -604,7 +604,7 @@ export default function AssignRoles() {
           features: newRole.features
         })
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         // Update roles list
@@ -616,7 +616,7 @@ export default function AssignRoles() {
           features: []
         });
         setError("");
-        
+
         // Show success message
         Swal.fire({
           icon: 'success',
@@ -721,7 +721,7 @@ export default function AssignRoles() {
   };
 
   const getStatusInfo = (isActive) => {
-    return isActive 
+    return isActive
       ? { label: 'Active', color: 'bg-green-100 text-green-800', icon: '✓' }
       : { label: 'Inactive', color: 'bg-red-100 text-red-800', icon: '✗' };
   };
@@ -729,7 +729,7 @@ export default function AssignRoles() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
       </div>
     );
   }
@@ -748,7 +748,7 @@ export default function AssignRoles() {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={() => setShowCreateRoleModal(true)}
-                className="bg-indigo-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
+                className="bg-brand-500 text-dark-base px-3 sm:px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
               >
                 <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">Create Role</span>
@@ -756,7 +756,7 @@ export default function AssignRoles() {
               </button>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-purple-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
+                className="bg-brand-500 text-dark-base px-3 sm:px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">Create Admin</span>
@@ -805,102 +805,102 @@ export default function AssignRoles() {
         {/* Roles Table */}
         {(() => {
           // Filter roles for country admins - only show roles they created (strictly filter)
-          const filteredRoles = isCountryAdmin 
+          const filteredRoles = isCountryAdmin
             ? roles.filter(r => {
-                // Only show roles that have created_by matching current admin email
-                const adminInfoStr = localStorage.getItem('adminInfo');
-                let adminInfo = null;
-                try {
-                  adminInfo = adminInfoStr ? JSON.parse(adminInfoStr) : null;
-                } catch (e) {}
-                const currentEmail = adminInfo?.email || admin?.email || '';
-                // Strictly check: role must have created_by and it must match current email
-                return r.created_by && r.created_by === currentEmail;
-              })
+              // Only show roles that have created_by matching current admin email
+              const adminInfoStr = localStorage.getItem('adminInfo');
+              let adminInfo = null;
+              try {
+                adminInfo = adminInfoStr ? JSON.parse(adminInfoStr) : null;
+              } catch (e) { }
+              const currentEmail = adminInfo?.email || admin?.email || '';
+              // Strictly check: role must have created_by and it must match current email
+              return r.created_by && r.created_by === currentEmail;
+            })
             : roles;
-          
+
           return filteredRoles.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-visible mb-8">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Custom Roles</h2>
-              <p className="text-sm sm:text-base text-gray-600 mt-1">Manage roles saved in the database</p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Features</th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredRoles.map(r => {
-                    const features = r.permissions?.features || [];
-                    return (
-                      <tr key={r.id} className="hover:bg-gray-50">
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{r.name}</td>
-                        <td className="px-3 sm:px-6 py-3 text-sm text-gray-600">{r.description || '-'}</td>
-                        <td className="px-3 sm:px-6 py-3 text-sm text-gray-600">{features.length} feature{features.length === 1 ? '' : 's'}</td>
-                        <td className="px-3 sm:px-6 py-3 text-sm">
-                          <div className="flex items-end gap-6">
-                            {r.name.toLowerCase() !== 'superadmin' && (
-                              <button 
-                                onClick={() => { setSelectedRole(r); setShowEditRoleModal(true); setEditRole({ name: r.name || '', description: r.description || '', features: (r.permissions?.features)||[] }); }} 
-                                className="flex flex-col items-center text-green-600 hover:text-green-700"
-                                title="Edit Features"
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-visible mb-8">
+              <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Custom Roles</h2>
+                <p className="text-sm sm:text-base text-gray-600 mt-1">Manage roles saved in the database</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Features</th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredRoles.map(r => {
+                      const features = r.permissions?.features || [];
+                      return (
+                        <tr key={r.id} className="hover:bg-gray-50">
+                          <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{r.name}</td>
+                          <td className="px-3 sm:px-6 py-3 text-sm text-gray-600">{r.description || '-'}</td>
+                          <td className="px-3 sm:px-6 py-3 text-sm text-gray-600">{features.length} feature{features.length === 1 ? '' : 's'}</td>
+                          <td className="px-3 sm:px-6 py-3 text-sm">
+                            <div className="flex items-end gap-6">
+                              {r.name.toLowerCase() !== 'superadmin' && (
+                                <button
+                                  onClick={() => { setSelectedRole(r); setShowEditRoleModal(true); setEditRole({ name: r.name || '', description: r.description || '', features: (r.permissions?.features) || [] }); }}
+                                  className="flex flex-col items-center text-green-600 hover:text-green-700"
+                                  title="Edit Features"
+                                >
+                                  <Settings className="h-4 w-4" />
+                                  <small className="text-[10px] leading-3 mt-1">Features</small>
+                                </button>
+                              )}
+
+                              <button
+                                onClick={() => { setSelectedRole(r); setShowRoleViewModal(true); }}
+                                className="flex flex-col items-center text-blue-600 hover:text-blue-700"
+                                title="View Role"
                               >
-                                <Settings className="h-4 w-4" />
-                                <small className="text-[10px] leading-3 mt-1">Features</small>
+                                <Eye className="h-4 w-4" />
+                                <small className="text-[10px] leading-3 mt-1">View</small>
                               </button>
-                            )}
 
-                            <button 
-                              onClick={() => { setSelectedRole(r); setShowRoleViewModal(true); }} 
-                              className="flex flex-col items-center text-blue-600 hover:text-blue-700"
-                              title="View Role"
-                            >
-                              <Eye className="h-4 w-4" />
-                              <small className="text-[10px] leading-3 mt-1">View</small>
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                Swal.fire({
-                                  icon: 'info',
-                                  title: 'Change Password',
-                                  text: 'Roles do not have passwords. Please change passwords from Admin Users.',
-                                  confirmButtonText: 'OK'
-                                });
-                              }}
-                              className="flex flex-col items-center text-orange-600 hover:text-orange-700"
-                              title="Change Password"
-                            >
-                              <Lock className="h-4 w-4" />
-                              <small className="text-[10px] leading-3 mt-1">Password</small>
-                            </button>
-
-                            {/* Delete button - available for all custom roles except superadmin */}
-                            {r.name.toLowerCase() !== 'superadmin' && (
-                              <button 
-                                onClick={() => handleDeleteRole(r)} 
-                                className="flex flex-col items-center text-red-600 hover:text-red-700"
-                                title="Delete Role"
+                              <button
+                                onClick={() => {
+                                  Swal.fire({
+                                    icon: 'info',
+                                    title: 'Change Password',
+                                    text: 'Roles do not have passwords. Please change passwords from Admin Users.',
+                                    confirmButtonText: 'OK'
+                                  });
+                                }}
+                                className="flex flex-col items-center text-orange-600 hover:text-orange-700"
+                                title="Change Password"
                               >
-                                <Trash2 className="h-4 w-4" />
-                                <small className="text-[10px] leading-3 mt-1">Delete</small>
+                                <Lock className="h-4 w-4" />
+                                <small className="text-[10px] leading-3 mt-1">Password</small>
                               </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+
+                              {/* Delete button - available for all custom roles except superadmin */}
+                              {r.name.toLowerCase() !== 'superadmin' && (
+                                <button
+                                  onClick={() => handleDeleteRole(r)}
+                                  className="flex flex-col items-center text-red-600 hover:text-red-700"
+                                  title="Delete Role"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  <small className="text-[10px] leading-3 mt-1">Delete</small>
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
           );
         })()}
 
@@ -911,7 +911,7 @@ export default function AssignRoles() {
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Admin Users</h2>
             <p className="text-sm sm:text-base text-gray-600 mt-1">Manage admin accounts and their roles</p>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -944,14 +944,14 @@ export default function AssignRoles() {
                   const statusInfo = getStatusInfo(adminUser.is_active);
                   // For display purposes, determine role label
                   const roleLabel = isSuperAdmin ? SUPERADMIN_ROLE.label : (customRole?.name || adminUser.admin_role);
-                  const roleColor = isSuperAdmin ? SUPERADMIN_ROLE.color : 'bg-indigo-100 text-indigo-800';
+                  const roleColor = isSuperAdmin ? SUPERADMIN_ROLE.color : 'bg-brand-100 text-brand-800';
                   return (
                     <tr key={adminUser.id} className="hover:bg-gray-50">
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                              <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-brand-100 flex items-center justify-center">
+                              <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600" />
                             </div>
                           </div>
                           <div className="ml-2 sm:ml-4">
@@ -964,13 +964,13 @@ export default function AssignRoles() {
                         <div className="role-dropdown">
                           <button
                             onClick={(e) => handleRoleDropdownToggle(adminUser.id, e)}
-                            className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-900 hover:text-purple-600 transition-colors"
+                            className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-900 hover:text-brand-600 transition-colors"
                           >
                             <span className={`px-2 py-1 rounded-full text-xs ${roleColor}`}>
                               {roleLabel}
                             </span>
                           </button>
-                          
+
                           {showRoleDropdown === adminUser.id && dropdownAnchor && dropdownAnchor.id === adminUser.id && createPortal(
                             (
                               <div
@@ -987,19 +987,19 @@ export default function AssignRoles() {
                                   // Super admin first (protected) - only show to superadmins
                                   ...(isCountryAdmin ? [] : [SUPERADMIN_ROLE]),
                                   // then custom roles from DB - filter for country admins (strictly)
-                                  ...(isCountryAdmin 
+                                  ...(isCountryAdmin
                                     ? roles.filter(r => {
-                                        const adminInfoStr = localStorage.getItem('adminInfo');
-                                        let adminInfo = null;
-                                        try {
-                                          adminInfo = adminInfoStr ? JSON.parse(adminInfoStr) : null;
-                                        } catch (e) {}
-                                        const currentEmail = adminInfo?.email || admin?.email || '';
-                                        // Only show roles created by this country admin
-                                        return r.created_by && r.created_by === currentEmail;
-                                      })
+                                      const adminInfoStr = localStorage.getItem('adminInfo');
+                                      let adminInfo = null;
+                                      try {
+                                        adminInfo = adminInfoStr ? JSON.parse(adminInfoStr) : null;
+                                      } catch (e) { }
+                                      const currentEmail = adminInfo?.email || admin?.email || '';
+                                      // Only show roles created by this country admin
+                                      return r.created_by && r.created_by === currentEmail;
+                                    })
                                     : roles
-                                  ).map(r => ({ value: r.name, label: r.name, color: 'bg-indigo-100 text-indigo-800' })),
+                                  ).map(r => ({ value: r.name, label: r.name, color: 'bg-brand-100 text-brand-800' })),
                                 ].map((roleOption) => (
                                   <div
                                     key={roleOption.value}
@@ -1049,7 +1049,7 @@ export default function AssignRoles() {
                           )}
 
                           {!isSuperAdmin && (
-                            <button 
+                            <button
                               onClick={() => handleFeatureSelection(adminUser)}
                               className="flex flex-col items-center text-green-600 hover:text-green-800"
                               title="Edit Features"
@@ -1059,7 +1059,7 @@ export default function AssignRoles() {
                             </button>
                           )}
 
-                          <button 
+                          <button
                             onClick={() => { setSelectedAdmin(adminUser); setShowViewModal(true); }}
                             className="flex flex-col items-center text-blue-600 hover:text-blue-800"
                             title="View Details"
@@ -1068,7 +1068,7 @@ export default function AssignRoles() {
                             <small className="text-[10px] leading-3 mt-1">View</small>
                           </button>
 
-                          <button 
+                          <button
                             onClick={() => { setSelectedAdmin(adminUser); setShowPasswordModal(true); }}
                             className="flex flex-col items-center text-orange-600 hover:text-orange-800"
                             title="Change Password"
@@ -1078,7 +1078,7 @@ export default function AssignRoles() {
                           </button>
 
                           {adminUser.admin_role !== 'superadmin' && (
-                            <button 
+                            <button
                               onClick={() => handleDeleteAdmin(adminUser)}
                               className="flex flex-col items-center text-red-600 hover:text-red-800"
                               title="Delete Admin"
@@ -1115,9 +1115,8 @@ export default function AssignRoles() {
                   {(() => {
                     const isSuperAdmin = selectedAdmin.admin_role === 'superadmin';
                     return (
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                        isSuperAdmin ? SUPERADMIN_ROLE.color : 'bg-indigo-100 text-indigo-800'
-                      }`}>
+                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${isSuperAdmin ? SUPERADMIN_ROLE.color : 'bg-brand-100 text-brand-800'
+                        }`}>
                         {isSuperAdmin ? SUPERADMIN_ROLE.label : (selectedAdmin.admin_role)}
                       </span>
                     );
@@ -1178,7 +1177,7 @@ export default function AssignRoles() {
                   {/* Basic Info */}
                   <div className="space-y-4">
                     <h4 className="text-md font-semibold text-gray-900 mb-4">Basic Information</h4>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Username *
@@ -1186,8 +1185,8 @@ export default function AssignRoles() {
                       <input
                         type="text"
                         value={newAdmin.username}
-                        onChange={(e) => setNewAdmin({...newAdmin, username: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        onChange={(e) => setNewAdmin({ ...newAdmin, username: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         placeholder="Enter username"
                         required
                       />
@@ -1200,8 +1199,8 @@ export default function AssignRoles() {
                       <input
                         type="email"
                         value={newAdmin.email}
-                        onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         placeholder="Enter email"
                         required
                       />
@@ -1214,8 +1213,8 @@ export default function AssignRoles() {
                       <input
                         type="password"
                         value={newAdmin.password}
-                        onChange={(e) => setNewAdmin({...newAdmin, password: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         placeholder="Enter password"
                         required
                       />
@@ -1227,25 +1226,25 @@ export default function AssignRoles() {
                       </label>
                       <select
                         value={newAdmin.admin_role}
-                        onChange={(e) => setNewAdmin({...newAdmin, admin_role: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        onChange={(e) => setNewAdmin({ ...newAdmin, admin_role: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         required
                       >
                         {/* Super admin - only show to superadmins */}
                         {!isCountryAdmin && <option value={SUPERADMIN_ROLE.value}>{SUPERADMIN_ROLE.label}</option>}
                         {/* Custom roles from DB - filter for country admins (strictly) */}
                         {(() => {
-                          const filteredRoles = isCountryAdmin 
+                          const filteredRoles = isCountryAdmin
                             ? roles.filter(r => {
-                                const adminInfoStr = localStorage.getItem('adminInfo');
-                                let adminInfo = null;
-                                try {
-                                  adminInfo = adminInfoStr ? JSON.parse(adminInfoStr) : null;
-                                } catch (e) {}
-                                const currentEmail = adminInfo?.email || admin?.email || '';
-                                // Only show roles created by this country admin
-                                return r.created_by && r.created_by === currentEmail;
-                              })
+                              const adminInfoStr = localStorage.getItem('adminInfo');
+                              let adminInfo = null;
+                              try {
+                                adminInfo = adminInfoStr ? JSON.parse(adminInfoStr) : null;
+                              } catch (e) { }
+                              const currentEmail = adminInfo?.email || admin?.email || '';
+                              // Only show roles created by this country admin
+                              return r.created_by && r.created_by === currentEmail;
+                            })
                             : roles;
                           return filteredRoles.map(r => (
                             <option key={r.id} value={r.name}>{r.name}</option>
@@ -1275,7 +1274,7 @@ export default function AssignRoles() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                    className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 flex items-center gap-2"
                   >
                     <Save className="h-4 w-4" />
                     Create Admin
@@ -1328,7 +1327,7 @@ export default function AssignRoles() {
                           type="checkbox"
                           checked={selectedFeatures.includes(feature.path)}
                           onChange={() => handleFeatureToggle(feature.path)}
-                          className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                          className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                         />
                         <feature.icon className="h-4 w-4 text-gray-500" />
                         <span>{feature.name}</span>
@@ -1349,7 +1348,7 @@ export default function AssignRoles() {
                   </button>
                   <button
                     onClick={handleSaveFeatures}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                    className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 flex items-center gap-2"
                   >
                     <Save className="h-4 w-4" />
                     Save Features
@@ -1390,8 +1389,8 @@ export default function AssignRoles() {
                     <input
                       type="password"
                       value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       placeholder="Enter new password"
                       required
                     />
@@ -1404,8 +1403,8 @@ export default function AssignRoles() {
                     <input
                       type="password"
                       value={passwordForm.confirmPassword}
-                      onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       placeholder="Confirm new password"
                       required
                     />
@@ -1425,7 +1424,7 @@ export default function AssignRoles() {
                   </button>
                   <button
                     onClick={handleChangePassword}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                    className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 flex items-center gap-2"
                   >
                     <Save className="h-4 w-4" />
                     Update Password
@@ -1470,8 +1469,8 @@ export default function AssignRoles() {
                       <input
                         type="text"
                         value={newRole.name}
-                        onChange={(e) => setNewRole({...newRole, name: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         placeholder="e.g., Manager, Supervisor, Coordinator"
                         required
                       />
@@ -1484,8 +1483,8 @@ export default function AssignRoles() {
                       <input
                         type="text"
                         value={newRole.description}
-                        onChange={(e) => setNewRole({...newRole, description: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         placeholder="Brief description of this role"
                       />
                     </div>
@@ -1529,7 +1528,7 @@ export default function AssignRoles() {
                                   });
                                 }
                               }}
-                              className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                              className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                             />
                             <feature.icon className="h-4 w-4 text-gray-500" />
                             <span>{feature.name}</span>
@@ -1555,7 +1554,7 @@ export default function AssignRoles() {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
+                      className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 flex items-center gap-2"
                     >
                       <Save className="h-4 w-4" />
                       Create Role
@@ -1581,7 +1580,7 @@ export default function AssignRoles() {
                 <p className="text-sm text-gray-600 mb-4">{selectedRole.description || '—'}</p>
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">Enabled Features</h4>
                 <div className="flex flex-wrap gap-2">
-                  {(selectedRole.permissions?.features||[]).map((p, idx) => {
+                  {(selectedRole.permissions?.features || []).map((p, idx) => {
                     const feature = FEATURE_MAP[p] || { name: p, icon: Settings };
                     const Icon = feature.icon;
                     return (
@@ -1591,7 +1590,7 @@ export default function AssignRoles() {
                       </span>
                     );
                   })}
-                  {(selectedRole.permissions?.features||[]).length === 0 && (
+                  {(selectedRole.permissions?.features || []).length === 0 && (
                     <span className="text-sm text-gray-500">No features assigned.</span>
                   )}
                 </div>
@@ -1621,7 +1620,7 @@ export default function AssignRoles() {
                       type="text"
                       value={editRole.name}
                       onChange={(e) => setEditRole({ ...editRole, name: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       required
                     />
                   </div>
@@ -1631,7 +1630,7 @@ export default function AssignRoles() {
                       type="text"
                       value={editRole.description}
                       onChange={(e) => setEditRole({ ...editRole, description: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
                 </div>
@@ -1666,7 +1665,7 @@ export default function AssignRoles() {
                                 setEditRole({ ...editRole, features: editRole.features.filter(f => f !== feature.path) });
                               }
                             }}
-                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                           />
                           <feature.icon className="h-4 w-4 text-gray-500" />
                           <span>{feature.name}</span>
@@ -1710,7 +1709,7 @@ export default function AssignRoles() {
                         Swal.fire({ icon: 'error', title: 'Update failed', text: err.message || 'Unable to update role' });
                       }
                     }}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
+                    className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 flex items-center gap-2"
                   >
                     <Save className="h-4 w-4" />
                     Save Changes

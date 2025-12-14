@@ -14,7 +14,7 @@ function getAllFeaturesFromMenu() {
     '/admin/assign-roles',
     'assign-roles'
   ];
-  
+
   for (const section of ADMIN_MENU) {
     for (const item of section.items) {
       if (item.children && Array.isArray(item.children)) {
@@ -64,16 +64,18 @@ export default function AssignCountryPartner() {
 
   useEffect(() => {
     const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
-    fetch(`${BASE}/admin/countries`).then(r=>r.json()).then(res=>{
-      if(res.ok && Array.isArray(res.countries)) setCountries(res.countries.filter(Boolean));
+    fetch(`${BASE}/admin/countries`).then(r => r.json()).then(res => {
+      if (res.ok && Array.isArray(res.countries)) setCountries(res.countries.filter(Boolean));
     });
   }, []);
 
   const FLATTENED_FEATURES = useMemo(() => getAllFeaturesFromMenu(), []);
   const handleCheck = (feature) => {
-    setForm(f => ({ ...f, features: f.features.includes(feature)
-      ? f.features.filter(f2 => f2 !== feature)
-      : [...f.features, feature] }));
+    setForm(f => ({
+      ...f, features: f.features.includes(feature)
+        ? f.features.filter(f2 => f2 !== feature)
+        : [...f.features, feature]
+    }));
   };
 
   const handleSubmit = async e => {
@@ -108,7 +110,7 @@ export default function AssignCountryPartner() {
       await Swal.fire({ icon: 'success', title: 'Partner created!', text: 'Country manager account created.' });
       setForm({ name: "", email: "", password: "", status: "active", features: [], country: "" });
       navigate("/admin/assigned-country-admins");
-    } catch(e) {
+    } catch (e) {
       await Swal.fire({ icon: 'error', title: 'Error', text: e.message });
     } finally {
       setLoading(false);
@@ -127,7 +129,7 @@ export default function AssignCountryPartner() {
       <div className="w-full">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           {/* Card Header */}
-          <div className="bg-linear-to-r from-purple-50 to-blue-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+          <div className="bg-linear-to-r from-brand-50 to-neutral-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900">User Information</h2>
             <p className="text-xs sm:text-sm text-gray-600 mt-1">Fill in the details to add a new Country Partner</p>
           </div>
@@ -140,21 +142,21 @@ export default function AssignCountryPartner() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Full Name *</label>
-                    <input className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" required value={form.name} onChange={e => setForm(f=>({...f,name:e.target.value}))} placeholder="Enter full name"/>
+                    <input className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Enter full name" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Email Address *</label>
-                    <input className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" required type="email" value={form.email} onChange={e => setForm(f=>({...f,email:e.target.value}))} placeholder="user@example.com"/>
+                    <input className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="user@example.com" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Password *</label>
-                    <input className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" required type="password" value={form.password} onChange={e => setForm(f=>({...f,password:e.target.value}))} placeholder="Enter secure password"/>
+                    <input className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" required type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="Enter secure password" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Country</label>
-                    <select className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" required value={form.country || ""} onChange={e=>setForm(f=>({...f,country:e.target.value}))}>
+                    <select className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" required value={form.country || ""} onChange={e => setForm(f => ({ ...f, country: e.target.value }))}>
                       <option value="" disabled>Select country...</option>
-                      {countries.map((c)=>c && c.code ? (
+                      {countries.map((c) => c && c.code ? (
                         <option key={c.code} value={c.code}>{c.country}</option>
                       ) : null)}
                     </select>
@@ -167,7 +169,7 @@ export default function AssignCountryPartner() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Status</label>
-                    <select className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))}>
+                    <select className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
                     </select>
@@ -179,7 +181,7 @@ export default function AssignCountryPartner() {
                         <button
                           type="button"
                           onClick={() => setForm(f => ({ ...f, features: FLATTENED_FEATURES.map(feat => feat.key) }))}
-                          className="px-3 py-1 text-xs font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-all"
+                          className="px-3 py-1 text-xs font-medium text-brand-600 hover:text-brand-700 hover:bg-brand-50 rounded-md transition-all"
                         >
                           Select All
                         </button>
@@ -195,7 +197,7 @@ export default function AssignCountryPartner() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
                       {FLATTENED_FEATURES.map(feat => (
                         <label key={feat.key} className="flex items-center min-h-[32px] p-2 rounded-lg hover:bg-gray-50 cursor-pointer w-full transition-all">
-                          <input type="checkbox" checked={form.features.includes(feat.key)} onChange={()=>handleCheck(feat.key)} className="mr-2"/>
+                          <input type="checkbox" checked={form.features.includes(feat.key)} onChange={() => handleCheck(feat.key)} className="mr-2" />
                           <span className="text-sm">{feat.label}</span>
                         </label>
                       ))}
@@ -214,7 +216,7 @@ export default function AssignCountryPartner() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 sm:px-8 py-2 sm:py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-60 disabled:cursor-not-allowed transition-all font-medium shadow-sm hover:shadow-md text-sm sm:text-base"
+                    className="px-6 sm:px-8 py-2 sm:py-3 rounded-lg bg-brand-500 hover:bg-brand-600 text-dark-base disabled:opacity-60 disabled:cursor-not-allowed transition-all font-medium shadow-sm hover:shadow-md text-sm sm:text-base"
                   >{loading ? "Creating..." : "Create Partner"}</button>
                 </div>
               </div>

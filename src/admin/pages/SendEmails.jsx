@@ -9,12 +9,12 @@ const RECIPIENT_TYPES = [
   { value: 'all', label: 'All Users', icon: Users, gradient: 'from-blue-500 to-cyan-500' },
   { value: 'verified', label: 'Verified Users', icon: Mail, gradient: 'from-green-500 to-emerald-500' },
   { value: 'unverified', label: 'Unverified Users', icon: Mail, gradient: 'from-yellow-500 to-orange-500' },
-  { value: 'active', label: 'Active Users', icon: Users, gradient: 'from-purple-500 to-pink-500' },
+  { value: 'active', label: 'Active Users', icon: Users, gradient: 'from-brand-500 to-brand-600' },
   { value: 'banned', label: 'Banned Users', icon: Users, gradient: 'from-red-500 to-rose-500' },
   { value: 'inactive', label: 'Inactive Users', icon: Users, gradient: 'from-gray-500 to-slate-500' },
-  { value: 'kyc_verified', label: 'KYC Verified Users', icon: Mail, gradient: 'from-indigo-500 to-blue-500' },
+  { value: 'kyc_verified', label: 'KYC Verified Users', icon: Mail, gradient: 'from-blue-500 to-cyan-500' },
   { value: 'kyc_unverified', label: 'KYC Unverified Users', icon: Mail, gradient: 'from-amber-500 to-yellow-500' },
-  { value: 'specific', label: 'Specific User(s)', icon: Search, gradient: 'from-violet-500 to-purple-500' },
+  { value: 'specific', label: 'Specific User(s)', icon: Search, gradient: 'from-neutral-600 to-neutral-800' },
 ];
 
 export default function SendEmails() {
@@ -73,19 +73,19 @@ export default function SendEmails() {
   const loadTemplateContent = async (templateId) => {
     try {
       const token = localStorage.getItem('adminToken');
-      
+
       // Get the template details
       const templateResponse = await axios.get(`${BASE}/admin/email-templates/${templateId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       if (templateResponse.data.ok && templateResponse.data.template) {
         const template = templateResponse.data.template;
         const htmlCode = template.html_code || '';
-        
+
         // Extract subject from HTML
         let extractedSubject = '';
-        
+
         // Method 1: Try to find <title> tag
         const titleMatch = htmlCode.match(/<title[^>]*>([^<]+)<\/title>/i);
         if (titleMatch) {
@@ -93,7 +93,7 @@ export default function SendEmails() {
           // Remove variable syntax if present
           extractedSubject = extractedSubject.replace(/\{\{subject\}\}/gi, '').trim();
         }
-        
+
         // Method 2: If no title, try to find text near {{subject}} variable
         if (!extractedSubject) {
           const subjectVarMatch = htmlCode.match(/\{\{subject\}\}/i);
@@ -113,19 +113,19 @@ export default function SendEmails() {
             }
           }
         }
-        
+
         // Method 3: Use template name as fallback
         if (!extractedSubject) {
           extractedSubject = template.name || 'Email Subject';
         }
-        
+
         // Get the PREVIEW (rendered HTML with sample data) to show in body
         const previewResponse = await axios.post(
           `${BASE}/admin/email-templates/preview`,
           { html_code: htmlCode },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        
+
         if (previewResponse.data.ok && previewResponse.data.preview_html) {
           // Set subject and body with preview content
           setSubject(extractedSubject);
@@ -149,7 +149,7 @@ export default function SendEmails() {
   const handleTemplateChange = async (e) => {
     const templateId = e.target.value ? Number(e.target.value) : null;
     setSelectedTemplateId(templateId);
-    
+
     if (templateId) {
       // Load template content to show subject and body
       await loadTemplateContent(templateId);
@@ -490,7 +490,7 @@ export default function SendEmails() {
     const now = new Date();
     const diff = now - d;
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
+
     if (days === 0) {
       return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     } else if (days === 1) {
@@ -503,24 +503,24 @@ export default function SendEmails() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-5rem)] w-full bg-gradient-to-br from-gray-50 via-white to-violet-50 rounded-xl overflow-hidden border border-gray-200 shadow-xl">
+    <div className="flex h-[calc(100vh-5rem)] w-full bg-gradient-to-br from-gray-50 via-white to-brand-50 rounded-xl overflow-hidden border border-gray-200 shadow-xl">
       {/* Left Sidebar */}
-      <div className="w-64 md:w-72 lg:w-80 flex-shrink-0 bg-gradient-to-b from-violet-600 via-purple-600 to-indigo-700 text-white flex flex-col relative overflow-hidden">
+      <div className="w-64 md:w-72 lg:w-80 flex-shrink-0 bg-gradient-to-b from-gray-800 via-gray-900 to-black text-white flex flex-col relative overflow-hidden">
         {/* Decorative gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 via-transparent to-purple-500/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-500/10 via-transparent to-brand-500/10 pointer-events-none" />
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-        
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+
         <div className="relative z-10 flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 md:p-6 border-b border-violet-500/30">
+          <div className="p-4 md:p-6 border-b border-gray-700">
             <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
               <div className="relative">
                 <div className="absolute inset-0 bg-white/20 rounded-xl blur-lg" />
                 <div className="relative bg-gradient-to-br from-white/30 to-white/10 p-3 rounded-xl backdrop-blur-sm border border-white/20">
-                  <img 
-                    src="/favicon-32x32.png" 
-                    alt="Solitaire" 
+                  <img
+                    src="/favicon-32x32.png"
+                    alt="Solitaire"
                     className="h-8 w-8 rounded-lg"
                     onError={(e) => {
                       e.target.style.display = 'none';
@@ -560,11 +560,10 @@ export default function SendEmails() {
             <nav className="space-y-1">
               <button
                 onClick={() => setActiveTab('compose')}
-                className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-xl transition-all ${
-                  activeTab === 'compose' 
-                    ? 'bg-white/20 backdrop-blur-sm shadow-lg border border-white/20' 
-                    : 'hover:bg-white/10'
-                }`}
+                className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-xl transition-all ${activeTab === 'compose'
+                  ? 'bg-white/20 backdrop-blur-sm shadow-lg border border-white/20'
+                  : 'hover:bg-white/10'
+                  }`}
               >
                 <div className="flex items-center gap-2 md:gap-3">
                   <Inbox size={18} />
@@ -573,11 +572,10 @@ export default function SendEmails() {
               </button>
               <button
                 onClick={() => setActiveTab('sent')}
-                className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-xl transition-all ${
-                  activeTab === 'sent' 
-                    ? 'bg-white/20 backdrop-blur-sm shadow-lg border border-white/20' 
-                    : 'hover:bg-white/10'
-                }`}
+                className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-xl transition-all ${activeTab === 'sent'
+                  ? 'bg-white/20 backdrop-blur-sm shadow-lg border border-white/20'
+                  : 'hover:bg-white/10'
+                  }`}
               >
                 <div className="flex items-center gap-2 md:gap-3">
                   <Send size={18} />
@@ -593,7 +591,7 @@ export default function SendEmails() {
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-violet-500/30">
+          <div className="p-4 border-t border-gray-700">
             <div className="flex items-center gap-2 text-white/70 text-xs">
               <Sparkles size={14} />
               <span>Powered by Solitaire</span>
@@ -612,7 +610,7 @@ export default function SendEmails() {
               <input
                 type="text"
                 placeholder="Search messages..."
-                className="w-full pl-10 pr-4 py-2 md:py-2.5 border border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent shadow-sm text-sm md:text-base"
+                className="w-full pl-10 pr-4 py-2 md:py-2.5 border border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent shadow-sm text-sm md:text-base"
               />
             </div>
           </div>
@@ -623,8 +621,8 @@ export default function SendEmails() {
           {activeTab === 'compose' && (
             <div className="p-4 md:p-6 lg:p-8 space-y-6 w-full">
               <div className="flex items-center gap-2 md:gap-3 mb-2">
-                <div className="h-1 w-8 md:w-12 bg-gradient-to-r from-violet-600 to-purple-600 rounded-full" />
-                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 via-violet-700 to-purple-700 bg-clip-text text-transparent">
+                <div className="h-1 w-8 md:w-12 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full" />
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
                   Compose Email
                 </h1>
               </div>
@@ -647,16 +645,15 @@ export default function SendEmails() {
                           setPreviewData(null);
                           setShowPreview(false);
                         }}
-                        className={`group relative flex flex-col items-center gap-1 md:gap-2 px-2 md:px-4 py-3 md:py-4 rounded-lg md:rounded-xl border-2 transition-all overflow-hidden ${
-                          isActive
-                            ? `border-transparent bg-gradient-to-br ${type.gradient} text-white shadow-lg scale-105`
-                            : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-md text-gray-700'
-                        }`}
+                        className={`group relative flex flex-col items-center gap-1 md:gap-2 px-2 md:px-4 py-3 md:py-4 rounded-lg md:rounded-xl border-2 transition-all overflow-hidden ${isActive
+                          ? `border-transparent bg-gradient-to-br ${type.gradient} text-white shadow-lg scale-105`
+                          : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-md text-gray-700'
+                          }`}
                       >
                         {isActive && (
                           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
                         )}
-                        <div className={`relative ${isActive ? 'text-white' : `text-gray-600 group-hover:text-violet-600`}`}>
+                        <div className={`relative ${isActive ? 'text-white' : `text-gray-600 group-hover:text-brand-600`}`}>
                           <Icon size={16} className="md:w-5 md:h-5" />
                         </div>
                         <span className={`text-[10px] md:text-xs font-medium relative text-center ${isActive ? 'text-white' : 'text-gray-700'}`}>
@@ -680,10 +677,10 @@ export default function SendEmails() {
                           if (searchResults.length > 0) setShowSearchResults(true);
                         }}
                         placeholder="Search users by email or name..."
-                        className="w-full rounded-xl border border-gray-300 h-12 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white shadow-sm"
+                        className="w-full rounded-xl border border-gray-300 h-12 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-sm"
                       />
                       <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      
+
                       {/* Search Results Dropdown */}
                       {showSearchResults && searchResults.length > 0 && (
                         <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
@@ -691,7 +688,7 @@ export default function SendEmails() {
                             <button
                               key={user.id}
                               onClick={() => handleAddUser(user)}
-                              className="w-full text-left px-4 py-3 hover:bg-violet-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                              className="w-full text-left px-4 py-3 hover:bg-brand-50 border-b border-gray-100 last:border-b-0 transition-colors"
                             >
                               <div className="font-medium text-gray-900">{user.email}</div>
                               {user.name && <div className="text-sm text-gray-500">{user.name}</div>}
@@ -715,12 +712,12 @@ export default function SendEmails() {
                         {specificUsers.map((user) => (
                           <div
                             key={user.id}
-                            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-violet-100 to-purple-100 text-violet-700 rounded-full text-sm font-medium shadow-sm"
+                            className="flex items-center gap-2 px-3 py-2 bg-brand-100 text-brand-900 rounded-full text-sm font-medium shadow-sm"
                           >
                             <span>{user.email}</span>
                             <button
                               onClick={() => handleRemoveUser(user.id)}
-                              className="hover:text-violet-900 transition-colors"
+                              className="hover:text-brand-900 transition-colors"
                             >
                               <X size={14} />
                             </button>
@@ -743,7 +740,7 @@ export default function SendEmails() {
                   <select
                     value={selectedTemplateId || ''}
                     onChange={handleTemplateChange}
-                    className="w-full rounded-xl border border-gray-300 h-10 md:h-12 px-3 md:px-4 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white shadow-sm text-sm md:text-base"
+                    className="w-full rounded-xl border border-gray-300 h-10 md:h-12 px-3 md:px-4 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-sm text-sm md:text-base"
                     disabled={loadingTemplates}
                   >
                     <option value="">Use Default Template</option>
@@ -769,7 +766,7 @@ export default function SendEmails() {
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="Email subject"
-                    className="w-full rounded-xl border border-gray-300 h-10 md:h-12 px-3 md:px-4 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white shadow-sm text-sm md:text-base"
+                    className="w-full rounded-xl border border-gray-300 h-10 md:h-12 px-3 md:px-4 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-sm text-sm md:text-base"
                     readOnly={!!selectedTemplateId}
                   />
                 </div>
@@ -780,7 +777,7 @@ export default function SendEmails() {
                     Email Body {!selectedTemplateId && '*'}
                     {selectedTemplateId && <span className="text-xs text-gray-500 ml-2">(from template - preview)</span>}
                   </label>
-                  
+
                   {selectedTemplateId ? (
                     // Show HTML preview when template is selected (same as Email Templates page)
                     <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
@@ -792,7 +789,7 @@ export default function SendEmails() {
                           <div
                             dangerouslySetInnerHTML={{ __html: body }}
                             className="bg-white rounded-lg shadow-sm"
-                            style={{ 
+                            style={{
                               maxWidth: '100%',
                               margin: '0 auto'
                             }}
@@ -833,7 +830,7 @@ export default function SendEmails() {
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="https://example.com/image.jpg"
-                    className="w-full rounded-xl border border-gray-300 h-12 px-4 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white shadow-sm"
+                    className="w-full rounded-xl border border-gray-300 h-12 px-4 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-sm"
                   />
                   <p className="text-xs text-gray-500 mt-2">Image will be displayed at the bottom of the email</p>
                 </div>
@@ -869,7 +866,7 @@ export default function SendEmails() {
                 <button
                   onClick={handleSend}
                   disabled={sending || (!selectedTemplateId && (!subject.trim() || !body.trim()))}
-                  className="flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700 font-semibold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 text-sm md:text-base"
+                  className="flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-dark-base hover:from-brand-600 hover:to-brand-700 font-semibold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 text-sm md:text-base"
                 >
                   {sending ? (
                     <>
@@ -887,7 +884,7 @@ export default function SendEmails() {
 
               {/* Preview Section */}
               {showPreview && previewData && (
-                <div className="mt-6 p-6 bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl border border-violet-200 shadow-sm">
+                <div className="mt-6 p-6 bg-gradient-to-br from-brand-50 to-brand-100 rounded-2xl border border-brand-200 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Preview</h3>
                   <div className="space-y-2">
                     <p className="text-sm text-gray-700">
@@ -919,7 +916,7 @@ export default function SendEmails() {
                     <div className="mb-4 pb-4 border-b border-gray-200">
                       <strong className="text-gray-900">Subject:</strong> <span className="text-gray-700">{subject || '(No subject)'}</span>
                     </div>
-                    <div 
+                    <div
                       className="prose max-w-none"
                       dangerouslySetInnerHTML={{ __html: body }}
                     />
@@ -942,31 +939,28 @@ export default function SendEmails() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setSentFilter('all')}
-                    className={`px-4 py-2 text-sm rounded-xl font-medium transition-colors ${
-                      sentFilter === 'all'
-                        ? 'bg-violet-600 text-white shadow-sm'
-                        : 'text-gray-700 hover:bg-violet-50 hover:text-violet-700'
-                    }`}
+                    className={`px-4 py-2 text-sm rounded-xl font-medium transition-colors ${sentFilter === 'all'
+                      ? 'bg-brand-500 text-dark-base shadow-sm'
+                      : 'text-gray-700 hover:bg-brand-50 hover:text-brand-700'
+                      }`}
                   >
                     All
                   </button>
                   <button
                     onClick={() => setSentFilter('successful')}
-                    className={`px-4 py-2 text-sm rounded-xl font-medium transition-colors ${
-                      sentFilter === 'successful'
-                        ? 'bg-violet-600 text-white shadow-sm'
-                        : 'text-gray-700 hover:bg-violet-50 hover:text-violet-700'
-                    }`}
+                    className={`px-4 py-2 text-sm rounded-xl font-medium transition-colors ${sentFilter === 'successful'
+                      ? 'bg-brand-500 text-dark-base shadow-sm'
+                      : 'text-gray-700 hover:bg-brand-50 hover:text-brand-700'
+                      }`}
                   >
                     Successful
                   </button>
                   <button
                     onClick={() => setSentFilter('failed')}
-                    className={`px-4 py-2 text-sm rounded-xl font-medium transition-colors ${
-                      sentFilter === 'failed'
-                        ? 'bg-violet-600 text-white shadow-sm'
-                        : 'text-gray-700 hover:bg-violet-50 hover:text-violet-700'
-                    }`}
+                    className={`px-4 py-2 text-sm rounded-xl font-medium transition-colors ${sentFilter === 'failed'
+                      ? 'bg-brand-500 text-dark-base shadow-sm'
+                      : 'text-gray-700 hover:bg-brand-50 hover:text-brand-700'
+                      }`}
                   >
                     Failed
                   </button>
@@ -976,8 +970,8 @@ export default function SendEmails() {
                 {sentEmails.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-gray-500">
                     <div className="text-center">
-                      <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center">
-                        <Send size={40} className="text-violet-400" />
+                      <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-brand-100 to-brand-200 rounded-full flex items-center justify-center">
+                        <Send size={40} className="text-brand-400" />
                       </div>
                       <p className="text-lg font-medium">No sent emails</p>
                       <p className="text-sm">Emails you send will appear here</p>
@@ -996,75 +990,75 @@ export default function SendEmails() {
                         return true;
                       })
                       .map((email) => {
-                      const typeInfo = RECIPIENT_TYPES.find(t => t.value === email.recipientType);
-                      const firstRecipient = Array.isArray(email.results) && email.results.length > 0
-                        ? email.results[0]
-                        : null;
-                      return (
-                        <div
-                          key={email.id}
-                          className="p-5 hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 cursor-pointer transition-all rounded-xl border border-gray-200 hover:border-violet-200 hover:shadow-md"
-                          onClick={() => {
-                            setSelectedSentEmail(email);
-                            setShowSentDetails(true);
-                          }}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${typeInfo?.gradient || 'from-gray-400 to-gray-500'} text-white flex items-center justify-center font-semibold text-sm shadow-sm`}>
-                                  {typeInfo?.label.charAt(0) || 'A'}
+                        const typeInfo = RECIPIENT_TYPES.find(t => t.value === email.recipientType);
+                        const firstRecipient = Array.isArray(email.results) && email.results.length > 0
+                          ? email.results[0]
+                          : null;
+                        return (
+                          <div
+                            key={email.id}
+                            className="p-5 hover:bg-gradient-to-r hover:from-brand-50 hover:to-brand-100 cursor-pointer transition-all rounded-xl border border-gray-200 hover:border-brand-200 hover:shadow-md"
+                            onClick={() => {
+                              setSelectedSentEmail(email);
+                              setShowSentDetails(true);
+                            }}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${typeInfo?.gradient || 'from-gray-400 to-gray-500'} text-white flex items-center justify-center font-semibold text-sm shadow-sm`}>
+                                    {typeInfo?.label.charAt(0) || 'A'}
+                                  </div>
+                                  <div>
+                                    <div className="font-semibold text-gray-900">
+                                      {typeInfo?.label || 'Recipients'}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      {email.recipientCount} recipients
+                                    </div>
+                                  </div>
                                 </div>
-                                <div>
-                                  <div className="font-semibold text-gray-900">
-                                    {typeInfo?.label || 'Recipients'}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {email.recipientCount} recipients
-                                  </div>
+                                <div className="ml-14">
+                                  <div className="font-bold text-gray-900 mb-1">{email.subject}</div>
+                                  {firstRecipient ? (
+                                    <>
+                                      <div className="text-sm text-gray-800 font-medium">
+                                        {firstRecipient.name || firstRecipient.email}
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        {firstRecipient.email}
+                                      </div>
+                                      <div className="text-xs text-gray-400 mt-1">
+                                        Sent {fmtDate(firstRecipient.sentAt)}
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div
+                                      className="text-sm text-gray-600 line-clamp-2"
+                                      dangerouslySetInnerHTML={{
+                                        __html: email.body.substring(0, 100) + '...',
+                                      }}
+                                    />
+                                  )}
                                 </div>
                               </div>
-                              <div className="ml-14">
-                                <div className="font-bold text-gray-900 mb-1">{email.subject}</div>
-                                {firstRecipient ? (
-                                  <>
-                                    <div className="text-sm text-gray-800 font-medium">
-                                      {firstRecipient.name || firstRecipient.email}
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                      {firstRecipient.email}
-                                    </div>
-                                    <div className="text-xs text-gray-400 mt-1">
-                                      Sent {fmtDate(firstRecipient.sentAt)}
-                                    </div>
-                                  </>
-                                ) : (
-                                  <div
-                                    className="text-sm text-gray-600 line-clamp-2"
-                                    dangerouslySetInnerHTML={{
-                                      __html: email.body.substring(0, 100) + '...',
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            </div>
-                            <div className="text-right ml-4">
-                              <div className="text-sm text-gray-500 mb-2">{fmtDate(email.sentAt)}</div>
-                              <div className="flex items-center gap-2 text-xs">
-                                <span className={`px-3 py-1 rounded-lg font-medium ${email.successCount > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                                  ✓ {email.successCount}
-                                </span>
-                                {email.failureCount > 0 && (
-                                  <span className="px-3 py-1 rounded-lg font-medium bg-red-100 text-red-700">
-                                    ✗ {email.failureCount}
+                              <div className="text-right ml-4">
+                                <div className="text-sm text-gray-500 mb-2">{fmtDate(email.sentAt)}</div>
+                                <div className="flex items-center gap-2 text-xs">
+                                  <span className={`px-3 py-1 rounded-lg font-medium ${email.successCount > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                                    ✓ {email.successCount}
                                   </span>
-                                )}
+                                  {email.failureCount > 0 && (
+                                    <span className="px-3 py-1 rounded-lg font-medium bg-red-100 text-red-700">
+                                      ✗ {email.failureCount}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                 )}
               </div>
@@ -1117,13 +1111,13 @@ export default function SendEmails() {
                           });
                         }
                       }}
-                      className="bg-gray-50 rounded-xl p-3 border border-gray-100 text-left hover:border-violet-300 hover:bg-violet-50/40 transition-colors"
+                      className="bg-gray-50 rounded-xl p-3 border border-gray-100 text-left hover:border-brand-300 hover:bg-brand-50/40 transition-colors"
                     >
                       <div className="text-xs text-gray-500 mb-1">Recipients</div>
                       <div className="text-sm font-semibold text-gray-900">
                         {selectedSentEmail.recipientCount ?? '-'}
                       </div>
-                      <div className="text-[11px] text-violet-600 mt-1">View all</div>
+                      <div className="text-[11px] text-brand-600 mt-1">View all</div>
                     </button>
                     <button
                       type="button"
@@ -1187,31 +1181,28 @@ export default function SendEmails() {
                     </h4>
                     <div className="flex gap-1 text-[11px]">
                       <span
-                        className={`px-2 py-0.5 rounded-full cursor-pointer ${
-                          recipientListFilter === 'all'
-                            ? 'bg-violet-600 text-white'
-                            : 'text-gray-600 hover:bg-violet-50 hover:text-violet-700'
-                        }`}
+                        className={`px-2 py-0.5 rounded-full cursor-pointer ${recipientListFilter === 'all'
+                          ? 'bg-brand-500 text-dark-base'
+                          : 'text-gray-600 hover:bg-brand-50 hover:text-brand-700'
+                          }`}
                         onClick={() => setRecipientListFilter('all')}
                       >
                         All
                       </span>
                       <span
-                        className={`px-2 py-0.5 rounded-full cursor-pointer ${
-                          recipientListFilter === 'success'
-                            ? 'bg-green-600 text-white'
-                            : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
-                        }`}
+                        className={`px-2 py-0.5 rounded-full cursor-pointer ${recipientListFilter === 'success'
+                          ? 'bg-green-600 text-white'
+                          : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
+                          }`}
                         onClick={() => setRecipientListFilter('success')}
                       >
                         ✓
                       </span>
                       <span
-                        className={`px-2 py-0.5 rounded-full cursor-pointer ${
-                          recipientListFilter === 'failed'
-                            ? 'bg-red-600 text-white'
-                            : 'text-gray-600 hover:bg-red-50 hover:text-red-700'
-                        }`}
+                        className={`px-2 py-0.5 rounded-full cursor-pointer ${recipientListFilter === 'failed'
+                          ? 'bg-red-600 text-white'
+                          : 'text-gray-600 hover:bg-red-50 hover:text-red-700'
+                          }`}
                         onClick={() => setRecipientListFilter('failed')}
                       >
                         ✗
@@ -1241,11 +1232,10 @@ export default function SendEmails() {
                               </div>
                             </div>
                             <span
-                              className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-                                r.status === 'success'
-                                  ? 'bg-green-100 text-green-700'
-                                  : 'bg-red-100 text-red-700'
-                              }`}
+                              className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${r.status === 'success'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
+                                }`}
                             >
                               {r.status === 'success' ? 'Sent' : 'Failed'}
                             </span>
@@ -1256,7 +1246,7 @@ export default function SendEmails() {
                         </li>
                       ))}
                     {!Array.isArray(selectedSentEmail.results) ||
-                    selectedSentEmail.results.length === 0 ? (
+                      selectedSentEmail.results.length === 0 ? (
                       <li className="px-3 py-4 text-[11px] text-gray-500 text-center">
                         No per-recipient details available for this email.
                       </li>

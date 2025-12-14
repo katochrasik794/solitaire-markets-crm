@@ -2,14 +2,14 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { 
-  Code2, 
-  Eye, 
-  Save, 
-  Trash2, 
-  Star, 
-  Plus, 
-  Edit, 
+import {
+  Code2,
+  Eye,
+  Save,
+  Trash2,
+  Star,
+  Plus,
+  Edit,
   Loader2,
   Copy,
   Check,
@@ -264,21 +264,21 @@ export default function EmailTemplates() {
     setTimeout(() => setCopiedVariable(null), 2000);
   };
 
-  const filteredTemplates = templates.filter(t => 
+  const filteredTemplates = templates.filter(t =>
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (t.description && t.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-neutral-50 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1920px] mx-auto h-full">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+            <div className="p-2 bg-brand-500 rounded-lg">
               <FileCode className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-gray-900">
               Email Templates
             </h1>
           </div>
@@ -288,7 +288,7 @@ export default function EmailTemplates() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
           {/* Left Panel - Code Editor */}
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 flex items-center justify-between">
+            <div className="bg-brand-600 p-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Code2 className="w-5 h-5" />
                 <span className="font-semibold">Template Code</span>
@@ -310,7 +310,7 @@ export default function EmailTemplates() {
                   value={templateName}
                   onChange={(e) => setTemplateName(e.target.value)}
                   placeholder="e.g., Welcome Email Template"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -320,7 +320,7 @@ export default function EmailTemplates() {
                   value={templateDescription}
                   onChange={(e) => setTemplateDescription(e.target.value)}
                   placeholder="Brief description of this template"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -330,7 +330,7 @@ export default function EmailTemplates() {
                   value={fromEmail}
                   onChange={(e) => setFromEmail(e.target.value)}
                   placeholder="e.g., noreply@solitaire.com or leave empty for default"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-500 mt-1">Email address to send from when using this template. Leave empty to use default SMTP settings.</p>
               </div>
@@ -357,7 +357,7 @@ export default function EmailTemplates() {
               <button
                 onClick={handleSave}
                 disabled={saving || !templateName.trim() || !htmlCode.trim()}
-                className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
+                className="w-full px-4 py-2 bg-brand-600 text-white rounded-lg font-semibold hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
               >
                 {saving ? (
                   <>
@@ -407,7 +407,7 @@ export default function EmailTemplates() {
 
         {/* Template List */}
         <div className="mt-6 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-4 flex items-center justify-between">
+          <div className="bg-brand-600 p-4 flex items-center justify-between">
             <div className="flex items-center gap-2 text-white">
               <Sparkles className="w-5 h-5" />
               <span className="font-semibold">Saved Templates</span>
@@ -423,7 +423,7 @@ export default function EmailTemplates() {
 
           {loading ? (
             <div className="p-8 text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto text-purple-500" />
+              <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-500" />
             </div>
           ) : filteredTemplates.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
@@ -436,11 +436,10 @@ export default function EmailTemplates() {
                 {filteredTemplates.map((template) => (
                   <div
                     key={template.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                      selectedTemplate?.id === template.id
-                        ? 'border-purple-500 bg-purple-50 shadow-md'
-                        : 'border-gray-200 hover:border-purple-300 hover:shadow-sm'
-                    }`}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedTemplate?.id === template.id
+                      ? 'border-brand-500 bg-brand-50 shadow-md'
+                      : 'border-gray-200 hover:border-brand-300 hover:shadow-sm'
+                      }`}
                     onClick={() => handleSelectTemplate(template)}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -494,7 +493,7 @@ export default function EmailTemplates() {
         {/* Variable Helper */}
         <div className="mt-6 bg-white rounded-xl shadow-lg border border-gray-200 p-4">
           <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <Code2 className="w-5 h-5 text-purple-500" />
+            <Code2 className="w-5 h-5 text-brand-500" />
             Available Variables
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
@@ -502,14 +501,14 @@ export default function EmailTemplates() {
               <button
                 key={variable.name}
                 onClick={() => copyVariable(variable.name)}
-                className="p-3 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all text-left group"
+                className="p-3 border border-gray-200 rounded-lg hover:border-brand-300 hover:bg-brand-50 transition-all text-left group"
               >
                 <div className="flex items-center justify-between mb-1">
-                  <code className="text-sm font-mono text-purple-600">{`{{${variable.name}}}`}</code>
+                  <code className="text-sm font-mono text-brand-600">{`{{${variable.name}}}`}</code>
                   {copiedVariable === variable.name ? (
                     <Check className="w-4 h-4 text-green-500" />
                   ) : (
-                    <Copy className="w-4 h-4 text-gray-400 group-hover:text-purple-500" />
+                    <Copy className="w-4 h-4 text-gray-400 group-hover:text-brand-500" />
                   )}
                 </div>
                 <p className="text-xs text-gray-600">{variable.description}</p>

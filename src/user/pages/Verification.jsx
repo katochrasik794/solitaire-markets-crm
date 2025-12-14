@@ -405,8 +405,8 @@ function Verification() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
             <div className="mb-6">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-yellow-100 rounded-full mb-4">
-                <svg className="w-10 h-10 text-yellow-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-brand-100 rounded-full mb-4">
+                <svg className="w-10 h-10 text-brand-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </div>
@@ -417,8 +417,8 @@ function Verification() {
                 Your verification documents are being reviewed. We'll notify you once the review is complete.
               </p>
             </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <div className="bg-brand-50 border border-brand-200 rounded-lg p-4">
+              <p className="text-sm text-brand-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
                 Status: <span className="font-semibold">Pending</span>
               </p>
             </div>
@@ -649,7 +649,7 @@ function Verification() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 py-3 rounded-lg transition-colors font-semibold uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base py-3 rounded-lg transition-colors font-semibold uppercase disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
               >
                 {submitting ? 'SUBMITTING...' : 'CONTINUE'}

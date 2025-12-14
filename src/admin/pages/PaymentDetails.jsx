@@ -44,7 +44,7 @@ export default function PaymentDetails() {
           for (const a of data.admins) map[String(a.id)] = a;
           setAdmins(map);
         }
-      } catch {}
+      } catch { }
     })();
   }, []);
 
@@ -104,46 +104,54 @@ export default function PaymentDetails() {
 
   const columns = useMemo(() => ([
     { key: "__index", label: "#", sortable: false },
-    { key: "user", label: "User", render: (v, r) => (
-      <div>
-        <div className="text-sm font-medium text-gray-900">{r.user?.name || r.user?.email || r.userId}</div>
-        <div className="text-xs text-gray-500">{r.user?.email || '-'}</div>
-      </div>
-    ) },
+    {
+      key: "user", label: "User", render: (v, r) => (
+        <div>
+          <div className="text-sm font-medium text-gray-900">{r.user?.name || r.user?.email || r.userId}</div>
+          <div className="text-xs text-gray-500">{r.user?.email || '-'}</div>
+        </div>
+      )
+    },
     { key: "createdAt", label: "Created", render: (v) => fmt(v) },
     { key: "updatedAt", label: "Updated", render: (v) => fmt(v) },
     { key: "methodType", label: "Method Type" },
-    { key: "details", label: "Bank Details", render: (_v, row) => {
-      const isBank = (row.methodType === 'bank') || !!(row.bankName || row.accountNumber || row.ifscSwiftCode);
-      if (isBank) {
+    {
+      key: "details", label: "Bank Details", render: (_v, row) => {
+        const isBank = (row.methodType === 'bank') || !!(row.bankName || row.accountNumber || row.ifscSwiftCode);
+        if (isBank) {
+          return (
+            <div className="text-xs text-gray-700 whitespace-normal break-words max-w-[520px] leading-tight">
+              <div><b>Bank:</b> {row.bankName || '-'}</div>
+              <div><b>Account:</b> {row.accountName || '-'} <span className="ml-2"><b>#</b> {row.accountNumber || '-'}</span></div>
+              <div><b>IFSC/SWIFT:</b> {row.ifscSwiftCode || '-'}</div>
+              <div><b>Type:</b> {row.accountType || '-'}</div>
+            </div>
+          );
+        }
+        // Non-bank methods compact details
         return (
           <div className="text-xs text-gray-700 whitespace-normal break-words max-w-[520px] leading-tight">
-            <div><b>Bank:</b> {row.bankName || '-'}</div>
-            <div><b>Account:</b> {row.accountName || '-'} <span className="ml-2"><b>#</b> {row.accountNumber || '-'}</span></div>
-            <div><b>IFSC/SWIFT:</b> {row.ifscSwiftCode || '-'}</div>
-            <div><b>Type:</b> {row.accountType || '-'}</div>
+            <div><b>Address:</b> {row.address || '-'}</div>
+            <div><b>Network:</b> {row.network || '-'} <span className="ml-2"><b>Currency:</b> {row.currency || '-'}</span></div>
           </div>
         );
       }
-      // Non-bank methods compact details
-      return (
-        <div className="text-xs text-gray-700 whitespace-normal break-words max-w-[520px] leading-tight">
-          <div><b>Address:</b> {row.address || '-'}</div>
-          <div><b>Network:</b> {row.network || '-'} <span className="ml-2"><b>Currency:</b> {row.currency || '-'}</span></div>
-        </div>
-      );
-    } },
-    { key: "status", label: "Status", render: (v, _r, Badge) => (
-      <Badge tone={v === 'approved' ? 'green' : v === 'rejected' ? 'red' : 'amber'}>{v}</Badge>
-    ) },
+    },
+    {
+      key: "status", label: "Status", render: (v, _r, Badge) => (
+        <Badge tone={v === 'approved' ? 'green' : v === 'rejected' ? 'red' : 'amber'}>{v}</Badge>
+      )
+    },
     { key: "approvedAt", label: "Approved At", render: (v) => fmt(v) },
-    { key: "approvedBy", label: "Approved By", render: (v) => {
-      if (!v) return '-';
-      const a = admins[String(v)];
-      if (!a) return String(v);
-      const name = a.username || a.name || a.email || String(v);
-      return `${name} (${a.email})`;
-    } },
+    {
+      key: "approvedBy", label: "Approved By", render: (v) => {
+        if (!v) return '-';
+        const a = admins[String(v)];
+        if (!a) return String(v);
+        const name = a.username || a.name || a.email || String(v);
+        return `${name} (${a.email})`;
+      }
+    },
     { key: "rejectionReason", label: "Rejection Reason", render: (v) => v || '-' },
     { key: "actions", label: "Actions", sortable: false },
   ]), [admins]);
@@ -151,12 +159,14 @@ export default function PaymentDetails() {
   const pendingColumns = useMemo(() => (
     columns.map(c => (
       c.key === 'actions'
-        ? { ...c, render: (_v, row) => (
+        ? {
+          ...c, render: (_v, row) => (
             <div className="flex items-center gap-4">
               <button onClick={() => approve(row.actions.id)} className="flex items-center gap-1 text-green-600 hover:text-green-700"><CheckCircle2 className="h-4 w-4" /> Approve</button>
               <button onClick={() => reject(row.actions.id)} className="flex items-center gap-1 text-red-600 hover:text-red-700"><XCircle className="h-4 w-4" /> Reject</button>
             </div>
-          ) }
+          )
+        }
         : c
     ))
   ), [columns]);
@@ -164,9 +174,11 @@ export default function PaymentDetails() {
   const approvedColumns = useMemo(() => (
     columns.map(c => (
       c.key === 'actions'
-        ? { ...c, render: (_v, row) => (
+        ? {
+          ...c, render: (_v, row) => (
             <div className="text-xs text-gray-500">Approved {row.actions.approvedAt ? new Date(row.actions.approvedAt).toLocaleString() : ''}</div>
-          ) }
+          )
+        }
         : c
     ))
   ), [columns]);
@@ -174,7 +186,7 @@ export default function PaymentDetails() {
   if (loading) {
     return (
       <div className="min-h-[50vh] grid place-items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
       </div>
     );
   }
@@ -191,13 +203,13 @@ export default function PaymentDetails() {
         <div className="p-4">
           <ProTable
             title={null}
-            rows={pending.map((r, i) => ({ ...r, __index: i+1, actions: r }))}
+            rows={pending.map((r, i) => ({ ...r, __index: i + 1, actions: r }))}
             columns={pendingColumns}
             filters={{
               searchKeys: [
-                'address','currency','network','status','approvedBy','rejectionReason',
-                'methodType','bankName','accountName','accountNumber','ifscSwiftCode','accountType',
-                'user.email','user.name'
+                'address', 'currency', 'network', 'status', 'approvedBy', 'rejectionReason',
+                'methodType', 'bankName', 'accountName', 'accountNumber', 'ifscSwiftCode', 'accountType',
+                'user.email', 'user.name'
               ],
               dateKey: 'submittedAt'
             }}
@@ -214,13 +226,13 @@ export default function PaymentDetails() {
         <div className="p-4">
           <ProTable
             title={null}
-            rows={approved.map((r, i) => ({ ...r, __index: i+1, actions: r }))}
+            rows={approved.map((r, i) => ({ ...r, __index: i + 1, actions: r }))}
             columns={approvedColumns}
             filters={{
               searchKeys: [
-                'address','currency','network','status','approvedBy','rejectionReason',
-                'methodType','bankName','accountName','accountNumber','ifscSwiftCode','accountType',
-                'user.email','user.name'
+                'address', 'currency', 'network', 'status', 'approvedBy', 'rejectionReason',
+                'methodType', 'bankName', 'accountName', 'accountNumber', 'ifscSwiftCode', 'accountType',
+                'user.email', 'user.name'
               ],
               dateKey: 'submittedAt'
             }}

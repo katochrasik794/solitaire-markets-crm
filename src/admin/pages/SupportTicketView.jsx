@@ -61,7 +61,7 @@ export default function SupportTicketView() {
   if (loading || !ticket) {
     return (
       <div className="min-h-[50vh] grid place-items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
       </div>
     );
   }
@@ -96,7 +96,7 @@ export default function SupportTicketView() {
           <div className="px-4 sm:px-6 py-3 border-b border-gray-200 font-semibold">Conversation</div>
           <div className="p-4 sm:p-6 space-y-4 max-h-[600px] overflow-y-auto">
             {replies.map((r, idx) => (
-              <div key={idx} className={`p-3 rounded-lg border ${r.sender_type === 'admin' ? 'bg-indigo-50 border-indigo-100 ml-10' : 'bg-gray-50 border-gray-200 mr-10'}`}>
+              <div key={idx} className={`p-3 rounded-lg border ${r.sender_type === 'admin' ? 'bg-brand-50 border-brand-100 ml-10' : 'bg-gray-50 border-gray-200 mr-10'}`}>
                 <div className="text-xs text-gray-500 mb-1 flex justify-between">
                   <span className="font-bold">{r.sender_name || (r.sender_type === 'admin' ? 'Support Agent' : 'User')}</span>
                   <span>{new Date(r.created_at).toLocaleString()}</span>
@@ -110,11 +110,11 @@ export default function SupportTicketView() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500"
               placeholder="Write a reply..."
             />
             <div className="flex items-center justify-end mt-2">
-              <button onClick={sendReply} className="px-4 py-2 bg-purple-600 text-white rounded-lg flex items-center gap-2">
+              <button onClick={sendReply} className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg flex items-center gap-2">
                 <Send className="h-4 w-4" /> Send Reply
               </button>
             </div>
@@ -127,8 +127,8 @@ export default function SupportTicketView() {
             <div className="flex justify-between border-b pb-2">
               <span className="text-gray-500">Status</span>
               <span className={`font-medium px-2 py-0.5 rounded-full text-xs ${ticket.status === 'open' ? 'bg-green-100 text-green-800' :
-                  ticket.status === 'closed' ? 'bg-gray-100 text-gray-800' :
-                    'bg-blue-100 text-blue-800'
+                ticket.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                  'bg-blue-100 text-blue-800'
                 }`}>{ticket.status.toUpperCase()}</span>
             </div>
             <div className="flex justify-between border-b pb-2">

@@ -316,7 +316,7 @@ const AccountsTable = ({
                         </div>
                         {/* Mobile Actions */}
                         <div className="flex gap-2">
-                            <Link to="/user/deposits" className="flex-1 bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 px-4 py-2 rounded text-center text-sm font-medium transition-colors">Deposit</Link>
+                            <Link to="/user/deposits" className="flex-1 bg-brand-500 hover:bg-brand-600 text-dark-base px-4 py-2 rounded text-center text-sm font-medium transition-colors">Deposit</Link>
                             <button
                                 onClick={() => onSync && onSync(account.account_number)}
                                 disabled={syncingAccount === account.account_number}

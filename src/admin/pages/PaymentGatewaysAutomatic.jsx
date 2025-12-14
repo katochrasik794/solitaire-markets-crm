@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Save, 
-  X, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Save,
+  X,
   CreditCard,
   Wallet,
   Key,
@@ -50,7 +50,7 @@ export default function PaymentGatewaysAutomatic() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setGateways(data.gateways || []);
@@ -66,15 +66,15 @@ export default function PaymentGatewaysAutomatic() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const token = localStorage.getItem('adminToken');
-      const url = editingGateway 
+      const url = editingGateway
         ? `${BASE}/api/admin/payment-gateways/${editingGateway.id}`
         : `${BASE}/api/admin/payment-gateways`;
-      
+
       const method = editingGateway ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -83,7 +83,7 @@ export default function PaymentGatewaysAutomatic() {
         },
         body: JSON.stringify(formData)
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         if (editingGateway) {
@@ -136,7 +136,7 @@ export default function PaymentGatewaysAutomatic() {
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this gateway?')) return;
-    
+
     try {
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${BASE}/api/admin/payment-gateways/${id}`, {
@@ -146,7 +146,7 @@ export default function PaymentGatewaysAutomatic() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         setGateways(gateways.filter(g => g.id !== id));
         setError("");
@@ -166,7 +166,7 @@ export default function PaymentGatewaysAutomatic() {
   };
 
   const getStatusInfo = (isActive) => {
-    return isActive 
+    return isActive
       ? { label: 'Active', color: 'bg-green-100 text-green-800', icon: CheckCircle }
       : { label: 'Inactive', color: 'bg-red-100 text-red-800', icon: AlertCircle };
   };
@@ -174,7 +174,7 @@ export default function PaymentGatewaysAutomatic() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
       </div>
     );
   }
@@ -191,7 +191,7 @@ export default function PaymentGatewaysAutomatic() {
             </div>
             <button
               onClick={() => setShowForm(true)}
-              className="bg-purple-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
+              className="bg-brand-500 text-dark-base px-3 sm:px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
               <span className="hidden sm:inline">Add Gateway</span>
@@ -248,8 +248,8 @@ export default function PaymentGatewaysAutomatic() {
                   <input
                     type="text"
                     value={formData.wallet_name}
-                    onChange={(e) => setFormData({...formData, wallet_name: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, wallet_name: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     placeholder="e.g., USDT Wallet, Bitcoin Wallet"
                     required
                   />
@@ -261,8 +261,8 @@ export default function PaymentGatewaysAutomatic() {
                   </label>
                   <select
                     value={formData.gateway_type}
-                    onChange={(e) => setFormData({...formData, gateway_type: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, gateway_type: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     required
                   >
                     <option value="Cryptocurrency">Cryptocurrency</option>
@@ -279,8 +279,8 @@ export default function PaymentGatewaysAutomatic() {
                 <input
                   type="text"
                   value={formData.deposit_wallet_address}
-                  onChange={(e) => setFormData({...formData, deposit_wallet_address: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  onChange={(e) => setFormData({ ...formData, deposit_wallet_address: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   placeholder="e.g., 0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6 (Optional)"
                 />
               </div>
@@ -294,8 +294,8 @@ export default function PaymentGatewaysAutomatic() {
                   <input
                     type="text"
                     value={formData.project_id}
-                    onChange={(e) => setFormData({...formData, project_id: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     placeholder="e.g., 1445920661479424"
                     required
                   />
@@ -308,8 +308,8 @@ export default function PaymentGatewaysAutomatic() {
                   <input
                     type="text"
                     value={formData.gateway_url}
-                    onChange={(e) => setFormData({...formData, gateway_url: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, gateway_url: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     placeholder="e.g., https://t-fumzndoo.cregis.io"
                     required
                   />
@@ -324,8 +324,8 @@ export default function PaymentGatewaysAutomatic() {
                   <input
                     type="password"
                     value={formData.api_key}
-                    onChange={(e) => setFormData({...formData, api_key: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, api_key: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     placeholder="Enter API key"
                     required
                   />
@@ -338,8 +338,8 @@ export default function PaymentGatewaysAutomatic() {
                   <input
                     type="password"
                     value={formData.secret_key}
-                    onChange={(e) => setFormData({...formData, secret_key: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, secret_key: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     placeholder="Enter secret key"
                     required
                   />
@@ -355,8 +355,8 @@ export default function PaymentGatewaysAutomatic() {
                   <input
                     type="password"
                     value={formData.webhook_secret}
-                    onChange={(e) => setFormData({...formData, webhook_secret: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, webhook_secret: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     placeholder="Enter webhook secret (optional)"
                   />
                 </div>
@@ -368,8 +368,8 @@ export default function PaymentGatewaysAutomatic() {
                   <input
                     type="number"
                     value={formData.display_order}
-                    onChange={(e) => setFormData({...formData, display_order: parseInt(e.target.value) || 0})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     placeholder="0"
                     min="0"
                   />
@@ -383,8 +383,8 @@ export default function PaymentGatewaysAutomatic() {
                 </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   placeholder="Optional description for this gateway"
                   rows={3}
                 />
@@ -395,8 +395,8 @@ export default function PaymentGatewaysAutomatic() {
                   type="checkbox"
                   id="is_active"
                   checked={formData.is_active}
-                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
-                  className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                  className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                 />
                 <label htmlFor="is_active" className="text-sm text-gray-700">
                   Active Gateway
@@ -429,7 +429,7 @@ export default function PaymentGatewaysAutomatic() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                  className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 flex items-center gap-2"
                 >
                   <Save className="h-4 w-4" />
                   {editingGateway ? 'Update Gateway' : 'Save Gateway'}
@@ -445,7 +445,7 @@ export default function PaymentGatewaysAutomatic() {
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Payment Gateways</h2>
             <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your payment gateway configurations</p>
           </div>
-          
+
           {gateways.length === 0 ? (
             <div className="p-8 text-center">
               <CreditCard className="h-12 w-12 text-gray-300 mx-auto mb-4" />
@@ -453,7 +453,7 @@ export default function PaymentGatewaysAutomatic() {
               <p className="text-gray-500 mb-4">Get started by adding your first payment gateway</p>
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2 mx-auto"
+                className="bg-brand-500 text-dark-base px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center gap-2 mx-auto"
               >
                 <Plus className="h-4 w-4" />
                 Add Gateway
@@ -498,8 +498,8 @@ export default function PaymentGatewaysAutomatic() {
                         <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-                              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                                <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+                              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-brand-100 flex items-center justify-center">
+                                <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600" />
                               </div>
                             </div>
                             <div className="ml-2 sm:ml-4">
@@ -510,30 +510,30 @@ export default function PaymentGatewaysAutomatic() {
                         </td>
                         <td className="hidden lg:table-cell px-3 sm:px-6 py-4">
                           <div className="text-xs sm:text-sm text-gray-900 font-mono">
-                            {gateway.deposit_wallet_address 
-                              ? (gateway.deposit_wallet_address.length > 20 
-                                  ? `${gateway.deposit_wallet_address.substring(0, 20)}...`
-                                  : gateway.deposit_wallet_address)
+                            {gateway.deposit_wallet_address
+                              ? (gateway.deposit_wallet_address.length > 20
+                                ? `${gateway.deposit_wallet_address.substring(0, 20)}...`
+                                : gateway.deposit_wallet_address)
                               : <span className="text-gray-400 italic">Not set</span>
                             }
                           </div>
                         </td>
                         <td className="hidden sm:table-cell px-3 sm:px-6 py-4">
                           <div className="text-xs sm:text-sm text-gray-900 font-mono">
-                            {gateway.project_id 
-                              ? (gateway.project_id.length > 15 
-                                  ? `${gateway.project_id.substring(0, 15)}...`
-                                  : gateway.project_id)
+                            {gateway.project_id
+                              ? (gateway.project_id.length > 15
+                                ? `${gateway.project_id.substring(0, 15)}...`
+                                : gateway.project_id)
                               : <span className="text-gray-400 italic">Not set</span>
                             }
                           </div>
                         </td>
                         <td className="hidden xl:table-cell px-3 sm:px-6 py-4">
                           <div className="text-xs sm:text-sm text-gray-900 font-mono">
-                            {gateway.gateway_url 
-                              ? (gateway.gateway_url.length > 25 
-                                  ? `${gateway.gateway_url.substring(0, 25)}...`
-                                  : gateway.gateway_url)
+                            {gateway.gateway_url
+                              ? (gateway.gateway_url.length > 25
+                                ? `${gateway.gateway_url.substring(0, 25)}...`
+                                : gateway.gateway_url)
                               : <span className="text-gray-400 italic">Not set</span>
                             }
                           </div>
@@ -541,10 +541,10 @@ export default function PaymentGatewaysAutomatic() {
                         <td className="hidden md:table-cell px-3 sm:px-6 py-4">
                           <div className="flex items-center gap-2">
                             <span className="text-xs sm:text-sm text-gray-900 font-mono">
-                              {showApiKey[gateway.id] 
-                                ? (gateway.api_key?.length > 20 
-                                    ? `${gateway.api_key.substring(0, 20)}...`
-                                    : gateway.api_key)
+                              {showApiKey[gateway.id]
+                                ? (gateway.api_key?.length > 20
+                                  ? `${gateway.api_key.substring(0, 20)}...`
+                                  : gateway.api_key)
                                 : '••••••••••••••••'
                               }
                             </span>
@@ -573,7 +573,7 @@ export default function PaymentGatewaysAutomatic() {
                           <div className="flex items-center gap-1 sm:gap-2">
                             <button
                               onClick={() => handleEdit(gateway)}
-                              className="p-1.5 sm:p-2 text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded-lg transition-colors"
+                              className="p-1.5 sm:p-2 text-brand-600 hover:text-brand-900 hover:bg-brand-50 rounded-lg transition-colors"
                               title="Edit Gateway"
                             >
                               <Edit className="h-3 w-3 sm:h-4 sm:w-4" />

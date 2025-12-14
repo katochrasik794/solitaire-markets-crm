@@ -3,10 +3,10 @@ import { useEffect, useMemo, useState } from 'react';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
-export default function AddUser(){
-  const [state, setState] = useState({ name:'', email:'', phone:'', country:'', password:'', role:'user', status:'active', emailVerified:false, kycVerified:false });
-  const [submitting,setSubmitting] = useState(false);
-  const [msg,setMsg] = useState('');
+export default function AddUser() {
+  const [state, setState] = useState({ name: '', email: '', phone: '', country: '', password: '', role: 'user', status: 'active', emailVerified: false, kycVerified: false });
+  const [submitting, setSubmitting] = useState(false);
+  const [msg, setMsg] = useState('');
   const BASE = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:5000/api';
   const navigate = useNavigate(); // <-- for redirect
   const [countries, setCountries] = useState([]);
@@ -14,7 +14,7 @@ export default function AddUser(){
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     // Use the public countries API backed by the countries table
-    fetch(`${BASE}/countries?active_only=true`, { headers: { 'Authorization': `Bearer ${token}` }} )
+    fetch(`${BASE}/countries?active_only=true`, { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => r.json())
       .then(data => {
         if (data?.success && Array.isArray(data.data)) {
@@ -28,7 +28,7 @@ export default function AddUser(){
           );
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [BASE]);
 
   // ISO2 -> dial code mapping (common countries)
@@ -42,25 +42,25 @@ export default function AddUser(){
     ZA: 27, BD: 880, LK: 94, KR: 82, TW: 886, KW: 965, BH: 973, QA: 974, OM: 968, AE: 971
   }), []);
 
-  async function onSubmit(e){
+  async function onSubmit(e) {
     e.preventDefault(); setSubmitting(true); setMsg('');
-    try{
+    try {
       const token = localStorage.getItem('adminToken');
       // Create user first as before
       const payload = {
         ...state,
         country: (state.country || '').toLowerCase(),
       };
-      const r = await fetch(`${BASE}/admin/users`, { 
-        method:'POST', 
-        headers:{
-          'Content-Type':'application/json',
+      const r = await fetch(`${BASE}/admin/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        }, 
-        body: JSON.stringify(payload) 
+        },
+        body: JSON.stringify(payload)
       });
       const data = await r.json();
-      if(!data?.ok) throw new Error(data?.error||'Failed');
+      if (!data?.ok) throw new Error(data?.error || 'Failed');
       setMsg(`User created: ${data.user.email}`);
       // Call the welcome mail API
       const res = await fetch('https://zuperior-crm-api.onrender.com/api/emails/send-welcome', {
@@ -90,17 +90,17 @@ export default function AddUser(){
         title: 'User Added & Mail Sent',
         text: `User added successfully and welcome email sent to ${state.email}.`,
       });
-      setState({ name:'', email:'', phone:'', country:'', password:'', role:'user', status:'active', emailVerified:false, kycVerified:false });
+      setState({ name: '', email: '', phone: '', country: '', password: '', role: 'user', status: 'active', emailVerified: false, kycVerified: false });
       navigate('/admin/users/all');
-    }catch(e){ 
+    } catch (e) {
       await Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: e.message||String(e)
+        text: e.message || String(e)
       });
-      setMsg(e.message||String(e)); 
+      setMsg(e.message || String(e));
     }
-    finally{ setSubmitting(false); }
+    finally { setSubmitting(false); }
   }
 
   return (
@@ -115,7 +115,7 @@ export default function AddUser(){
       <div className="w-full">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           {/* Card Header */}
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+          <div className="bg-gradient-to-r from-brand-50 to-neutral-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900">User Information</h2>
             <p className="text-xs sm:text-sm text-gray-600 mt-1">Fill in the details to create a new user account</p>
           </div>
@@ -129,21 +129,21 @@ export default function AddUser(){
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Full Name *</label>
-                    <input 
-                      value={state.name} 
-                      onChange={e=>setState({...state,name:e.target.value})} 
-                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" 
+                    <input
+                      value={state.name}
+                      onChange={e => setState({ ...state, name: e.target.value })}
+                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
                       placeholder="Enter full name"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Email Address *</label>
-                    <input 
-                      required 
-                      type="email" 
-                      value={state.email} 
-                      onChange={e=>setState({...state,email:e.target.value})} 
-                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" 
+                    <input
+                      required
+                      type="email"
+                      value={state.email}
+                      onChange={e => setState({ ...state, email: e.target.value })}
+                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
                       placeholder="user@example.com"
                     />
                   </div>
@@ -159,39 +159,39 @@ export default function AddUser(){
                         if (dial) {
                           const prefix = `+${String(dial)}`;
                           if (!phone.startsWith(prefix)) {
-                            phone = phone.replace(/^\+\d+\s*/,'');
+                            phone = phone.replace(/^\+\d+\s*/, '');
                             phone = `${prefix} ${phone}`.trimEnd();
                           }
                         }
                         // store ISO2 uppercase in state to match option values
                         setState({ ...state, country: iso2, phone });
                       }}
-                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
                     >
                       <option value="">Select country</option>
                       {countries.map((c, idx) => (
-                        <option key={idx} value={(c.code||'').toUpperCase()}>{c.country}</option>
+                        <option key={idx} value={(c.code || '').toUpperCase()}>{c.country}</option>
                       ))}
                     </select>
                   </div>
                   {/* Phone number next, auto-prefixed by country code */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Phone Number</label>
-                    <input 
-                      value={state.phone} 
-                      onChange={e=>setState({...state,phone:e.target.value})} 
-                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" 
+                    <input
+                      value={state.phone}
+                      onChange={e => setState({ ...state, phone: e.target.value })}
+                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
                       placeholder="+1 555 123 4567"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Password *</label>
-                    <input 
-                      required 
-                      type="password" 
-                      value={state.password} 
-                      onChange={e=>setState({...state,password:e.target.value})} 
-                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" 
+                    <input
+                      required
+                      type="password"
+                      value={state.password}
+                      onChange={e => setState({ ...state, password: e.target.value })}
+                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
                       placeholder="Enter secure password"
                     />
                   </div>
@@ -204,10 +204,10 @@ export default function AddUser(){
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Account Status</label>
-                    <select 
-                      value={state.status} 
-                      onChange={e=>setState({...state,status:e.target.value})} 
-                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                    <select
+                      value={state.status}
+                      onChange={e => setState({ ...state, status: e.target.value })}
+                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
                     >
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
@@ -217,12 +217,12 @@ export default function AddUser(){
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Email Verification</label>
                     <div className="flex items-center space-x-3 pt-2">
-                      <input 
-                        id="ev" 
-                        type="checkbox" 
-                        checked={state.emailVerified} 
-                        onChange={e=>setState({...state,emailVerified:e.target.checked})} 
-                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      <input
+                        id="ev"
+                        type="checkbox"
+                        checked={state.emailVerified}
+                        onChange={e => setState({ ...state, emailVerified: e.target.checked })}
+                        className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
                       />
                       <label htmlFor="ev" className="text-sm text-gray-700">Mark email as verified</label>
                     </div>
@@ -234,8 +234,8 @@ export default function AddUser(){
                         id="kv"
                         type="checkbox"
                         checked={state.kycVerified}
-                        onChange={e=>setState({...state, kycVerified: e.target.checked})}
-                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                        onChange={e => setState({ ...state, kycVerified: e.target.checked })}
+                        className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
                       />
                       <label htmlFor="kv" className="text-sm text-gray-700">Mark KYC as verified</label>
                     </div>
@@ -246,26 +246,25 @@ export default function AddUser(){
               {/* Action Buttons */}
               <div className="flex flex-col gap-4 pt-4 sm:pt-6 border-t border-gray-200">
                 {msg && (
-                  <div className={`p-3 sm:p-4 rounded-lg text-sm ${
-                    msg.includes('created') 
-                      ? 'bg-green-50 text-green-700 border border-green-200' 
-                      : 'bg-red-50 text-red-700 border border-red-200'
-                  }`}>
+                  <div className={`p-3 sm:p-4 rounded-lg text-sm ${msg.includes('created')
+                    ? 'bg-green-50 text-green-700 border border-green-200'
+                    : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}>
                     {msg}
                   </div>
                 )}
                 <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-                  <button 
-                    type="button" 
-                    onClick={() => setState({ name:'', email:'', phone:'', country:'', password:'', role:'user', status:'active', emailVerified:false })}
+                  <button
+                    type="button"
+                    onClick={() => setState({ name: '', email: '', phone: '', country: '', password: '', role: 'user', status: 'active', emailVerified: false })}
                     className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all font-medium text-sm sm:text-base"
                   >
                     Reset Form
                   </button>
-                  <button 
-                    type="submit" 
-                    disabled={submitting} 
-                    className="px-6 sm:px-8 py-2 sm:py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-60 disabled:cursor-not-allowed transition-all font-medium shadow-sm hover:shadow-md text-sm sm:text-base"
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-6 sm:px-8 py-2 sm:py-3 rounded-lg bg-brand hover:bg-brand-600 text-dark-base disabled:opacity-60 disabled:cursor-not-allowed transition-all font-medium shadow-sm hover:shadow-md text-sm sm:text-base"
                   >
                     {submitting ? (
                       <span className="flex items-center gap-2">

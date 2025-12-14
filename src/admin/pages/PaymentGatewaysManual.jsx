@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Save, 
-  X, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Save,
+  X,
   CreditCard,
   Upload,
   QrCode,
@@ -27,7 +27,7 @@ const GATEWAY_TYPES = [
   { value: 'crypto', label: 'Cryptocurrency', icon: DollarSign, color: 'bg-orange-100 text-orange-800' },
   { value: 'wire', label: 'Wire Transfer', icon: Building2, color: 'bg-blue-100 text-blue-800' },
   { value: 'upi', label: 'UPI', icon: Smartphone, color: 'bg-green-100 text-green-800' },
-  { value: 'local', label: 'Local Depositor', icon: Banknote, color: 'bg-purple-100 text-purple-800' }
+  { value: 'local', label: 'Local Depositor', icon: Banknote, color: 'bg-brand-100 text-brand-900' }
 ];
 
 export default function PaymentGatewaysManual() {
@@ -96,7 +96,7 @@ export default function PaymentGatewaysManual() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setGateways(Array.isArray(data.gateways) ? data.gateways : []);
@@ -117,7 +117,7 @@ export default function PaymentGatewaysManual() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const token = localStorage.getItem('adminToken');
       const formDataToSend = new FormData();
@@ -135,7 +135,7 @@ export default function PaymentGatewaysManual() {
       formDataToSend.append('swift_code', formData.swift_code || '');
       formDataToSend.append('account_type', formData.account_type || '');
       formDataToSend.append('country_code', formData.country_code || '');
-      
+
       if (formData.icon) {
         formDataToSend.append('icon', formData.icon);
       }
@@ -143,12 +143,12 @@ export default function PaymentGatewaysManual() {
         formDataToSend.append('qr_code', formData.qr_code);
       }
 
-      const url = editingGateway 
+      const url = editingGateway
         ? `${BASE}/admin/manual-gateways/${editingGateway.id}`
         : `${BASE}/admin/manual-gateways`;
-      
+
       const method = editingGateway ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -156,7 +156,7 @@ export default function PaymentGatewaysManual() {
         },
         body: formDataToSend
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         if (editingGateway) {
@@ -221,7 +221,7 @@ export default function PaymentGatewaysManual() {
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this gateway?')) return;
-    
+
     try {
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${BASE}/admin/manual-gateways/${id}`, {
@@ -231,7 +231,7 @@ export default function PaymentGatewaysManual() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         setGateways(gateways.filter(g => g.id !== id));
         setError("");
@@ -250,7 +250,7 @@ export default function PaymentGatewaysManual() {
   const handleToggleStatus = async (gateway) => {
     try {
       const token = localStorage.getItem('adminToken');
-      
+
       const response = await fetch(`${BASE}/admin/manual-gateways/${gateway.id}/toggle-status`, {
         method: 'PATCH',
         headers: {
@@ -258,16 +258,16 @@ export default function PaymentGatewaysManual() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setGateways(gateways.map(g => g.id === gateway.id ? data.gateway : g));
         setError("");
-        Swal.fire({ 
-          icon: 'success', 
-          title: `Gateway ${data.gateway.is_active ? 'activated' : 'deactivated'}`, 
-          timer: 1200, 
-          showConfirmButton: false 
+        Swal.fire({
+          icon: 'success',
+          title: `Gateway ${data.gateway.is_active ? 'activated' : 'deactivated'}`,
+          timer: 1200,
+          showConfirmButton: false
         });
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -284,7 +284,7 @@ export default function PaymentGatewaysManual() {
   const handleToggleRecommended = async (gateway) => {
     try {
       const token = localStorage.getItem('adminToken');
-      
+
       const response = await fetch(`${BASE}/admin/manual-gateways/${gateway.id}/toggle-recommended`, {
         method: 'PATCH',
         headers: {
@@ -292,16 +292,16 @@ export default function PaymentGatewaysManual() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setGateways(gateways.map(g => g.id === gateway.id ? data.gateway : g));
         setError("");
-        Swal.fire({ 
-          icon: 'success', 
-          title: `Gateway ${data.gateway.is_recommended ? 'marked as recommended' : 'removed from recommended'}`, 
-          timer: 1200, 
-          showConfirmButton: false 
+        Swal.fire({
+          icon: 'success',
+          title: `Gateway ${data.gateway.is_recommended ? 'marked as recommended' : 'removed from recommended'}`,
+          timer: 1200,
+          showConfirmButton: false
         });
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -341,13 +341,13 @@ export default function PaymentGatewaysManual() {
       'Other': 'local',
       'other': 'local'
     };
-    
+
     const mappedType = typeMap[type] || type;
     return GATEWAY_TYPES.find(t => t.value === mappedType) || GATEWAY_TYPES[0];
   };
 
   const getStatusInfo = (isActive) => {
-    return isActive 
+    return isActive
       ? { label: 'Active', color: 'bg-green-100 text-green-800', icon: CheckCircle }
       : { label: 'Inactive', color: 'bg-red-100 text-red-800', icon: AlertCircle };
   };
@@ -356,12 +356,12 @@ export default function PaymentGatewaysManual() {
   const fileUrl = (u) => {
     if (!u) return '';
     if (/^https?:\/\//i.test(u)) return u;
-    
+
     // Remove /api from BASE to get the server root URL
     // BASE is like "http://localhost:5000/api"
     // We need "http://localhost:5000" for static files
     const serverBase = BASE.replace(/\/api\/?$/, '');
-    
+
     // Path should already start with /uploads/...
     const path = String(u).startsWith('/') ? u : `/${u}`;
     return `${serverBase}${path}`;
@@ -370,7 +370,7 @@ export default function PaymentGatewaysManual() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
       </div>
     );
   }
@@ -387,7 +387,7 @@ export default function PaymentGatewaysManual() {
             </div>
             <button
               onClick={() => setShowForm(true)}
-              className="bg-purple-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
+              className="bg-brand-500 text-dark-base px-3 sm:px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
               <span className="hidden sm:inline">Add Manual Gateway</span>
@@ -438,8 +438,8 @@ export default function PaymentGatewaysManual() {
                   </label>
                   <select
                     value={formData.type}
-                    onChange={(e) => setFormData({...formData, type: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     required
                   >
                     {GATEWAY_TYPES.map((type) => (
@@ -455,8 +455,8 @@ export default function PaymentGatewaysManual() {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     placeholder="e.g., UPI PAYMENT, USDT TRC20"
                     required
                   />
@@ -464,52 +464,52 @@ export default function PaymentGatewaysManual() {
               </div>
 
               {/* Method-specific fields */}
-              {(['upi','crypto','local'].includes(formData.type)) && (
+              {(['upi', 'crypto', 'local'].includes(formData.type)) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      {formData.type==='upi' ? 'UPI VPA Address *' : formData.type==='crypto' ? 'Crypto Address *' : 'Details *'}
+                      {formData.type === 'upi' ? 'UPI VPA Address *' : formData.type === 'crypto' ? 'Crypto Address *' : 'Details *'}
                     </label>
                     <input
                       type="text"
-                      value={formData.type==='upi' ? formData.vpa_address : formData.type==='crypto' ? formData.crypto_address : formData.details}
-                      onChange={(e) => setFormData({...formData, [formData.type==='upi'?'vpa_address':formData.type==='crypto'?'crypto_address':'details']: e.target.value})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder={formData.type==='upi' ? 'e.g., username@bank' : formData.type==='crypto' ? 'e.g., USDT TRC20 address' : 'Local depositor details'}
+                      value={formData.type === 'upi' ? formData.vpa_address : formData.type === 'crypto' ? formData.crypto_address : formData.details}
+                      onChange={(e) => setFormData({ ...formData, [formData.type === 'upi' ? 'vpa_address' : formData.type === 'crypto' ? 'crypto_address' : 'details']: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      placeholder={formData.type === 'upi' ? 'e.g., username@bank' : formData.type === 'crypto' ? 'e.g., USDT TRC20 address' : 'Local depositor details'}
                       required
                     />
                   </div>
                 </div>
               )}
 
-              {formData.type==='wire' && (
+              {formData.type === 'wire' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Bank Name *</label>
-                    <input type="text" value={formData.bank_name} onChange={e=>setFormData({...formData, bank_name:e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                    <input type="text" value={formData.bank_name} onChange={e => setFormData({ ...formData, bank_name: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Account Name *</label>
-                    <input type="text" value={formData.account_name} onChange={e=>setFormData({...formData, account_name:e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                    <input type="text" value={formData.account_name} onChange={e => setFormData({ ...formData, account_name: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Account Number *</label>
-                    <input type="text" value={formData.account_number} onChange={e=>setFormData({...formData, account_number:e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                    <input type="text" value={formData.account_number} onChange={e => setFormData({ ...formData, account_number: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">IFSC / SWIFT Code *</label>
-                    <input type="text" value={formData.ifsc_code || formData.swift_code} onChange={e=>setFormData({...formData, ifsc_code:e.target.value, swift_code:e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                    <input type="text" value={formData.ifsc_code || formData.swift_code} onChange={e => setFormData({ ...formData, ifsc_code: e.target.value, swift_code: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Account Type</label>
-                    <input type="text" value={formData.account_type} onChange={e=>setFormData({...formData, account_type:e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Savings / Current" />
+                    <input type="text" value={formData.account_type} onChange={e => setFormData({ ...formData, account_type: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Savings / Current" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Eligible Country *</label>
-                    <select value={formData.country_code} onChange={e=>setFormData({...formData, country_code:e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                    <select value={formData.country_code} onChange={e => setFormData({ ...formData, country_code: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" required>
                       <option value="">Select Country</option>
                       {countries.map(c => (
-                        <option key={c.code || c.country_code || c.id} value={(c.code||'').toUpperCase()}>{c.country || c.name} ({c.code})</option>
+                        <option key={c.code || c.country_code || c.id} value={(c.code || '').toUpperCase()}>{c.country || c.name} ({c.code})</option>
                       ))}
                     </select>
                   </div>
@@ -525,7 +525,7 @@ export default function PaymentGatewaysManual() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => setFormData({...formData, icon: e.target.files[0]})}
+                      onChange={(e) => setFormData({ ...formData, icon: e.target.files[0] })}
                       className="hidden"
                       id="icon-upload"
                     />
@@ -542,7 +542,7 @@ export default function PaymentGatewaysManual() {
                   </div>
                 </div>
 
-                {(['upi','crypto'].includes(formData.type)) && (
+                {(['upi', 'crypto'].includes(formData.type)) && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       QR Code
@@ -551,7 +551,7 @@ export default function PaymentGatewaysManual() {
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => setFormData({...formData, qr_code: e.target.files[0]})}
+                        onChange={(e) => setFormData({ ...formData, qr_code: e.target.files[0] })}
                         className="hidden"
                         id="qr-upload"
                       />
@@ -568,7 +568,7 @@ export default function PaymentGatewaysManual() {
                     </div>
                   </div>
                 )}
-                {formData.type!=='upi' && formData.type!=='crypto' && (
+                {formData.type !== 'upi' && formData.type !== 'crypto' && (
                   <div className="text-xs text-gray-500 md:col-span-2">QR is typically not used for bank transfer; you may leave it blank.</div>
                 )}
               </div>
@@ -578,8 +578,8 @@ export default function PaymentGatewaysManual() {
                   type="checkbox"
                   id="is_active"
                   checked={formData.is_active}
-                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
-                  className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                  className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                 />
                 <label htmlFor="is_active" className="text-sm text-gray-700">
                   Active Gateway
@@ -592,31 +592,31 @@ export default function PaymentGatewaysManual() {
                   onClick={() => {
                     setShowForm(false);
                     setEditingGateway(null);
-                  setFormData({
-                    type: "upi",
-                    name: "",
-                    details: "",
-                    icon: null,
-                    qr_code: null,
-                    is_active: true,
-                    vpa_address: "",
-                    crypto_address: "",
-                    bank_name: "",
-                    account_name: "",
-                    account_number: "",
-                    ifsc_code: "",
-                    swift_code: "",
-                    account_type: "",
-                    country_code: ""
-                  });
-                }}
+                    setFormData({
+                      type: "upi",
+                      name: "",
+                      details: "",
+                      icon: null,
+                      qr_code: null,
+                      is_active: true,
+                      vpa_address: "",
+                      crypto_address: "",
+                      bank_name: "",
+                      account_name: "",
+                      account_number: "",
+                      ifsc_code: "",
+                      swift_code: "",
+                      account_type: "",
+                      country_code: ""
+                    });
+                  }}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                  className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 flex items-center gap-2"
                 >
                   <Save className="h-4 w-4" />
                   {editingGateway ? 'Update Gateway' : 'Save Gateway'}
@@ -632,7 +632,7 @@ export default function PaymentGatewaysManual() {
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900">All Manual Gateways</h2>
             <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your manual payment gateway configurations</p>
           </div>
-          
+
           {gateways.length === 0 ? (
             <div className="p-8 text-center">
               <CreditCard className="h-12 w-12 text-gray-300 mx-auto mb-4" />
@@ -640,7 +640,7 @@ export default function PaymentGatewaysManual() {
               <p className="text-gray-500 mb-4">Get started by adding your first manual payment gateway</p>
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2 mx-auto"
+                className="bg-brand-500 text-dark-base px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center gap-2 mx-auto"
               >
                 <Plus className="h-4 w-4" />
                 Add Gateway
@@ -651,7 +651,7 @@ export default function PaymentGatewaysManual() {
               <ProTable
                 title={null}
                 rows={gateways.map((g, i) => ({
-                  __index: i+1,
+                  __index: i + 1,
                   type: g.type,
                   name: g.name,
                   icon: g.icon_url,
@@ -662,7 +662,8 @@ export default function PaymentGatewaysManual() {
                 }))}
                 columns={[
                   { key: '__index', label: '#', sortable: false },
-                  { key: 'type', label: 'Type', render: (v) => {
+                  {
+                    key: 'type', label: 'Type', render: (v) => {
                       const info = getTypeInfo(v);
                       const Icon = info.icon;
                       return (
@@ -673,11 +674,12 @@ export default function PaymentGatewaysManual() {
                     }
                   },
                   { key: 'name', label: 'Name' },
-                  { key: 'icon', label: 'Icon', render: (v) => (
+                  {
+                    key: 'icon', label: 'Icon', render: (v) => (
                       v ? (
-                        <img 
-                          src={fileUrl(v)} 
-                          alt="icon" 
+                        <img
+                          src={fileUrl(v)}
+                          alt="icon"
                           className="h-8 w-8 rounded-full object-cover mx-auto"
                           onError={(e) => {
                             e.target.style.display = 'none';
@@ -695,11 +697,12 @@ export default function PaymentGatewaysManual() {
                       )
                     )
                   },
-                  { key: 'qr', label: 'QR', render: (v) => (
+                  {
+                    key: 'qr', label: 'QR', render: (v) => (
                       v ? (
-                        <img 
-                          src={fileUrl(v)} 
-                          alt="QR" 
+                        <img
+                          src={fileUrl(v)}
+                          alt="QR"
                           className="h-8 w-8 rounded object-cover mx-auto"
                           onError={(e) => {
                             e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"%3E%3Cpath fill="%23ccc" d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/%3E%3C/svg%3E';
@@ -708,7 +711,8 @@ export default function PaymentGatewaysManual() {
                       ) : <span className="text-gray-400 text-sm">No QR</span>
                     )
                   },
-                  { key: 'details', label: 'Details', render: (_v, row) => {
+                  {
+                    key: 'details', label: 'Details', render: (_v, row) => {
                       const g = row.details;
                       if (g.type === 'upi') {
                         return <div className="text-xs text-gray-700"><b>VPA:</b> {g.vpa_address || '-'}</div>;
@@ -731,21 +735,23 @@ export default function PaymentGatewaysManual() {
                       return <div className="text-xs text-gray-700">{g.details || '-'}</div>;
                     }
                   },
-                  { key: 'status', label: 'Status', render: (v) => {
+                  {
+                    key: 'status', label: 'Status', render: (v) => {
                       const info = getStatusInfo(v === 'Active');
                       const Icon = info.icon;
                       return <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full ${info.color}`}><Icon className="h-3 w-3" /> {info.label}</span>;
                     }
                   },
-                  { key: 'actions', label: 'Actions', sortable: false, render: (_v, row) => {
+                  {
+                    key: 'actions', label: 'Actions', sortable: false, render: (_v, row) => {
                       const gateway = row.actions;
                       return (
                         <div className="flex items-center justify-center gap-1.5">
                           {gateway.icon_url && (
                             <div className="flex flex-col items-center gap-0.5">
-                              <button 
-                                onClick={() => setViewingImage({ type: 'icon', url: fileUrl(gateway.icon_url) })} 
-                                className="p-1.5 w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-900 hover:bg-blue-50 border border-blue-200 rounded" 
+                              <button
+                                onClick={() => setViewingImage({ type: 'icon', url: fileUrl(gateway.icon_url) })}
+                                className="p-1.5 w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-900 hover:bg-blue-50 border border-blue-200 rounded"
                                 title="View Icon"
                               >
                                 <Eye className="h-3 w-3" />
@@ -755,9 +761,9 @@ export default function PaymentGatewaysManual() {
                           )}
                           {gateway.qr_code_url && (
                             <div className="flex flex-col items-center gap-0.5">
-                              <button 
-                                onClick={() => setViewingImage({ type: 'qr', url: fileUrl(gateway.qr_code_url) })} 
-                                className="p-1.5 w-8 h-8 flex items-center justify-center text-purple-600 hover:text-purple-900 hover:bg-purple-50 border border-purple-200 rounded" 
+                              <button
+                                onClick={() => setViewingImage({ type: 'qr', url: fileUrl(gateway.qr_code_url) })}
+                                className="p-1.5 w-8 h-8 flex items-center justify-center text-brand-600 hover:text-brand-900 hover:bg-brand-50 border border-brand-200 rounded"
                                 title="View QR Code"
                               >
                                 <Eye className="h-3 w-3" />
@@ -781,11 +787,10 @@ export default function PaymentGatewaysManual() {
                           <div className="flex flex-col items-center gap-0.5">
                             <button
                               onClick={() => handleToggleRecommended(gateway)}
-                              className={`p-1.5 w-8 h-8 flex items-center justify-center border rounded transition-all ${
-                                gateway.is_recommended
+                              className={`p-1.5 w-8 h-8 flex items-center justify-center border rounded transition-all ${gateway.is_recommended
                                   ? 'text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 border-yellow-200 bg-yellow-50'
                                   : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 border-gray-200'
-                              }`}
+                                }`}
                               title={gateway.is_recommended ? 'Remove from Recommended' : 'Mark as Recommended'}
                             >
                               <Star className={`h-3 w-3 ${gateway.is_recommended ? 'fill-current' : ''}`} />
@@ -796,18 +801,16 @@ export default function PaymentGatewaysManual() {
                           <div className="flex flex-col items-center gap-0.5">
                             <button
                               onClick={() => handleToggleStatus(gateway)}
-                              className={`relative inline-flex h-5 w-7 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-1 focus:ring-offset-1 shadow-sm ${
-                                gateway.is_active
+                              className={`relative inline-flex h-5 w-7 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-1 focus:ring-offset-1 shadow-sm ${gateway.is_active
                                   ? 'bg-gradient-to-r from-green-400 to-green-600 focus:ring-green-400 shadow-green-200'
                                   : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-300 shadow-gray-200'
-                              }`}
+                                }`}
                               role="switch"
                               aria-checked={gateway.is_active}
                             >
                               <span
-                                className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-all duration-300 ease-in-out shadow-md ${
-                                  gateway.is_active ? 'translate-x-3.5' : 'translate-x-0.5'
-                                }`}
+                                className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-all duration-300 ease-in-out shadow-md ${gateway.is_active ? 'translate-x-3.5' : 'translate-x-0.5'
+                                  }`}
                               />
                             </button>
                             <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">
@@ -819,7 +822,7 @@ export default function PaymentGatewaysManual() {
                     }
                   },
                 ]}
-                filters={{ searchKeys: ['name','type','country_code','vpa_address','crypto_address','bank_name','account_name','account_number'] }}
+                filters={{ searchKeys: ['name', 'type', 'country_code', 'vpa_address', 'crypto_address', 'bank_name', 'account_name', 'account_number'] }}
                 pageSize={10}
               />
             </div>
@@ -828,7 +831,7 @@ export default function PaymentGatewaysManual() {
 
         {/* Image Viewing Modal */}
         {viewingImage && (
-          <div 
+          <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
             onClick={() => setViewingImage(null)}
           >
@@ -844,8 +847,8 @@ export default function PaymentGatewaysManual() {
                   {viewingImage.type === 'icon' ? 'Gateway Icon' : 'QR Code'}
                 </h3>
                 <div className="flex justify-center">
-                  <img 
-                    src={viewingImage.url} 
+                  <img
+                    src={viewingImage.url}
                     alt={viewingImage.type === 'icon' ? 'Gateway Icon' : 'QR Code'}
                     className="max-w-full max-h-[70vh] object-contain rounded-lg"
                     onError={(e) => {
@@ -854,11 +857,11 @@ export default function PaymentGatewaysManual() {
                   />
                 </div>
                 <div className="mt-4 text-center">
-                  <a 
-                    href={viewingImage.url} 
-                    target="_blank" 
+                  <a
+                    href={viewingImage.url}
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-purple-600 hover:text-purple-700 underline text-sm"
+                    className="text-brand-500 hover:text-brand-600 underline text-sm"
                   >
                     Open in new tab
                   </a>

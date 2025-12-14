@@ -54,9 +54,9 @@ export default function SupportTicketsList({ status }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search subject, email, or ID"
-            className="w-full sm:w-80 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full sm:w-80 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
-          <button onClick={fetchData} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Refresh</button>
+          <button onClick={fetchData} className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600">Refresh</button>
         </div>
 
         <div className="overflow-x-auto">
@@ -91,16 +91,16 @@ export default function SupportTicketsList({ status }) {
                     </td>
                     <td className="hidden md:table-cell px-3 sm:px-6 py-3">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${(t.priority || '').toLowerCase() === 'high' ? 'bg-red-100 text-red-800' :
-                          (t.priority || '').toLowerCase() === 'medium' ? 'bg-amber-100 text-amber-800' :
-                            'bg-blue-100 text-blue-800'
+                        (t.priority || '').toLowerCase() === 'medium' ? 'bg-amber-100 text-amber-800' :
+                          'bg-blue-100 text-blue-800'
                         }`}>
                         {(t.priority || 'medium').toUpperCase()}
                       </span>
                     </td>
                     <td className="px-3 sm:px-6 py-3">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${t.status === 'open' ? 'bg-green-100 text-green-800' :
-                          t.status === 'closed' ? 'bg-gray-100 text-gray-800' :
-                            'bg-blue-100 text-blue-800'
+                        t.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                          'bg-blue-100 text-blue-800'
                         }`}>
                         {t.status.toUpperCase()}
                       </span>

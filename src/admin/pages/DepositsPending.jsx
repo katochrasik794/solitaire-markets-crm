@@ -86,14 +86,14 @@ export default function DepositsPending() {
     { key: "userEmail", label: "User Email" },
     { key: "userName", label: "User Name" },
     { key: "mt5AccountId", label: "MT5 Account ID", render: (v) => v && v !== "-" ? v : "-" },
-    { 
-      key: "depositTo", 
-      label: "Deposit To", 
+    {
+      key: "depositTo",
+      label: "Deposit To",
       render: (v, row) => {
         if (row.depositTo === 'wallet' && row.walletNumber) {
           return <span className="text-blue-600 font-medium">Deposit in wallet {row.walletNumber}</span>;
         } else if (row.depositTo === 'mt5' && row.mt5AccountId && row.mt5AccountId !== "-") {
-          return <span className="text-purple-600 font-medium">Deposit in MT5 ID {row.mt5AccountId}</span>;
+          return <span className="text-brand-600 font-medium">Deposit in MT5 ID {row.mt5AccountId}</span>;
         }
         return <span className="text-gray-400">-</span>;
       }
@@ -101,57 +101,63 @@ export default function DepositsPending() {
     { key: "amount", label: "Amount", render: (v) => fmtAmount(v) },
     { key: "currency", label: "Currency" },
     // Combine payment method and bank details compactly under "Payment Method"
-    { key: "payment", label: "Payment Method", render: (_v, row) => {
-      const method = row.bankDetails ? 'Bank Transfer' : (row.paymentMethod || row.method || '-');
-      const raw = row.bankDetails || '';
-      // Split bank details by " | " and render 2 items per visual row using a grid
-      const parts = raw ? String(raw).split(' | ').map(s => s.trim()).filter(Boolean) : [];
-      const pairs = [];
-      for (let i = 0; i < parts.length; i += 2) {
-        pairs.push([parts[i], parts[i + 1] || '']);
+    {
+      key: "payment", label: "Payment Method", render: (_v, row) => {
+        const method = row.bankDetails ? 'Bank Transfer' : (row.paymentMethod || row.method || '-');
+        const raw = row.bankDetails || '';
+        // Split bank details by " | " and render 2 items per visual row using a grid
+        const parts = raw ? String(raw).split(' | ').map(s => s.trim()).filter(Boolean) : [];
+        const pairs = [];
+        for (let i = 0; i < parts.length; i += 2) {
+          pairs.push([parts[i], parts[i + 1] || '']);
+        }
+        return (
+          <div className="leading-tight">
+            <div className="text-gray-900 text-sm font-medium">{method}</div>
+            {parts.length ? (
+              <div className="text-xs text-gray-600 max-w-[520px]">
+                {pairs.map((p, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <span className="w-1/2 pr-2 truncate" title={p[0]}>{p[0]}</span>
+                    <span className="w-1/2 truncate" title={p[1]}>{p[1]}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-gray-400">-</div>
+            )}
+          </div>
+        );
       }
-      return (
-        <div className="leading-tight">
-          <div className="text-gray-900 text-sm font-medium">{method}</div>
-          {parts.length ? (
-            <div className="text-xs text-gray-600 max-w-[520px]">
-              {pairs.map((p, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <span className="w-1/2 pr-2 truncate" title={p[0]}>{p[0]}</span>
-                  <span className="w-1/2 truncate" title={p[1]}>{p[1]}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-xs text-gray-400">-</div>
-          )}
-        </div>
-      );
-    } },
-    { key: "status", label: "Status", render: (v, row, Badge) => (
-      <Badge tone="amber">{v}</Badge>
-    ) },
+    },
+    {
+      key: "status", label: "Status", render: (v, row, Badge) => (
+        <Badge tone="amber">{v}</Badge>
+      )
+    },
     { key: "createdAt", label: "Created", render: (v) => fmtDate(v) },
-    { key: "actions", label: "Actions", sortable: false, render: (v, row) => (
-      <div className="flex items-center gap-2 justify-center">
-        <button
-          onClick={() => setConfirmApprove(row)}
-          disabled={approving || rejecting}
-          className="h-8 w-8 grid place-items-center rounded-md border border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Approve Deposit"
-        >
-          <CheckCircle size={16} />
-        </button>
-        <button
-          onClick={() => { setConfirmReject(row); setRejectReason(""); }}
-          disabled={approving || rejecting}
-          className="h-8 w-8 grid place-items-center rounded-md border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Reject Deposit"
-        >
-          <XCircle size={16} />
-        </button>
-      </div>
-    ) },
+    {
+      key: "actions", label: "Actions", sortable: false, render: (v, row) => (
+        <div className="flex items-center gap-2 justify-center">
+          <button
+            onClick={() => setConfirmApprove(row)}
+            disabled={approving || rejecting}
+            className="h-8 w-8 grid place-items-center rounded-md border border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Approve Deposit"
+          >
+            <CheckCircle size={16} />
+          </button>
+          <button
+            onClick={() => { setConfirmReject(row); setRejectReason(""); }}
+            disabled={approving || rejecting}
+            className="h-8 w-8 grid place-items-center rounded-md border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Reject Deposit"
+          >
+            <XCircle size={16} />
+          </button>
+        </div>
+      )
+    },
   ], [approving, rejecting]);
 
   const filters = useMemo(() => ({
@@ -169,7 +175,7 @@ export default function DepositsPending() {
       });
       const data = await r.json();
       if (!data?.ok) throw new Error(data?.error || 'Failed to approve');
-      
+
       setRows(list => list.filter(it => it.id !== row.id));
       setConfirmApprove(null);
       setToast({ type: 'success', message: data.message || 'Deposit approved successfully.' });
@@ -229,8 +235,8 @@ export default function DepositsPending() {
           <div className="space-y-4">
             <p>Do you want to approve the deposit of <b>{fmtAmount(confirmApprove.amount)}</b> for <b>{confirmApprove.userEmail}</b>?</p>
             <div className="flex justify-end gap-2">
-              <button 
-                onClick={() => setConfirmApprove(null)} 
+              <button
+                onClick={() => setConfirmApprove(null)}
                 disabled={approving}
                 className="px-4 h-10 rounded-md border disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -251,11 +257,10 @@ export default function DepositsPending() {
 
       {/* Toast Notification */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-in slide-in-from-top-5 ${
-          toast.type === 'success' 
-            ? 'bg-green-100 border border-green-400 text-green-800' 
+        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-in slide-in-from-top-5 ${toast.type === 'success'
+            ? 'bg-green-100 border border-green-400 text-green-800'
             : 'bg-red-100 border border-red-400 text-red-800'
-        }`}>
+          }`}>
           {toast.type === 'success' ? (
             <CheckCircle className="w-5 h-5 text-green-600" />
           ) : (
@@ -288,9 +293,9 @@ export default function DepositsPending() {
               />
             </div>
             <div className="flex justify-end gap-2">
-              <button 
-                onClick={() => setConfirmReject(null)} 
-                disabled={rejecting} 
+              <button
+                onClick={() => setConfirmReject(null)}
+                disabled={rejecting}
                 className="px-4 h-10 rounded-md border disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel

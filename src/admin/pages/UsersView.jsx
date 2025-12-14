@@ -7,10 +7,10 @@ import Modal from "../components/Modal.jsx";
 import Badge from "../components/Badge.jsx";
 import Swal from "sweetalert2";
 
-function Stat({ icon:Icon, label, value, tone }) {
+function Stat({ icon: Icon, label, value, tone }) {
   return (
     <div className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
-      <span className={`h-10 w-10 grid place-items-center rounded-xl ${tone}`}> 
+      <span className={`h-10 w-10 grid place-items-center rounded-xl ${tone}`}>
         <Icon className="h-5 w-5" />
       </span>
       <div>
@@ -21,12 +21,12 @@ function Stat({ icon:Icon, label, value, tone }) {
   );
 }
 
-function fmt(v){ if(!v) return "-"; const d=new Date(v); return isNaN(d)?"-":d.toLocaleString(); }
+function fmt(v) { if (!v) return "-"; const d = new Date(v); return isNaN(d) ? "-" : d.toLocaleString(); }
 
-export default function UsersView(){
+export default function UsersView() {
   const { id } = useParams();
-  const [data,setData] = useState(null);
-  const [err,setErr] = useState("");
+  const [data, setData] = useState(null);
+  const [err, setErr] = useState("");
   const [logins, setLogins] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [actionModal, setActionModal] = useState(null); // { type, accountId, amount, comment }
@@ -38,7 +38,7 @@ export default function UsersView(){
 
 
   // Bonus actions
-  async function handleAddBonus(accountId){
+  async function handleAddBonus(accountId) {
     try {
       const { value: amountStr } = await Swal.fire({
         title: 'Add Bonus',
@@ -52,7 +52,7 @@ export default function UsersView(){
       if (amountStr === undefined) return; // cancelled
       const amount = Number(amountStr);
       if (!amount || amount <= 0) {
-        await Swal.fire({ icon:'error', title:'Enter a valid amount' });
+        await Swal.fire({ icon: 'error', title: 'Enter a valid amount' });
         return;
       }
 
@@ -102,27 +102,27 @@ export default function UsersView(){
           })
         });
         bonusEmailSent = emailResponse.ok;
-      } catch(emailError) {
+      } catch (emailError) {
         console.warn('Bonus email notification failed:', emailError);
       }
-      
-      await Swal.fire({ icon:'success', title: bonusEmailSent ? 'Bonus credited and email sent' : 'Bonus credited (email failed)', timer: 1800, showConfirmButton: false });
+
+      await Swal.fire({ icon: 'success', title: bonusEmailSent ? 'Bonus credited and email sent' : 'Bonus credited (email failed)', timer: 1800, showConfirmButton: false });
       // Refresh MT5 balances if available
       fetchUser();
       // Log admin transaction
       try {
         await fetch(`${BASE}/admin/admin-transactions`, {
-          method:'POST',
-          headers: { 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ operation_type:'bonus_add', mt5_login: accountId, amount, currency:'USD', status:'completed', comment })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ operation_type: 'bonus_add', mt5_login: accountId, amount, currency: 'USD', status: 'completed', comment })
         });
-      } catch(_) {}
+      } catch (_) { }
     } catch (e) {
-      await Swal.fire({ icon:'error', title:'Bonus credit failed', text: e.message || String(e) });
+      await Swal.fire({ icon: 'error', title: 'Bonus credit failed', text: e.message || String(e) });
     }
   }
 
-  async function handleWithdrawBonus(accountId){
+  async function handleWithdrawBonus(accountId) {
     try {
       const { value: amountStr } = await Swal.fire({
         title: 'Withdraw Bonus',
@@ -136,7 +136,7 @@ export default function UsersView(){
       if (amountStr === undefined) return; // cancelled
       const amount = Number(amountStr);
       if (!amount || amount <= 0) {
-        await Swal.fire({ icon:'error', title:'Enter a valid amount' });
+        await Swal.fire({ icon: 'error', title: 'Enter a valid amount' });
         return;
       }
 
@@ -186,23 +186,23 @@ export default function UsersView(){
           })
         });
         bonusEmailSent = emailResponse.ok;
-      } catch(emailError) {
+      } catch (emailError) {
         console.warn('Bonus withdrawal email notification failed:', emailError);
       }
-      
-      await Swal.fire({ icon:'success', title: bonusEmailSent ? 'Bonus deducted and email sent' : 'Bonus deducted (email failed)', timer: 1800, showConfirmButton: false });
+
+      await Swal.fire({ icon: 'success', title: bonusEmailSent ? 'Bonus deducted and email sent' : 'Bonus deducted (email failed)', timer: 1800, showConfirmButton: false });
       // Refresh MT5 balances if available
       fetchUser();
       // Log admin transaction
       try {
         await fetch(`${BASE}/admin/admin-transactions`, {
-          method:'POST',
-          headers: { 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ operation_type:'bonus_deduct', mt5_login: accountId, amount, currency:'USD', status:'completed', comment })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ operation_type: 'bonus_deduct', mt5_login: accountId, amount, currency: 'USD', status: 'completed', comment })
         });
-      } catch(_) {}
+      } catch (_) { }
     } catch (e) {
-      await Swal.fire({ icon:'error', title:'Bonus deduction failed', text: e.message || String(e) });
+      await Swal.fire({ icon: 'error', title: 'Bonus deduction failed', text: e.message || String(e) });
     }
   }
 
@@ -224,60 +224,60 @@ export default function UsersView(){
 
   // Real vs Demo split by group name
   const { realBalance, demoBalance, realEquity, demoEquity } = useMemo(() => {
-    let rb=0, db=0, re=0, de=0;
+    let rb = 0, db = 0, re = 0, de = 0;
     Object.values(mt5Map).forEach(v => {
-      const isDemo = String(v?.group||'').toLowerCase().includes('demo');
+      const isDemo = String(v?.group || '').toLowerCase().includes('demo');
       if (isDemo) {
-        db += Number(v?.balance||0);
-        de += Number(v?.equity||0);
+        db += Number(v?.balance || 0);
+        de += Number(v?.equity || 0);
       } else {
-        rb += Number(v?.balance||0);
-        re += Number(v?.equity||0);
+        rb += Number(v?.balance || 0);
+        re += Number(v?.equity || 0);
       }
     });
     return { realBalance: rb, demoBalance: db, realEquity: re, demoEquity: de };
   }, [mt5Map]);
 
-  const fetchUser = useCallback(()=>{
-    let stop=false;
+  const fetchUser = useCallback(() => {
+    let stop = false;
     const token = localStorage.getItem('adminToken');
     fetch(`${BASE}/admin/users/${id}`, {
       headers: token ? { 'Authorization': `Bearer ${token}` } : {}
     })
-      .then(r=>r.json())
-      .then(d=>{ if(stop) return; if(!d?.ok) throw new Error(d?.error||'Failed'); setData(d); })
-      .catch(e=>setErr(e.message||String(e)));
-    return ()=>{stop=true};
-  },[BASE,id]);
+      .then(r => r.json())
+      .then(d => { if (stop) return; if (!d?.ok) throw new Error(d?.error || 'Failed'); setData(d); })
+      .catch(e => setErr(e.message || String(e)));
+    return () => { stop = true };
+  }, [BASE, id]);
 
-  useEffect(()=>{
+  useEffect(() => {
     const cancel = fetchUser();
     return cancel;
-  },[fetchUser]);
+  }, [fetchUser]);
 
-  useEffect(()=>{
+  useEffect(() => {
     const token = localStorage.getItem('adminToken');
     let cancel = false;
     fetch(`${BASE}/admin/users/${id}/logins`, { headers: { 'Authorization': `Bearer ${token}` } })
-      .then(r=>r.json())
+      .then(r => r.json())
       .then(j => { if (cancel) return; setLogins(Array.isArray(j.items) ? j.items : []); })
-      .catch(()=>{});
+      .catch(() => { });
     return () => { cancel = true; };
   }, [BASE, id]);
 
   // Fetch payment methods for this user
-  useEffect(()=>{
+  useEffect(() => {
     const token = localStorage.getItem('adminToken');
     let cancel = false;
     fetch(`${BASE}/admin/users/${id}/payment-methods`, { headers: { 'Authorization': `Bearer ${token}` } })
-      .then(r=>r.json())
+      .then(r => r.json())
       .then(j => { if (cancel) return; setPaymentMethods(Array.isArray(j.paymentMethods) ? j.paymentMethods : []); })
-      .catch(()=>{});
+      .catch(() => { });
     return () => { cancel = true; };
   }, [BASE, id]);
 
   // Fetch MT5 balances/equity for each account id on page load
-  useEffect(()=>{
+  useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (!data?.user?.MT5Account?.length) return;
     let stop = false;
@@ -288,8 +288,8 @@ export default function UsersView(){
             const res = await fetch(`${BASE}/admin/mt5/proxy/${a.accountId}/getClientProfile`, { headers: { 'Authorization': `Bearer ${token}` } });
             const j = await res.json();
             const d = j?.data?.Data || j?.data || {};
-            const levRaw = d.LeverageInCents ? Number(d.LeverageInCents)/100 : (d.Leverage || null);
-            return [a.accountId, { balance: Number(d.Balance||0), equity: Number(d.Equity||0), group: d.Group || d.GroupName || '-', leverage: levRaw }];
+            const levRaw = d.LeverageInCents ? Number(d.LeverageInCents) / 100 : (d.Leverage || null);
+            return [a.accountId, { balance: Number(d.Balance || 0), equity: Number(d.Equity || 0), group: d.Group || d.GroupName || '-', leverage: levRaw }];
           } catch {
             return [a.accountId, { balance: 0, equity: 0, group: '-', leverage: null }];
           }
@@ -300,8 +300,8 @@ export default function UsersView(){
     return () => { stop = true; };
   }, [BASE, data?.user?.MT5Account]);
 
-  if(err) return <div className="rounded-xl bg-white border border-rose-200 text-rose-700 p-4">{err}</div>;
-  if(!data) return <div className="rounded-xl bg-white border border-gray-200 p-4">Loading…</div>;
+  if (err) return <div className="rounded-xl bg-white border border-rose-200 text-rose-700 p-4">{err}</div>;
+  if (!data) return <div className="rounded-xl bg-white border border-gray-200 p-4">Loading…</div>;
 
   const u = data.user; const t = data.totals;
 
@@ -323,13 +323,13 @@ export default function UsersView(){
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-        <Stat icon={Wallet} label="Real Balance" value={`$${realBalance.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`} tone="bg-violet-100 text-violet-700" />
-        <Stat icon={Wallet} label="Demo Balance" value={`$${demoBalance.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`} tone="bg-fuchsia-100 text-fuchsia-700" />
-        <Stat icon={Wallet} label="Real Equity" value={`$${realEquity.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`} tone="bg-blue-100 text-blue-700" />
-        <Stat icon={Wallet} label="Demo Equity" value={`$${demoEquity.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`} tone="bg-cyan-100 text-cyan-700" />
+        <Stat icon={Wallet} label="Real Balance" value={`$${realBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} tone="bg-violet-100 text-violet-700" />
+        <Stat icon={Wallet} label="Demo Balance" value={`$${demoBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} tone="bg-fuchsia-100 text-fuchsia-700" />
+        <Stat icon={Wallet} label="Real Equity" value={`$${realEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} tone="bg-blue-100 text-blue-700" />
+        <Stat icon={Wallet} label="Demo Equity" value={`$${demoEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} tone="bg-cyan-100 text-cyan-700" />
         <Stat icon={Download} label="Total Deposits" value={`$${t.deposits.amount.toLocaleString()} (${t.deposits.count})`} tone="bg-emerald-100 text-emerald-700" />
         <Stat icon={Upload} label="Total Withdrawals" value={`$${t.withdrawals.amount.toLocaleString()} (${t.withdrawals.count})`} tone="bg-rose-100 text-rose-700" />
-        <Stat icon={ShieldCheck} label="Email Verified" value={u.emailVerified ? 'Yes' : 'No'} tone={u.emailVerified?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-800'} />
+        <Stat icon={ShieldCheck} label="Email Verified" value={u.emailVerified ? 'Yes' : 'No'} tone={u.emailVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'} />
       </div>
 
       {/* KYC */}
@@ -362,8 +362,8 @@ export default function UsersView(){
         <div className="px-5 pt-4 pb-2 text-sm font-semibold">MT5 Accounts</div>
         <div className="p-4">
           <ProTable
-            rows={(u.MT5Account||[]).map((a, idx) => ({
-              __index: idx+1,
+            rows={(u.MT5Account || []).map((a, idx) => ({
+              __index: idx + 1,
               accountId: a.accountId,
               group: mt5Map[a.accountId]?.group || '-',
               leverage: mt5Map[a.accountId]?.leverage ? `1:${Number(mt5Map[a.accountId]?.leverage).toFixed(0)}` : '-',
@@ -375,35 +375,41 @@ export default function UsersView(){
             columns={[
               { key: '__index', label: 'Sr No', sortable: false },
               { key: 'accountId', label: 'Account ID' },
-              { key: 'group', label: 'Group', render: (v) => {
-                const groupName = v || '-';
-                const isDemo = String(groupName).toLowerCase().includes('demo');
-                return <Badge tone={isDemo ? 'green' : 'blue'}>{groupName}</Badge>;
-              }},
+              {
+                key: 'group', label: 'Group', render: (v) => {
+                  const groupName = v || '-';
+                  const isDemo = String(groupName).toLowerCase().includes('demo');
+                  return <Badge tone={isDemo ? 'green' : 'blue'}>{groupName}</Badge>;
+                }
+              },
               { key: 'leverage', label: 'Leverage' },
               { key: 'balance', label: 'Balance' },
               { key: 'equity', label: 'Equity' },
               { key: 'createdAt', label: 'Created' },
-              { key: 'actions', label: 'Actions', sortable: false, render: (v, row) => (
-                <div className="flex items-center gap-2">
-                  <button onClick={()=> setActionModal({ type:'deposit', accountId: row.accountId, amount:'', comment:'Admin deposit' })}
-                          className="px-2 py-1 rounded-full bg-emerald-600 text-white text-xs hover:bg-emerald-700 shadow-sm">Deposit</button>
-                  <button onClick={()=> setActionModal({ type:'withdraw', accountId: row.accountId, amount:'', comment:'Admin withdrawal', txId:'' })}
-                          className="px-2 py-1 rounded-full bg-rose-600 text-white text-xs hover:bg-rose-700 shadow-sm">Withdraw</button>
-                </div>
-              ) },
-              { key: 'bonus', label: 'Bonus Actions', sortable: false, render: (v, row) => (
-                <div className="flex items-center gap-2">
-                  <button onClick={()=> handleAddBonus(row.accountId)}
-                          className="px-2 py-1 rounded-full bg-purple-600 text-white text-xs hover:bg-purple-700 shadow-sm">Add Bonus</button>
-                  <button onClick={()=> handleWithdrawBonus(row.accountId)}
-                          className="px-2 py-1 rounded-full bg-gray-700 text-white text-xs hover:bg-gray-800 shadow-sm">Withdraw Bonus</button>
-                </div>
-              ) },
+              {
+                key: 'actions', label: 'Actions', sortable: false, render: (v, row) => (
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setActionModal({ type: 'deposit', accountId: row.accountId, amount: '', comment: 'Admin deposit' })}
+                      className="px-2 py-1 rounded-full bg-emerald-600 text-white text-xs hover:bg-emerald-700 shadow-sm">Deposit</button>
+                    <button onClick={() => setActionModal({ type: 'withdraw', accountId: row.accountId, amount: '', comment: 'Admin withdrawal', txId: '' })}
+                      className="px-2 py-1 rounded-full bg-rose-600 text-white text-xs hover:bg-rose-700 shadow-sm">Withdraw</button>
+                  </div>
+                )
+              },
+              {
+                key: 'bonus', label: 'Bonus Actions', sortable: false, render: (v, row) => (
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleAddBonus(row.accountId)}
+                      className="px-2 py-1 rounded-full bg-brand-500 text-dark-base text-xs hover:bg-brand-600 shadow-sm">Add Bonus</button>
+                    <button onClick={() => handleWithdrawBonus(row.accountId)}
+                      className="px-2 py-1 rounded-full bg-gray-700 text-white text-xs hover:bg-gray-800 shadow-sm">Withdraw Bonus</button>
+                  </div>
+                )
+              },
             ]}
             pageSize={5}
             searchPlaceholder="Search by account, group…"
-            filters={{ searchKeys: ['accountId','group'] }}
+            filters={{ searchKeys: ['accountId', 'group'] }}
           />
           <div className="px-4 pb-4 text-xs text-gray-600 flex items-center gap-4">
             <span className="flex items-center gap-2">
@@ -430,7 +436,7 @@ export default function UsersView(){
           ) : (
             <ProTable
               rows={paymentMethods.map((pm, idx) => ({
-                __index: idx+1,
+                __index: idx + 1,
                 address: pm.address || '-',
                 currency: pm.currency || '-',
                 network: pm.network || '-',
@@ -445,15 +451,17 @@ export default function UsersView(){
                 { key: 'network', label: 'Network' },
                 { key: 'submittedAt', label: 'Submitted' },
                 { key: 'approvedAt', label: 'Approved' },
-                { key: 'status', label: 'Status', render: (v) => (
-                  <Badge tone={v === 'approved' ? 'green' : v === 'rejected' ? 'red' : 'amber'}>
-                    {v || 'pending'}
-                  </Badge>
-                )},
+                {
+                  key: 'status', label: 'Status', render: (v) => (
+                    <Badge tone={v === 'approved' ? 'green' : v === 'rejected' ? 'red' : 'amber'}>
+                      {v || 'pending'}
+                    </Badge>
+                  )
+                },
               ]}
               pageSize={5}
               searchPlaceholder="Search by address, currency, network…"
-              filters={{ searchKeys: ['address','currency','network'] }}
+              filters={{ searchKeys: ['address', 'currency', 'network'] }}
             />
           )}
         </div>
@@ -465,8 +473,8 @@ export default function UsersView(){
         <div className="p-4">
           <ProTable
             title={null}
-            rows={(logins||[]).map((r, idx) => ({
-              __index: idx+1,
+            rows={(logins || []).map((r, idx) => ({
+              __index: idx + 1,
               time: r.createdAt || r.createdat || r.created_at,
               device: r.device || '-',
               browser: r.browser || '-',
@@ -483,60 +491,60 @@ export default function UsersView(){
               { key: 'success', label: 'Success' },
               { key: 'failure_reason', label: 'Failure Reason' },
             ]}
-            filters={{ searchKeys: ['device','browser','user_agent','failure_reason'] }}
+            filters={{ searchKeys: ['device', 'browser', 'user_agent', 'failure_reason'] }}
             pageSize={10}
           />
         </div>
       </div>
 
       {/* Deposit/Withdraw Modal for MT5 accounts */}
-      <Modal open={!!actionModal} onClose={()=>setActionModal(null)} title={actionModal ? (actionModal.type==='deposit' ? 'Add Balance' : 'Deduct Balance') : ''}>
+      <Modal open={!!actionModal} onClose={() => setActionModal(null)} title={actionModal ? (actionModal.type === 'deposit' ? 'Add Balance' : 'Deduct Balance') : ''}>
         {actionModal && (
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Amount (USD)</label>
               <input type="number" min="0" step="0.01" value={actionModal.amount}
-                     onChange={e=>setActionModal({ ...actionModal, amount: e.target.value })}
-                     disabled={submitting}
-                     className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-100 disabled:text-gray-500" />
+                onChange={e => setActionModal({ ...actionModal, amount: e.target.value })}
+                disabled={submitting}
+                className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-100 disabled:text-gray-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
               <input type="text" value={actionModal.comment}
-                     onChange={e=>setActionModal({ ...actionModal, comment: e.target.value })}
-                     disabled={submitting}
-                     className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-100 disabled:text-gray-500" />
+                onChange={e => setActionModal({ ...actionModal, comment: e.target.value })}
+                disabled={submitting}
+                className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-100 disabled:text-gray-500" />
             </div>
-            {actionModal.type==='withdraw' && (
+            {actionModal.type === 'withdraw' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Transaction ID / Hash (optional)</label>
-                <input type="text" value={actionModal.txId||''}
-                       onChange={e=>setActionModal({ ...actionModal, txId: e.target.value })}
-                       disabled={submitting}
-                       placeholder="Paste blockchain tx hash or bank reference (optional)"
-                       className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-100 disabled:text-gray-500" />
+                <input type="text" value={actionModal.txId || ''}
+                  onChange={e => setActionModal({ ...actionModal, txId: e.target.value })}
+                  disabled={submitting}
+                  placeholder="Paste blockchain tx hash or bank reference (optional)"
+                  className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100 disabled:text-gray-500" />
               </div>
             )}
             <div className="flex justify-end gap-2">
-              <button onClick={()=>setActionModal(null)} disabled={submitting} className="px-4 h-10 rounded-md border disabled:opacity-60">Cancel</button>
-              <button onClick={async ()=>{
+              <button onClick={() => setActionModal(null)} disabled={submitting} className="px-4 h-10 rounded-md border disabled:opacity-60">Cancel</button>
+              <button onClick={async () => {
                 const amt = Number(actionModal.amount);
-                if (!amt || amt<=0) { Swal.fire({ icon:'error', title:'Enter amount' }); return; }
+                if (!amt || amt <= 0) { Swal.fire({ icon: 'error', title: 'Enter amount' }); return; }
                 try {
                   setSubmitting(true);
                   const token = localStorage.getItem('adminToken');
-                  const url = actionModal.type==='deposit' ? `${BASE}/admin/mt5/deposit` : `${BASE}/admin/mt5/withdraw`;
-                  const r = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json','Authorization':`Bearer ${token}` }, body: JSON.stringify({ login: actionModal.accountId, amount: amt, description: actionModal.comment }) });
+                  const url = actionModal.type === 'deposit' ? `${BASE}/admin/mt5/deposit` : `${BASE}/admin/mt5/withdraw`;
+                  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ login: actionModal.accountId, amount: amt, description: actionModal.comment }) });
                   const j = await r.json();
-                  if (!j?.ok) throw new Error(j?.error||'Failed');
-                  
+                  if (!j?.ok) throw new Error(j?.error || 'Failed');
+
                   // Send email notification using external CRM API
                   let emailSent = false;
                   try {
-                    const emailUrl = actionModal.type === 'deposit' 
+                    const emailUrl = actionModal.type === 'deposit'
                       ? 'https://zuperior-crm-api.onrender.com/api/emails/send-deposit'
                       : 'https://zuperior-crm-api.onrender.com/api/emails/send-withdrawal';
-                    
+
                     const emailResponse = await fetch(emailUrl, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -549,21 +557,21 @@ export default function UsersView(){
                       })
                     });
                     emailSent = emailResponse.ok;
-                  } catch(emailError) {
+                  } catch (emailError) {
                     console.warn('Email notification failed:', emailError);
                   }
-                  
+
                   setActionModal(null);
-                  const title = actionModal.type==='deposit' 
-                    ? (emailSent ? 'Deposit successful and email sent' : 'Deposit successful (email failed)') 
+                  const title = actionModal.type === 'deposit'
+                    ? (emailSent ? 'Deposit successful and email sent' : 'Deposit successful (email failed)')
                     : (emailSent ? 'Withdrawal successful and email sent' : 'Withdrawal successful (email failed)');
-                  Swal.fire({ icon:'success', title, timer: 1800, showConfirmButton:false });
+                  Swal.fire({ icon: 'success', title, timer: 1800, showConfirmButton: false });
                   fetchUser();
                   // Log in admin_transactions for reporting
                   try {
                     await fetch(`${BASE}/admin/admin-transactions`, {
                       method: 'POST',
-                      headers: { 'Content-Type':'application/json','Authorization':`Bearer ${token}` },
+                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                       body: JSON.stringify({
                         operation_type: actionModal.type === 'deposit' ? 'deposit' : 'withdraw',
                         mt5_login: actionModal.accountId,
@@ -571,16 +579,16 @@ export default function UsersView(){
                         currency: 'USD',
                         status: 'completed',
                         comment: actionModal.comment || '',
-                        ...(actionModal.type==='withdraw' && actionModal.txId ? { external_transaction_id: actionModal.txId.trim() } : {})
+                        ...(actionModal.type === 'withdraw' && actionModal.txId ? { external_transaction_id: actionModal.txId.trim() } : {})
                       })
                     });
-                  } catch(_) {}
-                } catch(e) {
-                  Swal.fire({ icon:'error', title: actionModal.type==='deposit' ? 'Deposit failed' : 'Withdrawal failed', text:e.message||String(e) });
+                  } catch (_) { }
+                } catch (e) {
+                  Swal.fire({ icon: 'error', title: actionModal.type === 'deposit' ? 'Deposit failed' : 'Withdrawal failed', text: e.message || String(e) });
                 } finally {
                   setSubmitting(false);
                 }
-              }} disabled={submitting} className={`px-4 h-10 rounded-md text-white disabled:opacity-70 ${actionModal.type==='deposit' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'}`}>
+              }} disabled={submitting} className={`px-4 h-10 rounded-md text-white disabled:opacity-70 ${actionModal.type === 'deposit' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'}`}>
                 {submitting ? (
                   <span className="inline-flex items-center gap-2">
                     <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
@@ -590,7 +598,7 @@ export default function UsersView(){
                     Processing...
                   </span>
                 ) : (
-                  actionModal.type==='deposit' ? 'Deposit' : 'Withdraw'
+                  actionModal.type === 'deposit' ? 'Deposit' : 'Withdraw'
                 )}
               </button>
             </div>

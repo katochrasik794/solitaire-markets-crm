@@ -266,7 +266,7 @@ function Crypto() {
                 type="submit"
                 disabled={loading}
                 className={`w-full mt-3 py-2.5 rounded-lg font-semibold transition-colors ${!loading
-                  ? 'bg-[#e6c200] hover:bg-[#d4b000] text-gray-900 cursor-pointer'
+                  ? 'bg-brand-500 hover:bg-brand-600 text-dark-base cursor-pointer'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >

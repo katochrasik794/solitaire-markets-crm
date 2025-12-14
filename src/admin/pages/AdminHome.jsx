@@ -1,10 +1,10 @@
 function AdminHome() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-neutral-100">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <header className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-purple-600 mb-2">
+            <h1 className="text-4xl font-bold text-brand-600 mb-2">
               Admin Dashboard
             </h1>
             <p className="text-gray-600">
@@ -25,7 +25,7 @@ function AdminHome() {
             </div>
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Revenue</h3>
-              <p className="text-3xl font-bold text-purple-600">$12.5K</p>
+              <p className="text-3xl font-bold text-brand-600">$12.5K</p>
               <p className="text-sm text-gray-500 mt-2">This Month</p>
             </div>
           </div>

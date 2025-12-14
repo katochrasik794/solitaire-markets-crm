@@ -65,14 +65,14 @@ export default function DepositsRejected() {
     { key: "userEmail", label: "User Email" },
     { key: "userName", label: "User Name" },
     { key: "mt5AccountId", label: "MT5 Account ID", render: (v) => v && v !== "-" ? v : "-" },
-    { 
-      key: "depositTo", 
-      label: "Deposit To", 
+    {
+      key: "depositTo",
+      label: "Deposit To",
       render: (v, row) => {
         if (row.depositTo === 'wallet' && row.walletNumber) {
           return <span className="text-blue-600 font-medium">Deposit in wallet {row.walletNumber}</span>;
         } else if (row.depositTo === 'mt5' && row.mt5AccountId && row.mt5AccountId !== "-") {
-          return <span className="text-purple-600 font-medium">Deposit in MT5 ID {row.mt5AccountId}</span>;
+          return <span className="text-brand-600 font-medium">Deposit in MT5 ID {row.mt5AccountId}</span>;
         }
         return <span className="text-gray-400">-</span>;
       }
@@ -81,9 +81,11 @@ export default function DepositsRejected() {
     { key: "currency", label: "Currency" },
     { key: "method", label: "Method" },
     { key: "paymentMethod", label: "Payment Method" },
-    { key: "status", label: "Status", render: (v, row, Badge) => (
-      <Badge tone="red">{v}</Badge>
-    ) },
+    {
+      key: "status", label: "Status", render: (v, row, Badge) => (
+        <Badge tone="red">{v}</Badge>
+      )
+    },
     { key: "rejectionReason", label: "Rejection Reason" },
     { key: "rejectedAt", label: "Rejected At", render: (v) => fmtDate(v) },
     { key: "createdAt", label: "Created", render: (v) => fmtDate(v) },

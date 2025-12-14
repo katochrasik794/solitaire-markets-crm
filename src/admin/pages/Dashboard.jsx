@@ -48,14 +48,14 @@ const initialDashboardData = {
 function StatCard({ title, value, subtitle, icon: Icon, color = "blue", progress = null, onClick }) {
   const colorClasses = {
     blue: "bg-blue-50 text-blue-600",
-    green: "bg-green-50 text-green-600", 
+    green: "bg-green-50 text-green-600",
     red: "bg-red-50 text-red-600",
     yellow: "bg-yellow-50 text-yellow-600",
-    purple: "bg-purple-50 text-purple-600"
+    purple: "bg-brand-50 text-brand-600"
   };
 
   return (
-    <div 
+    <div
       className={`bg-white rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
@@ -66,7 +66,7 @@ function StatCard({ title, value, subtitle, icon: Icon, color = "blue", progress
         {progress !== null && (
           <div className="text-sm font-medium text-gray-600">
             {progress}%
-        </div>
+          </div>
         )}
       </div>
       <div className="space-y-1">
@@ -77,12 +77,12 @@ function StatCard({ title, value, subtitle, icon: Icon, color = "blue", progress
       {progress !== null && (
         <div className="mt-3">
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className={`h-2 rounded-full ${colorClasses[color].split(' ')[0]}`}
               style={{ width: `${Math.min(progress, 100)}%` }}
             ></div>
-      </div>
-    </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -100,28 +100,28 @@ function FinancialCard({ title, icon: Icon, color, items, summary }) {
       <div className="flex items-center gap-2 mb-4">
         <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
           <Icon className="h-5 w-5" />
-      </div>
+        </div>
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                </div>
-      
+      </div>
+
       <div className="space-y-4">
         {items.map((item, index) => (
           <div key={index} className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`p-1.5 rounded ${item.color}`}>
                 <item.icon className="h-4 w-4" />
-      </div>
+              </div>
               <div>
                 <div className="text-sm font-medium text-gray-900">{item.label}</div>
-                </div>
-                </div>
+              </div>
+            </div>
             <div className="text-right">
               <div className="text-sm font-semibold text-gray-900">{item.value}</div>
-                </div>
-              </div>
-            ))}
+            </div>
           </div>
-      
+        ))}
+      </div>
+
       {summary && (
         <div className="mt-4 pt-4 border-t border-gray-100">
           <div className="flex justify-between items-center text-sm">
@@ -129,20 +129,20 @@ function FinancialCard({ title, icon: Icon, color, items, summary }) {
               <div className="flex items-center gap-4">
                 <span className="text-gray-600">MTD</span>
                 <span className="font-semibold text-gray-900">{summary.mtd}</span>
-      </div>
+              </div>
               <div className="flex items-center gap-4">
                 <span className="text-gray-600">Today</span>
                 <span className="font-semibold text-gray-900">{summary.today}</span>
               </div>
-              </div>
+            </div>
             <div className="w-24 bg-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className="h-2 rounded-full bg-gray-400"
                 style={{ width: '50%' }}
               ></div>
             </div>
+          </div>
         </div>
-      </div>
       )}
     </div>
   );
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState(initialDashboardData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
+
   // Bulk operation logs state
   const [bulkLogsRows, setBulkLogsRows] = useState([]);
   const [recentDeposits, setRecentDeposits] = useState([]);
@@ -177,11 +177,11 @@ export default function AdminDashboard() {
       .then(r => r.json())
       .then(list => {
         if (cancelled) return;
-        const match = Array.isArray(list) ? list.find(ca => (ca.email||'').toLowerCase() === String(email).toLowerCase()) : null;
+        const match = Array.isArray(list) ? list.find(ca => (ca.email || '').toLowerCase() === String(email).toLowerCase()) : null;
         if (match?.country) setCountryScope(String(match.country).toLowerCase());
         setScopeResolved(true);
       })
-      .catch(()=>{ setScopeResolved(true); });
+      .catch(() => { setScopeResolved(true); });
     return () => { cancelled = true; };
   }, [BASE, admin?.email]);
 
@@ -202,19 +202,19 @@ export default function AdminDashboard() {
         fetch(`${BASE}/admin/users/all?limit=1000${scope}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }).then(r => r.json()).catch(() => ({ ok: false, items: [] })),
-        
+
         fetch(`${BASE}/admin/deposits?limit=1000${scope}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }).then(r => r.json()).catch(() => ({ ok: false, items: [] })),
-        
+
         fetch(`${BASE}/admin/withdrawals?limit=1000${scope}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }).then(r => r.json()).catch(() => ({ ok: false, items: [] })),
-        
+
         fetch(`${BASE}/admin/kyc?limit=1000${scope}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }).then(r => r.json()).catch(() => ({ ok: false, items: [] })),
-        
+
         fetch(`${BASE}/admin/mt5/users?limit=1000${scope}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }).then(r => r.json()).catch(() => ({ ok: false, items: [] }))
@@ -330,7 +330,7 @@ export default function AdminDashboard() {
   const fetchBulkLogs = useCallback(async () => {
     setBulkLogsLoading(true);
     setBulkLogsError("");
-    
+
     try {
       const token = localStorage.getItem('adminToken');
       if (!token) {
@@ -343,13 +343,13 @@ export default function AdminDashboard() {
       const response = await fetch(`${BASE}/admin/activity-logs?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       const data = await response.json();
-      
+
       if (!data?.ok) {
         throw new Error(data?.error || "Failed to load bulk logs");
       }
-      
+
       const items = Array.isArray(data.items) ? data.items : [];
       setBulkLogsRows(items.map((item, index) => ({
         ...item,
@@ -380,12 +380,12 @@ export default function AdminDashboard() {
   }, [fetchDashboardData, fetchBulkLogs, scopeResolved]);
 
   if (loading) {
-  return (
+    return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto text-gray-400" />
           <p className="mt-2 text-gray-600">Loading dashboard...</p>
-      </div>
+        </div>
       </div>
     );
   }
@@ -396,14 +396,14 @@ export default function AdminDashboard() {
         <div className="text-center">
           <AlertCircle className="h-8 w-8 mx-auto text-red-400" />
           <p className="mt-2 text-red-600">{error}</p>
-          <button 
+          <button
             onClick={fetchDashboardData}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Retry
           </button>
         </div>
-        </div>
+      </div>
     );
   }
 
@@ -431,7 +431,7 @@ export default function AdminDashboard() {
           color="blue"
           progress={100}
         />
-        
+
         <StatCard
           title="Email Unverified"
           value={dashboardData.emailUnverified}
@@ -440,7 +440,7 @@ export default function AdminDashboard() {
           color="red"
           progress={dashboardData.totalUsers > 0 ? (dashboardData.emailUnverified / dashboardData.totalUsers) * 100 : 0}
         />
-        
+
         <StatCard
           title="KYC Pending"
           value={dashboardData.kycPending}
@@ -449,7 +449,7 @@ export default function AdminDashboard() {
           color="purple"
           progress={dashboardData.totalUsers > 0 ? (dashboardData.kycPending / dashboardData.totalUsers) * 100 : 0}
         />
-        
+
         <StatCard
           title="Total MT5 Accounts"
           value={dashboardData.totalMT5Accounts}
@@ -458,7 +458,7 @@ export default function AdminDashboard() {
           color="blue"
           progress={dashboardData.totalUsers > 0 ? (dashboardData.totalMT5Accounts / dashboardData.totalUsers) * 100 : 0}
         />
-        </div>
+      </div>
 
       {/* Bottom Row - Financial Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -647,7 +647,7 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-xl p-8 text-center">
           <AlertCircle className="h-8 w-8 mx-auto text-red-400" />
           <p className="mt-2 text-red-600">{bulkLogsError}</p>
-          <button 
+          <button
             onClick={fetchBulkLogs}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
@@ -655,8 +655,8 @@ export default function AdminDashboard() {
           </button>
         </div>
       ) : (
-      <ProTable
-        title="Activity Logs"
+        <ProTable
+          title="Activity Logs"
           rows={bulkLogsRows}
           columns={[
             { key: "__index", label: "Sr No", sortable: false },
@@ -665,21 +665,23 @@ export default function AdminDashboard() {
             { key: "user", label: "User" },
             { key: "mts", label: "MTS" },
             { key: "amount", label: "Amount", render: (v) => fmtAmount(v) },
-            { key: "status", label: "Status", render: (v) => {
-              let tone = 'gray';
-              if (v === 'Approved' || v === 'Opened') tone = 'green';
-              else if (v === 'Rejected') tone = 'red';
-              else if (v === 'Pending') tone = 'amber';
-              return <Badge tone={tone}>{v}</Badge>;
-            } },
+            {
+              key: "status", label: "Status", render: (v) => {
+                let tone = 'gray';
+                if (v === 'Approved' || v === 'Opened') tone = 'green';
+                else if (v === 'Rejected') tone = 'red';
+                else if (v === 'Pending') tone = 'amber';
+                return <Badge tone={tone}>{v}</Badge>;
+              }
+            },
             { key: "details", label: "Details" },
           ]}
           filters={{
             searchKeys: ["user", "userName", "mts", "details", "status"],
           }}
-        searchPlaceholder="Search user, MTS, details…"
-        pageSize={10}
-      />
+          searchPlaceholder="Search user, MTS, details…"
+          pageSize={10}
+        />
       )}
     </div>
   );

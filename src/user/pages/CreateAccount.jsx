@@ -273,7 +273,7 @@ function CreateAccount() {
                       className="sr-only"
                     />
                     <div className={`border-2 rounded-lg p-1 transition-all ${formData.platform === 'MT5'
-                      ? 'border-[#e6c200] bg-[#e6c200] bg-opacity-5'
+                      ? 'border-brand-500 bg-brand-500 bg-opacity-5'
                       : 'border-gray-200 hover:border-gray-300'
                       }`}>
                       <div className="flex items-center gap-4">
@@ -322,11 +322,11 @@ function CreateAccount() {
                           className="sr-only"
                         />
                         <div className={`border-2 rounded-lg p-4 transition-all ${formData.mt5GroupId === group.id.toString()
-                          ? 'border-[#e6c200] bg-[#e6c200] bg-opacity-5'
+                          ? 'border-brand-500 bg-brand-500 bg-opacity-5'
                           : 'border-gray-200 hover:border-gray-300'
                           }`}>
                           <div className="flex items-center gap-3 mb-3">
-                            <div className={`w-4 h-4 rounded-full ${formData.mt5GroupId === group.id.toString() ? 'bg-[#e6c200]' : 'bg-gray-300'
+                            <div className={`w-4 h-4 rounded-full ${formData.mt5GroupId === group.id.toString() ? 'bg-brand-500' : 'bg-gray-300'
                               }`}></div>
                             <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
                               <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -357,7 +357,7 @@ function CreateAccount() {
                   value={formData.leverage}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e6c200] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                 >
                   <option value="50">1:50</option>
@@ -384,12 +384,12 @@ function CreateAccount() {
                       onChange={handleChange}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#e6c200] peer-focus:ring-opacity-20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#d4b000]"></div>
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-500 peer-focus:ring-opacity-20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
                   </label>
                 </div>
                 <p className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
                   By selecting Swap Free Account you agree to the{' '}
-                  <a href="#" className="text-[#e6c200] hover:underline">Terms and Conditions for Swap Free accounts</a>.
+                  <a href="#" className="text-brand-600 hover:underline">Terms and Conditions for Swap Free accounts</a>.
                   Swap Free Accounts are subject to a maximum leverage of 1:500.
                 </p>
               </div>
@@ -408,7 +408,7 @@ function CreateAccount() {
                       onChange={handleChange}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#e6c200] peer-focus:ring-opacity-20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#d4b000]"></div>
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-500 peer-focus:ring-opacity-20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
                   </label>
                 </div>
               </div>
@@ -422,7 +422,7 @@ function CreateAccount() {
                   name="reasonForAccount"
                   value={formData.reasonForAccount}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e6c200] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                 >
                   {reasons.map((reason) => (
@@ -448,7 +448,7 @@ function CreateAccount() {
                     value={formData.masterPassword}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e6c200] focus:border-transparent pr-10"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent pr-10"
                     style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                     placeholder="Set your MT5 master password"
                   />
@@ -486,7 +486,7 @@ function CreateAccount() {
                     value={formData.portalPassword}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e6c200] focus:border-transparent pr-10"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent pr-10"
                     style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
                     placeholder="Enter your portal password"
                   />
@@ -513,7 +513,7 @@ function CreateAccount() {
               <button
                 type="submit"
                 disabled={loading || loadingGroups || !formData.mt5GroupId}
-                className="w-full bg-[#d4b000] hover:bg-[#c2a000] text-gray-900 py-3 rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base py-3 rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
               >
                 {loading ? (
@@ -538,7 +538,7 @@ function CreateAccount() {
             {/* Success Icon */}
             <div className="mb-6">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-[#dff8f4] rounded-full mb-4">
-                <svg className="w-10 h-10 text-[#d4b000]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-10 h-10 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
@@ -582,7 +582,7 @@ function CreateAccount() {
 
             <button
               onClick={() => navigate('/user/dashboard')}
-              className="w-full bg-[#d4b000] hover:bg-[#c2a000] text-gray-900 py-3 rounded-lg transition-colors font-semibold"
+              className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base py-3 rounded-lg transition-colors font-semibold"
               style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px' }}
             >
               To Dashboard
