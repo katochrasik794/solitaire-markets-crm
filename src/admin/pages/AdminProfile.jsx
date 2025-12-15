@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import Datatable from "../../components/Datatable.jsx";
 
-const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+const BASE =
+  import.meta.env.VITE_BACKEND_API_URL ||
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5000/api";
 import {
   User,
   Mail,
@@ -19,17 +23,19 @@ import {
   Edit,
   CheckCircle,
   AlertCircle,
-  Info
+  Info,
+  LogOut
 } from "lucide-react";
 
 export default function AdminProfile() {
-  const { admin } = useAuth();
+  const { admin, logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loginHistory, setLoginHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState({ device: false, all: false });
   const [editForm, setEditForm] = useState({
     username: "",
     email: "",
@@ -167,6 +173,158 @@ export default function AdminProfile() {
     return roles[role] || roles['admin'];
   };
 
+  // Define columns for Datatable
+  const loginHistoryColumns = [
+    {
+      key: 'timestamp',
+      label: 'Date & Time',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-gray-400" />
+          <span>
+            {new Date(value).toLocaleString()}{" "}
+            <span className="text-xs text-gray-400">
+              ({formatRelativeTime(value)})
+            </span>
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'ip_address',
+      label: 'IP Address',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center gap-2">
+          <Globe className="h-4 w-4 text-gray-400" />
+          {value || 'Unknown'}
+        </div>
+      )
+    },
+    {
+      key: 'location',
+      label: 'Location',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-gray-400" />
+          {value || 'Unknown'}
+        </div>
+      )
+    },
+    {
+      key: 'device',
+      label: 'Device',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center gap-2">
+          <Monitor className="h-4 w-4 text-gray-400" />
+          <span className="truncate max-w-xs">{value || 'Unknown'}</span>
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: false,
+      render: (value, row) => (
+        <div className="flex flex-col gap-1">
+          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${row.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
+            {row.success ? 'Success' : 'Failed'}
+          </span>
+          {row.isCurrentSession && (
+            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+              Current Session
+            </span>
+          )}
+        </div>
+      )
+    }
+  ];
+
+  // Transform login history data for Datatable
+  const loginHistoryData = loginHistory.map((login) => ({
+    ...login,
+    status: login.success ? 'Success' : 'Failed'
+  }));
+
+  const formatRelativeTime = (iso) => {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    const now = new Date();
+    const diffMs = now - d;
+    const diffSec = Math.round(diffMs / 1000);
+    const diffMin = Math.round(diffSec / 60);
+    const diffHr = Math.round(diffMin / 60);
+    const diffDay = Math.round(diffHr / 24);
+    if (diffSec < 60) return `${diffSec}s ago`;
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHr < 24) return `${diffHr}h ago`;
+    return `${diffDay}d ago`;
+  };
+
+  const handleLogoutDevice = async () => {
+    if (!confirm('Are you sure you want to logout from this device?')) {
+      return;
+    }
+
+    setLogoutLoading({ ...logoutLoading, device: true });
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${BASE}/admin/logout/device`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.ok) {
+        logout(); // This will redirect to login
+      } else {
+        setError(data.error || 'Failed to logout from device');
+        setLogoutLoading({ ...logoutLoading, device: false });
+      }
+    } catch (err) {
+      console.error('Logout device error:', err);
+      setError('Failed to logout from device');
+      setLogoutLoading({ ...logoutLoading, device: false });
+    }
+  };
+
+  const handleLogoutAll = async () => {
+    if (!confirm('Are you sure you want to logout from all devices? This will invalidate all your active sessions.')) {
+      return;
+    }
+
+    setLogoutLoading({ ...logoutLoading, all: true });
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${BASE}/admin/logout/all`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.ok) {
+        logout(); // This will redirect to login
+      } else {
+        setError(data.error || 'Failed to logout from all devices');
+        setLogoutLoading({ ...logoutLoading, all: false });
+      }
+    } catch (err) {
+      console.error('Logout all devices error:', err);
+      setError('Failed to logout from all devices');
+      setLogoutLoading({ ...logoutLoading, all: false });
+    }
+  };
+
   const getStatusInfo = (isActive) => {
     return isActive
       ? { label: 'Active', color: 'bg-green-100 text-green-800', icon: CheckCircle }
@@ -195,6 +353,7 @@ export default function AdminProfile() {
 
   const statusInfo = getStatusInfo(profile.is_active);
   const roleInfo = getRoleInfo(profile.admin_role);
+  const StatusIcon = statusInfo.icon;
 
   return (
     <div className="min-h-screen p-3 sm:p-4 md:p-6">
@@ -346,7 +505,7 @@ export default function AdminProfile() {
                     <div>
                       <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
                       <div className="flex items-center gap-2">
-                        <statusInfo.icon className="h-4 w-4" />
+                        {StatusIcon && <StatusIcon className="h-4 w-4" />}
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>
                           {statusInfo.label}
                         </span>
@@ -371,87 +530,6 @@ export default function AdminProfile() {
               )}
             </div>
 
-            {/* Login History */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
-                  Login History
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">Recent login activity and IP addresses</p>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date & Time
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        IP Address
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Location
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Device
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {loginHistory.length > 0 ? (
-                      loginHistory.map((login, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4 text-gray-400" />
-                              {new Date(login.timestamp).toLocaleString()}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <div className="flex items-center gap-2">
-                              <Globe className="h-4 w-4 text-gray-400" />
-                              {login.ip_address || 'Unknown'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-gray-400" />
-                              {login.location || 'Unknown'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <div className="flex items-center gap-2">
-                              <Monitor className="h-4 w-4 text-gray-400" />
-                              {login.device || 'Unknown'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${login.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                              }`}>
-                              {login.success ? 'Success' : 'Failed'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                          <div className="flex flex-col items-center gap-2">
-                            <Activity className="h-8 w-8 text-gray-300" />
-                            <p>No login history available</p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
 
           {/* Sidebar */}
@@ -476,7 +554,9 @@ export default function AdminProfile() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Last Login</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {profile.last_login ? new Date(profile.last_login).toLocaleDateString() : 'Never'}
+                    {profile.last_login
+                      ? `${new Date(profile.last_login).toLocaleString()} (${formatRelativeTime(profile.last_login)})`
+                      : 'Never'}
                   </span>
                 </div>
               </div>
@@ -505,28 +585,52 @@ export default function AdminProfile() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Quick Actions
-              </h3>
-              <div className="space-y-2">
-                <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                  Change Password
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                  Security Settings
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                  Notification Preferences
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                  Export Data
-                </button>
+        {/* Login History - full width row */}
+        <div className="mt-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Login History
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">Recent login activity and IP addresses</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleLogoutDevice}
+                    disabled={logoutLoading.device || logoutLoading.all}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {logoutLoading.device ? 'Logging out...' : 'Logout from this device'}
+                  </button>
+                  <button
+                    onClick={handleLogoutAll}
+                    disabled={logoutLoading.device || logoutLoading.all}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {logoutLoading.all ? 'Logging out...' : 'Logout from all devices'}
+                  </button>
+                </div>
               </div>
             </div>
+
+            <Datatable
+              data={loginHistoryData}
+              columns={loginHistoryColumns}
+              loading={loading}
+              searchPlaceholder="Search login history..."
+              showPagination={true}
+              defaultPageSize={10}
+              showPageSize={true}
+              emptyMessage="No login history available"
+            />
           </div>
         </div>
       </div>
