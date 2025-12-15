@@ -88,7 +88,7 @@ export default function Shell() {
   }, [breadcrumbs]);
 
   return (
-    <div className="min-h-screen bg-gray-100 relative">
+    <div className="min-h-screen relative" style={{ backgroundColor: '#F1F6EC' }}>
       {/* Fixed sidebar (desktop) + drawer (mobile) */}
       <Sidebar
         role={role}

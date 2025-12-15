@@ -13,8 +13,8 @@ export default function ReportsInternalTransfers() {
   const [error, setError] = useState("");
 
   const BASE = import.meta.env.VITE_BACKEND_API_URL
-    || import.meta.env.VITE_API_BASE_URL
-    || "http://localhost:5003";
+    || import.meta.env.VITE_API_URL
+    || "http://localhost:5000/api";
 
   useEffect(() => {
     let stop = false;
@@ -22,7 +22,10 @@ export default function ReportsInternalTransfers() {
     setError("");
     const token = localStorage.getItem('adminToken');
     fetch(`${BASE}/admin/internal-transfers?limit=500`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     })
       .then(r => r.json())
       .then(data => {

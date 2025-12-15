@@ -13,15 +13,20 @@ export default function ReportsWallet() {
   const [error, setError] = useState("");
 
   const BASE = import.meta.env.VITE_BACKEND_API_URL
-    || import.meta.env.VITE_API_BASE_URL
-    || "http://localhost:5003";
+    || import.meta.env.VITE_API_URL
+    || "http://localhost:5000/api";
 
   useEffect(() => {
     let stop = false;
     setLoading(true);
     setError("");
     const token = localStorage.getItem('adminToken');
-    fetch(`${BASE}/admin/wallet-transactions?limit=1000`, { headers: { 'Authorization': `Bearer ${token}` } })
+    fetch(`${BASE}/admin/wallet-transactions?limit=1000`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
       .then(r => r.json())
       .then(data => {
         if (stop) return;
