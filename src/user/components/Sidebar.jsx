@@ -1,8 +1,10 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import authService from '../../services/auth.js'
 
 function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
+  const navigate = useNavigate()
   const [openSubmenus, setOpenSubmenus] = useState({
     analysis: false
   })
@@ -27,6 +29,11 @@ function Sidebar({ isOpen, onClose }) {
       ...prev,
       [menu]: !prev[menu]
     }))
+  }
+
+  const handleLogout = () => {
+    authService.logout()
+    navigate('/login')
   }
 
   const isActive = (path) => location.pathname === `/user${path}`
@@ -239,8 +246,37 @@ function Sidebar({ isOpen, onClose }) {
             </svg>
             <span className="text-sm font-normal">Partner's Cabinet</span>
           </Link>
+
+          {/* Solitaire Support */}
+          <Link
+            to="/user/support"
+            className={`flex items-center px-4 py-3 transition-colors relative ${isActive('/support')
+              ? 'bg-brand-500 text-dark-base'
+              : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
+              }`}
+            style={{}}
+          >
+            <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <span className="text-sm font-normal">Solitaire Support</span>
+          </Link>
         </div>
       </nav>
+
+      {/* Logout Button - Fixed at bottom */}
+      <div className="border-t border-gray-200 p-4 flex-shrink-0">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+          style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '500' }}
+        >
+          <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span>Logout</span>
+        </button>
+      </div>
     </div>
   )
 }

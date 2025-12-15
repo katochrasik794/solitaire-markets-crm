@@ -109,9 +109,13 @@ function Transfers() {
         const accountsData = await accountsRes.json()
         if (accountsData.success) {
           const all = Array.isArray(accountsData.data) ? accountsData.data : []
-          const mt5 = all.filter(
-            (acc) => (acc.platform || '').toUpperCase() === 'MT5'
-          )
+          // Filter for active MT5 accounts only, exclude demo accounts
+          const mt5 = all.filter((acc) => {
+            const isMT5 = (acc.platform || '').toUpperCase() === 'MT5'
+            const isActive = acc.account_status === 'active'
+            const isNotDemo = !acc.is_demo && (!acc.trading_server || !acc.trading_server.toLowerCase().includes('demo'))
+            return isMT5 && isActive && isNotDemo
+          })
           setMt5Accounts(mt5)
           
           // Fetch real-time balances for MT5 accounts from API
@@ -466,9 +470,13 @@ function Transfers() {
       const accountsData = await accountsRes.json()
       if (accountsData.success) {
         const all = Array.isArray(accountsData.data) ? accountsData.data : []
-        const mt5 = all.filter(
-          (acc) => (acc.platform || '').toUpperCase() === 'MT5'
-        )
+        // Filter for active MT5 accounts only, exclude demo accounts
+        const mt5 = all.filter((acc) => {
+          const isMT5 = (acc.platform || '').toUpperCase() === 'MT5'
+          const isActive = acc.account_status === 'active'
+          const isNotDemo = !acc.is_demo && (!acc.trading_server || !acc.trading_server.toLowerCase().includes('demo'))
+          return isMT5 && isActive && isNotDemo
+        })
         setMt5Accounts(mt5)
         
         // Fetch fresh balances for all MT5 accounts
@@ -550,9 +558,13 @@ function Transfers() {
       
       if (accountsData.success) {
         const all = Array.isArray(accountsData.data) ? accountsData.data : []
-        const mt5 = all.filter(
-          (acc) => (acc.platform || '').toUpperCase() === 'MT5'
-        )
+        // Filter for active MT5 accounts only, exclude demo accounts
+        const mt5 = all.filter((acc) => {
+          const isMT5 = (acc.platform || '').toUpperCase() === 'MT5'
+          const isActive = acc.account_status === 'active'
+          const isNotDemo = !acc.is_demo && (!acc.trading_server || !acc.trading_server.toLowerCase().includes('demo'))
+          return isMT5 && isActive && isNotDemo
+        })
         setMt5Accounts(mt5)
         
         // Fetch fresh balances for all MT5 accounts

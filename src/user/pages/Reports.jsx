@@ -15,6 +15,10 @@ function Reports() {
   const [loadingMt5, setLoadingMt5] = useState(false)
   const [selectedAccount, setSelectedAccount] = useState('')
   const [mt5Accounts, setMt5Accounts] = useState([])
+  const [downloadingPDF, setDownloadingPDF] = useState(false)
+  const [downloadingExcel, setDownloadingExcel] = useState(false)
+  const [downloadingTransactionPDF, setDownloadingTransactionPDF] = useState(false)
+  const [downloadingTransactionExcel, setDownloadingTransactionExcel] = useState(false)
 
   const reportOptions = [
     { value: '', label: 'Please select a report' },
@@ -121,8 +125,16 @@ function Reports() {
   }
 
   const handleDownloadPDF = async () => {
+    if (downloadingPDF) return // Prevent multiple clicks
+    
+    setDownloadingPDF(true)
     try {
       const token = authService.getToken()
+      if (!token) {
+        alert('Please login to download reports')
+        return
+      }
+
       const url = `${API_BASE_URL}/reports/mt5-account-statement/download/pdf${selectedAccount ? `?accountNumber=${encodeURIComponent(selectedAccount)}` : ''}`
       const response = await fetch(url, {
         headers: {
@@ -130,26 +142,61 @@ function Reports() {
         }
       })
 
-      if (response.ok) {
-        const blob = await response.blob()
-        const downloadUrl = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = downloadUrl
-        a.download = `MT5_Account_Statement_${selectedAccount || 'All'}_${Date.now()}.pdf`
-        document.body.appendChild(a)
-        a.click()
+      // Check if response is actually a PDF
+      if (!response.ok) {
+        // Try to get error message
+        const errorData = await response.json().catch(() => ({ error: 'Failed to download PDF' }))
+        throw new Error(errorData.error || errorData.message || 'Failed to download PDF')
+      }
+
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('application/pdf') && !contentType.includes('pdf')) {
+        // If not PDF, try to get error message
+        const text = await response.text()
+        try {
+          const errorData = JSON.parse(text)
+          throw new Error(errorData.error || errorData.message || 'Invalid response format')
+        } catch {
+          throw new Error('Invalid response format. Expected PDF file.')
+        }
+      }
+
+      const blob = await response.blob()
+      if (blob.size === 0) {
+        throw new Error('Downloaded file is empty')
+      }
+
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = `MT5_Account_Statement_${selectedAccount || 'All'}_${Date.now()}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      
+      // Clean up after a delay
+      setTimeout(() => {
         window.URL.revokeObjectURL(downloadUrl)
         document.body.removeChild(a)
-      }
+      }, 100)
     } catch (error) {
       console.error('Error downloading PDF:', error)
-      alert('Failed to download PDF')
+      alert(error.message || 'Failed to download PDF. Please try again.')
+    } finally {
+      setDownloadingPDF(false)
     }
   }
 
   const handleDownloadExcel = async () => {
+    if (downloadingExcel) return // Prevent multiple clicks
+    
+    setDownloadingExcel(true)
     try {
       const token = authService.getToken()
+      if (!token) {
+        alert('Please login to download reports')
+        return
+      }
+
       const url = `${API_BASE_URL}/reports/mt5-account-statement/download/excel${selectedAccount ? `?accountNumber=${encodeURIComponent(selectedAccount)}` : ''}`
       const response = await fetch(url, {
         headers: {
@@ -157,44 +204,163 @@ function Reports() {
         }
       })
 
-      if (response.ok) {
-        const blob = await response.blob()
-        const downloadUrl = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = downloadUrl
-        a.download = `MT5_Account_Statement_${selectedAccount || 'All'}_${Date.now()}.xlsx`
-        document.body.appendChild(a)
-        a.click()
+      // Check if response is actually an Excel file
+      if (!response.ok) {
+        // Try to get error message
+        const errorData = await response.json().catch(() => ({ error: 'Failed to download Excel' }))
+        throw new Error(errorData.error || errorData.message || 'Failed to download Excel')
+      }
+
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('spreadsheet') && !contentType.includes('excel') && !contentType.includes('xlsx') && !contentType.includes('application/vnd')) {
+        // If not Excel, try to get error message
+        const text = await response.text()
+        try {
+          const errorData = JSON.parse(text)
+          throw new Error(errorData.error || errorData.message || 'Invalid response format')
+        } catch {
+          throw new Error('Invalid response format. Expected Excel file.')
+        }
+      }
+
+      const blob = await response.blob()
+      if (blob.size === 0) {
+        throw new Error('Downloaded file is empty')
+      }
+
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = `MT5_Account_Statement_${selectedAccount || 'All'}_${Date.now()}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      
+      // Clean up after a delay
+      setTimeout(() => {
         window.URL.revokeObjectURL(downloadUrl)
         document.body.removeChild(a)
-      }
+      }, 100)
     } catch (error) {
       console.error('Error downloading Excel:', error)
-      alert('Failed to download Excel')
+      alert(error.message || 'Failed to download Excel. Please try again.')
+    } finally {
+      setDownloadingExcel(false)
     }
   }
 
   const handleDownloadTransactionHistoryPDF = async () => {
+    if (downloadingTransactionPDF) return
+    
+    setDownloadingTransactionPDF(true)
     try {
       const token = authService.getToken()
-      // For now, we'll create a simple PDF from transaction history
-      // You can create a backend endpoint for this later
-      alert('PDF download for Transaction History will be available soon')
+      if (!token) {
+        alert('Please login to download reports')
+        return
+      }
+
+      const url = `${API_BASE_URL}/reports/transaction-history/download/pdf`
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to download PDF' }))
+        throw new Error(errorData.error || errorData.message || 'Failed to download PDF')
+      }
+
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('application/pdf') && !contentType.includes('pdf')) {
+        const text = await response.text()
+        try {
+          const errorData = JSON.parse(text)
+          throw new Error(errorData.error || errorData.message || 'Invalid response format')
+        } catch {
+          throw new Error('Invalid response format. Expected PDF file.')
+        }
+      }
+
+      const blob = await response.blob()
+      if (blob.size === 0) {
+        throw new Error('Downloaded file is empty')
+      }
+
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = `Transaction_History_${Date.now()}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      
+      setTimeout(() => {
+        window.URL.revokeObjectURL(downloadUrl)
+        document.body.removeChild(a)
+      }, 100)
     } catch (error) {
       console.error('Error downloading PDF:', error)
-      alert('Failed to download PDF')
+      alert(error.message || 'Failed to download PDF. Please try again.')
+    } finally {
+      setDownloadingTransactionPDF(false)
     }
   }
 
   const handleDownloadTransactionHistoryExcel = async () => {
+    if (downloadingTransactionExcel) return
+    
+    setDownloadingTransactionExcel(true)
     try {
       const token = authService.getToken()
-      // For now, we'll create a simple Excel from transaction history
-      // You can create a backend endpoint for this later
-      alert('Excel download for Transaction History will be available soon')
+      if (!token) {
+        alert('Please login to download reports')
+        return
+      }
+
+      const url = `${API_BASE_URL}/reports/transaction-history/download/excel`
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to download Excel' }))
+        throw new Error(errorData.error || errorData.message || 'Failed to download Excel')
+      }
+
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('spreadsheet') && !contentType.includes('excel') && !contentType.includes('xlsx') && !contentType.includes('application/vnd')) {
+        const text = await response.text()
+        try {
+          const errorData = JSON.parse(text)
+          throw new Error(errorData.error || errorData.message || 'Invalid response format')
+        } catch {
+          throw new Error('Invalid response format. Expected Excel file.')
+        }
+      }
+
+      const blob = await response.blob()
+      if (blob.size === 0) {
+        throw new Error('Downloaded file is empty')
+      }
+
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = `Transaction_History_${Date.now()}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      
+      setTimeout(() => {
+        window.URL.revokeObjectURL(downloadUrl)
+        document.body.removeChild(a)
+      }, 100)
     } catch (error) {
       console.error('Error downloading Excel:', error)
-      alert('Failed to download Excel')
+      alert(error.message || 'Failed to download Excel. Please try again.')
+    } finally {
+      setDownloadingTransactionExcel(false)
     }
   }
 
@@ -433,6 +599,8 @@ function Reports() {
                   ]}
                   onDownloadPDF={handleDownloadPDF}
                   onDownloadExcel={handleDownloadExcel}
+                  downloadingPDF={downloadingPDF}
+                  downloadingExcel={downloadingExcel}
                   emptyMessage="No MT5 transactions found"
                 />
               </div>
@@ -535,6 +703,8 @@ function Reports() {
                   ]}
                   onDownloadPDF={handleDownloadTransactionHistoryPDF}
                   onDownloadExcel={handleDownloadTransactionHistoryExcel}
+                  downloadingPDF={downloadingTransactionPDF}
+                  downloadingExcel={downloadingTransactionExcel}
                   emptyMessage="No transactions found"
                 />
               </div>

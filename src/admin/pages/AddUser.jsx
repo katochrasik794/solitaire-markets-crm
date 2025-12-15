@@ -31,25 +31,29 @@ export default function AddUser() {
       .catch(() => { });
   }, [BASE]);
 
-  // ISO2 -> dial code mapping (common countries)
-  const DIAL_CODE = useMemo(() => ({
-    AE: 971, AR: 54, AT: 43, AU: 61, BE: 32, BG: 359, BH: 973, BR: 55, CA: 1, CH: 41,
-    CN: 86, CZ: 420, DE: 49, DK: 45, EG: 20, ES: 34, FI: 358, FR: 33, GB: 44, GR: 30,
-    HK: 852, HR: 385, HU: 36, ID: 62, IE: 353, IL: 972, IN: 91, IT: 39, JP: 81, JO: 962,
-    KE: 254, KW: 965, MY: 60, MX: 52, NL: 31, NO: 47, NP: 977, NZ: 64, OM: 968, PH: 63,
-    PK: 92, PL: 48, PT: 351, QA: 974, RO: 40, RS: 381, RU: 7, SA: 966, SE: 46, SG: 65,
-    SI: 386, SK: 421, TH: 66, TR: 90, UA: 380, AE: 971, US: 1, UY: 598, VE: 58, VN: 84,
-    ZA: 27, BD: 880, LK: 94, KR: 82, TW: 886, KW: 965, BH: 973, QA: 974, OM: 968, AE: 971
-  }), []);
+  // Get selected country's phone code
+  const selectedCountryData = useMemo(() => {
+    if (!state.country) return null;
+    return countries.find(c => (c.code || '').toUpperCase() === (state.country || '').toUpperCase());
+  }, [state.country, countries]);
 
   async function onSubmit(e) {
     e.preventDefault(); setSubmitting(true); setMsg('');
     try {
       const token = localStorage.getItem('adminToken');
+      
+      // Combine phone code and phone number if country is selected
+      let phoneNumber = state.phone || '';
+      if (state.country && selectedCountryData && phoneNumber) {
+        const phoneCode = selectedCountryData.phoneCode.replace(/^\+/, '');
+        phoneNumber = `+${phoneCode} ${phoneNumber}`.trim();
+      }
+      
       // Create user first as before
       const payload = {
         ...state,
         country: (state.country || '').toLowerCase(),
+        phone: phoneNumber,
       };
       const r = await fetch(`${BASE}/admin/users`, {
         method: 'POST',
@@ -154,17 +158,8 @@ export default function AddUser() {
                       value={state.country}
                       onChange={e => {
                         const iso2 = (e.target.value || '').toUpperCase();
-                        const dial = DIAL_CODE[iso2];
-                        let phone = state.phone || '';
-                        if (dial) {
-                          const prefix = `+${String(dial)}`;
-                          if (!phone.startsWith(prefix)) {
-                            phone = phone.replace(/^\+\d+\s*/, '');
-                            phone = `${prefix} ${phone}`.trimEnd();
-                          }
-                        }
-                        // store ISO2 uppercase in state to match option values
-                        setState({ ...state, country: iso2, phone });
+                        // Reset phone when country changes
+                        setState({ ...state, country: iso2, phone: '' });
                       }}
                       className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
                     >
@@ -174,16 +169,35 @@ export default function AddUser() {
                       ))}
                     </select>
                   </div>
-                  {/* Phone number next, auto-prefixed by country code */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Phone Number</label>
-                    <input
-                      value={state.phone}
-                      onChange={e => setState({ ...state, phone: e.target.value })}
-                      className="w-full rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
-                      placeholder="+1 555 123 4567"
-                    />
-                  </div>
+                  {/* Phone number - only show after country is selected */}
+                  {state.country && selectedCountryData && (
+                    <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+                      <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                      <div className="flex items-center gap-2">
+                        {/* Country Code Display */}
+                        <div className="flex-shrink-0 w-20 rounded-lg border border-gray-300 bg-gray-50 h-11 flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-700">
+                            {selectedCountryData.phoneCode ? `+${selectedCountryData.phoneCode.replace(/^\+/, '')}` : 'N/A'}
+                          </span>
+                        </div>
+                        {/* Phone Number Input */}
+                        <input
+                          type="tel"
+                          value={state.phone}
+                          onChange={e => {
+                            // Only allow digits and spaces
+                            const value = e.target.value.replace(/[^\d\s]/g, '');
+                            setState({ ...state, phone: value });
+                          }}
+                          className="flex-1 rounded-lg border border-gray-300 h-11 px-4 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
+                          placeholder="Enter phone number"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Full number: +{selectedCountryData.phoneCode.replace(/^\+/, '')} {state.phone || '...'}
+                      </p>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Password *</label>
                     <input

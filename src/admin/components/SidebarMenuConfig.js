@@ -274,29 +274,6 @@ export const ADMIN_MENU = [
     ],
   },
   {
-    label: "IB MANAGEMENT",
-    items: [
-      {
-        icon: GitBranch,
-        label: "IB Management",
-        to: "ib",
-        children: [
-          { label: "IB Dashboard", to: "ib/dashboard" },
-          { label: "IB Requests", to: "ib/requests" },
-          { label: "IB Profiles", to: "ib/profiles" },
-          { label: "Set IB Commission", to: "ib/commission" },
-          { label: "Set IB Structure", to: "ib/structure" },
-          { label: "IB Withdrawals", to: "ib/withdrawals" },
-          { label: "Move User to IB", to: "ib/move-user" },
-          { label: "IB Plans", to: "ib/plans" },
-          { label: "Manage IBs", to: "ib/manage" },
-          { label: "Map IBs", to: "ib/map" },
-          { label: "Commission Logs", to: "ib/commission-logs" },
-        ],
-      },
-    ],
-  },
-  {
     label: "COUNTRY PARTNER ADMIN",
     items: [
       { icon: Users, label: "Assign Country Partner", to: "assign-country-partner" },

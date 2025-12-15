@@ -93,20 +93,6 @@ export default [
   { path: "book-management/combined",        element: <EmptyState title="Combined Book" subtitle="Aggregated view" /> },
   { path: "book-management/liquidity-pool",  element: <EmptyState title="Liquidity Pool Report" subtitle="Pool balances & flow" /> },
 
-  /* --------------------------- IB MANAGEMENT -------------------------- */
-  { path: "ib",                     element: <EmptyState title="IB Management" subtitle="Overview" /> },
-  { path: "ib/dashboard",           element: <EmptyState title="IB Dashboard" subtitle="KPIs & summary" /> },
-  { path: "ib/requests",            element: <EmptyState title="IB Requests" subtitle="Pending onboarding" /> },
-  { path: "ib/profiles",            element: <EmptyState title="IB Profiles" subtitle="Manage IB details" /> },
-  { path: "ib/commission",          element: <EmptyState title="Set IB Commission" subtitle="Tiers & rates" /> },
-  { path: "ib/structure",           element: <EmptyState title="Set IB Structure" subtitle="Hierarchy settings" /> },
-  { path: "ib/withdrawals",         element: <EmptyState title="IB Withdrawals" subtitle="Partner payouts" /> },
-  { path: "ib/move-user",           element: <EmptyState title="Move User to IB" subtitle="Reassign client to IB" /> },
-  { path: "ib/plans",               element: <EmptyState title="IB Plans" subtitle="Commission plans" /> },
-  { path: "ib/manage",              element: <EmptyState title="Manage IBs" subtitle="IB account management" /> },
-  { path: "ib/map",                 element: <EmptyState title="Map IBs" subtitle="Attach clients to IBs" /> },
-  { path: "ib/commission-logs",     element: <EmptyState title="Commission Logs" subtitle="Earnings history" /> },
-
   /* --------------------------- MT5 MANAGEMENT ------------------------- */
   { path: "mt5",            element: <EmptyState title="MT5 Management" subtitle="Manager tools" /> },
   { path: "mt5/users",      element: <MT5Users /> },
