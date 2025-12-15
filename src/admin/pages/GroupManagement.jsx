@@ -31,20 +31,20 @@ export default function GroupManagement() {
       setLoading(true);
       setError("");
       const token = localStorage.getItem('adminToken');
-      
+
       const params = new URLSearchParams();
       if (filterActive !== "") {
         params.append('is_active', filterActive);
       }
-      
+
       const response = await axios.get(`${BASE}/admin/group-management?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (!response.data?.ok) {
         throw new Error(response.data?.error || "Failed to load groups");
       }
-      
+
       setRows(response.data.items || []);
     } catch (e) {
       setError(e.message || String(e));
@@ -62,7 +62,7 @@ export default function GroupManagement() {
     try {
       setSyncing(true);
       const token = localStorage.getItem('adminToken');
-      
+
       Swal.fire({
         title: 'Syncing Groups...',
         text: 'Please wait while we sync groups from the API',
@@ -71,23 +71,23 @@ export default function GroupManagement() {
           Swal.showLoading();
         }
       });
-      
+
       // Use Axios with no timeout so sync can run until the API finishes
       const response = await axios.post(
         `${BASE}/admin/group-management/sync`,
         {},
         {
-        headers: { 'Authorization': `Bearer ${token}` },
+          headers: { 'Authorization': `Bearer ${token}` },
           timeout: 0 // 0 = no timeout
         }
       );
-      
+
       if (!response.data?.ok) {
         throw new Error(response.data?.error || "Sync failed");
       }
-      
+
       const stats = response.data.stats || {};
-      
+
       Swal.fire({
         icon: 'success',
         title: 'Sync Completed!',
@@ -101,7 +101,7 @@ export default function GroupManagement() {
         `,
         confirmButtonText: 'OK'
       });
-      
+
       // Reload groups after sync
       await loadGroups();
     } catch (e) {
@@ -121,7 +121,7 @@ export default function GroupManagement() {
     try {
       const token = localStorage.getItem('adminToken');
       const newStatus = !row.is_active;
-      
+
       const result = await Swal.fire({
         title: newStatus ? 'Activate Group?' : 'Deactivate Group?',
         text: `Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} group "${row.group}"?`,
@@ -130,19 +130,19 @@ export default function GroupManagement() {
         confirmButtonText: 'Yes',
         cancelButtonText: 'No'
       });
-      
+
       if (!result.isConfirmed) return;
-      
+
       const response = await axios.put(
         `${BASE}/admin/group-management/${row.id}/toggle-active`,
         { is_active: newStatus },
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
-      
+
       if (!response.data?.ok) {
         throw new Error(response.data?.error || "Failed to update group status");
       }
-      
+
       Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -150,7 +150,7 @@ export default function GroupManagement() {
         timer: 1500,
         showConfirmButton: false
       });
-      
+
       // Reload groups
       await loadGroups();
     } catch (e) {
@@ -178,21 +178,21 @@ export default function GroupManagement() {
 
   const handleSaveDedicatedName = useCallback(async () => {
     if (!editModal || savingDedicatedName) return;
-    
+
     try {
       setSavingDedicatedName(true);
       const token = localStorage.getItem('adminToken');
-      
+
       const response = await axios.put(
         `${BASE}/admin/group-management/${editModal.id}/dedicated-name`,
         { dedicated_name: editModal.dedicated_name },
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
-      
+
       if (!response.data?.ok) {
         throw new Error(response.data?.error || "Failed to update dedicated name");
       }
-      
+
       Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -200,7 +200,7 @@ export default function GroupManagement() {
         timer: 1500,
         showConfirmButton: false
       });
-      
+
       setEditModal(null);
       // Reload groups
       await loadGroups();
@@ -220,9 +220,9 @@ export default function GroupManagement() {
   const columns = useMemo(() => [
     { key: "__index", label: "Sr No", sortable: false },
     { key: "group", label: "Group Name" },
-    { 
-      key: "dedicated_name", 
-      label: "Dedicated Name", 
+    {
+      key: "dedicated_name",
+      label: "Dedicated Name",
       render: (v, row) => (
         <div className="flex items-center gap-2">
           <span>{v || "-"}</span>
@@ -242,37 +242,39 @@ export default function GroupManagement() {
     { key: "margin_call", label: "Margin Call", render: (v) => v ? `${v}%` : "-" },
     { key: "margin_stop_out", label: "Margin Stop Out", render: (v) => v ? `${v}%` : "-" },
     { key: "synced_at", label: "Last Synced", render: (v) => fmtDate(v) },
-    { key: "is_active", label: "Status", render: (v) => (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-        v ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-      }`}>
-        {v ? 'Active' : 'Inactive'}
-      </span>
-    ) },
-    { key: "actions", label: "Actions", sortable: false, render: (v, row) => (
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => handleView(row)}
-          className="flex flex-col items-center gap-1 px-2 py-1 rounded-md border border-violet-200 text-violet-700 hover:bg-violet-50 transition-colors"
-          title="View Details"
-        >
-          <Eye size={16} />
-          <span className="text-xs">View</span>
-        </button>
-        <button
-          onClick={() => handleToggleActive(row)}
-          className={`flex flex-col items-center gap-1 px-2 py-1 rounded-md border transition-colors ${
-            row.is_active
+    {
+      key: "is_active", label: "Status", render: (v) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${v ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}>
+          {v ? 'Active' : 'Inactive'}
+        </span>
+      )
+    },
+    {
+      key: "actions", label: "Actions", sortable: false, render: (v, row) => (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => handleView(row)}
+            className="flex flex-col items-center gap-1 px-2 py-1 rounded-md border border-brand-200 text-brand-700 hover:bg-brand-50 transition-colors"
+            title="View Details"
+          >
+            <Eye size={16} />
+            <span className="text-xs">View</span>
+          </button>
+          <button
+            onClick={() => handleToggleActive(row)}
+            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-md border transition-colors ${row.is_active
               ? 'border-orange-200 text-orange-700 hover:bg-orange-50'
               : 'border-green-200 text-green-700 hover:bg-green-50'
-          }`}
-          title={row.is_active ? "Deactivate" : "Activate"}
-        >
-          <Power size={16} />
-          <span className="text-xs">{row.is_active ? 'Inactive' : 'Active'}</span>
-        </button>
-      </div>
-    ) },
+              }`}
+            title={row.is_active ? "Deactivate" : "Activate"}
+          >
+            <Power size={16} />
+            <span className="text-xs">{row.is_active ? 'Inactive' : 'Active'}</span>
+          </button>
+        </div>
+      )
+    },
   ], [handleView, handleToggleActive, handleEditDedicatedName]);
 
   const filters = useMemo(() => ({
@@ -293,7 +295,7 @@ export default function GroupManagement() {
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="flex items-center gap-2 px-4 py-2 rounded-md bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-brand-500 text-dark-base hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw size={16} className={syncing ? "animate-spin" : ""} />
             {syncing ? "Syncing..." : "Sync from API"}
@@ -301,7 +303,7 @@ export default function GroupManagement() {
           <select
             value={filterActive}
             onChange={(e) => setFilterActive(e.target.value)}
-            className="px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            className="px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="">All Groups</option>
             <option value="true">Active Only</option>
@@ -347,9 +349,8 @@ export default function GroupManagement() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <div className="px-3 py-2 bg-gray-50 rounded-md">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    viewModal.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${viewModal.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
                     {viewModal.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
@@ -459,9 +460,9 @@ export default function GroupManagement() {
       </Modal>
 
       {/* Edit Dedicated Name Modal */}
-      <Modal 
-        open={!!editModal} 
-        onClose={savingDedicatedName ? undefined : () => setEditModal(null)} 
+      <Modal
+        open={!!editModal}
+        onClose={savingDedicatedName ? undefined : () => setEditModal(null)}
         title={`Edit Dedicated Name: ${editModal?.group || ''}`}
       >
         {editModal && (
@@ -474,23 +475,23 @@ export default function GroupManagement() {
                 onChange={(e) => setEditModal({ ...editModal, dedicated_name: e.target.value })}
                 placeholder="Enter dedicated name"
                 disabled={savingDedicatedName}
-                className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 autoFocus
               />
               <p className="text-xs text-gray-500 mt-1">Leave empty to clear the dedicated name</p>
             </div>
             <div className="flex justify-end gap-2">
-              <button 
-                onClick={() => setEditModal(null)} 
+              <button
+                onClick={() => setEditModal(null)}
                 disabled={savingDedicatedName}
                 className="px-4 h-10 rounded-md border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleSaveDedicatedName}
                 disabled={savingDedicatedName}
-                className="px-4 h-10 rounded-md bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 h-10 rounded-md bg-brand-500 text-dark-base hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {savingDedicatedName && (
                   <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

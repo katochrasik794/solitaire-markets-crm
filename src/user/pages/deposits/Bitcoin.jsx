@@ -6,47 +6,47 @@ function Bitcoin() {
   const [amount, setAmount] = useState('0.00')
 
   return (
-     <div className="w-full max-w-8xl mx-auto ">
-    <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
+    <div className="w-full max-w-8xl mx-auto ">
+      <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
 
-      {/* LEFT-ALIGNED HEADER + OFFER AREA */}
-      <div className="w-full max-w-3xl">
+        {/* LEFT-ALIGNED HEADER + OFFER AREA */}
+        <div className="w-full max-w-3xl">
 
-        {/* HEADER */}
-        <div className="mb-6">
-  <Link
-    to="/user/deposits"
-    className="inline-flex items-center text-[#00A896] hover:text-[#008f7a] mb-2 block"
-  >
-    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-    Back
-  </Link>
+          {/* HEADER */}
+          <div className="mb-6">
+            <Link
+              to="/user/deposits"
+              className="inline-flex items-center text-[#00A896] hover:text-[#008f7a] mb-2 block"
+            >
+              <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </Link>
 
-  <h1
-    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '26px', color: '#000', fontWeight: '400' }}
-  >
-    Deposit with Bitcoin
-  </h1>
-</div>
+            <h1
+              style={{ fontFamily: 'Roboto, sans-serif', fontSize: '26px', color: '#000', fontWeight: '400' }}
+            >
+              Deposit with Bitcoin
+            </h1>
+          </div>
 
 
-        {/* OFFER BANNER (LEFT ALIGNED) */}
-        <div className="bg-[#00A896] text-white rounded-lg px-5 py-4 mb-6 flex items-center shadow-sm">
-          <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
-            />
-          </svg>
-          <p className="text-sm leading-snug" style={{ fontFamily: 'Roboto, sans-serif' }}>
-            Deposit $100 or more to receive a complimentary 30% bonus credit
-          </p>
+          {/* OFFER BANNER (LEFT ALIGNED) */}
+          <div className="bg-[#00A896] text-white rounded-lg px-5 py-4 mb-6 flex items-center shadow-sm">
+            <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+              />
+            </svg>
+            <p className="text-sm leading-snug" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              Deposit $100 or more to receive a complimentary 30% bonus credit
+            </p>
+          </div>
         </div>
-      </div>
 
 
 
@@ -65,11 +65,10 @@ function Bitcoin() {
             {/* ACCOUNT 1 */}
             <div
               onClick={() => setSelectedAccount('account1')}
-              className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                selectedAccount === 'account1'
+              className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedAccount === 'account1'
                   ? 'border-[#00A896] bg-gray-50'
                   : 'border-gray-300'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -97,11 +96,10 @@ function Bitcoin() {
             {/* ACCOUNT 2 */}
             <div
               onClick={() => setSelectedAccount('account2')}
-              className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                selectedAccount === 'account2'
+              className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedAccount === 'account2'
                   ? 'border-[#00A896] bg-gray-50'
                   : 'border-gray-300'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -182,10 +180,10 @@ function Bitcoin() {
 
         {/* BITCOIN BUTTON (CENTERED FULL WIDTH) */}
         <div className="flex justify-center"  >
-        <button className="max-w-4xl w-full bg-orange-500 text-white py-4 rounded-lg flex items-center justify-center hover:bg-orange-600 transition-all">
-          <img src="/bitcoin-logo.webp" alt="Bitcoin" className="w-6 h-6 mr-2" />
-          Continue with Bitcoin
-        </button>
+          <button className="max-w-4xl w-full bg-brand-500 text-dark-base py-4 rounded-lg flex items-center justify-center hover:bg-brand-600 transition-all font-semibold">
+            <img src="/bitcoin.svg" alt="Bitcoin" className="w-6 h-6 mr-2" />
+            Continue with Bitcoin
+          </button>
         </div>
       </div>
     </div>

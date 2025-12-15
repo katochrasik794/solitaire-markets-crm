@@ -66,8 +66,8 @@ function Ethereum() {
             <div
               onClick={() => setSelectedAccount('account1')}
               className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedAccount === 'account1'
-                  ? 'border-[#00A896] bg-gray-50'
-                  : 'border-gray-300'
+                ? 'border-[#00A896] bg-gray-50'
+                : 'border-gray-300'
                 }`}
             >
               <div className="flex items-center justify-between">
@@ -97,8 +97,8 @@ function Ethereum() {
             <div
               onClick={() => setSelectedAccount('account2')}
               className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedAccount === 'account2'
-                  ? 'border-[#00A896] bg-gray-50'
-                  : 'border-gray-300'
+                ? 'border-[#00A896] bg-gray-50'
+                : 'border-gray-300'
                 }`}
             >
               <div className="flex items-center justify-between">
@@ -180,10 +180,8 @@ function Ethereum() {
 
         {/* ETHEREUM BUTTON (CENTERED FULL WIDTH) */}
         <div className="flex justify-center"  >
-          <button className="max-w-4xl w-full bg-brand-500 text-dark-base py-4 rounded-lg flex items-center justify-center hover:bg-brand-600 transition-all">
-            <svg className="w-6 h-6 mr-2 text-inherit" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z" />
-            </svg>
+          <button className="max-w-4xl w-full bg-brand-500 text-dark-base py-4 rounded-lg flex items-center justify-center hover:bg-brand-600 transition-all font-semibold">
+            <img src="/ethereum.svg" alt="Ethereum" className="w-6 h-6 mr-2" />
             Continue with Ethereum
           </button>
         </div>
