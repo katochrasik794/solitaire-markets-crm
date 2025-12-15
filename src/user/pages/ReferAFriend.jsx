@@ -1,331 +1,233 @@
 import { useState } from 'react'
 
 function ReferAFriend() {
-  const [selectedTimeFilter, setSelectedTimeFilter] = useState('all')
-  const [copied, setCopied] = useState(false)
+  const [activeTab, setActiveTab] = useState('spread')
 
-  const referralLink = 'https://portal.my-Solitaire.com/sc/register...'
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(referralLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const badges = [
-    {
-      id: 1,
-      name: 'Referral Starter',
-      description: 'To earn this badge and get rewarded with $10 refer us to 5 of your friends.',
-      progress: 0,
-      target: 5,
-      reward: '$10',
-      icon: (
-        <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      )
+  const commissionStructures = {
+    spread: {
+      title: 'Spread Commission',
+      description: 'Earn commissions based on the spread of each trade',
+      features: [
+        { label: 'Commission Rate', value: 'Up to 50%' },
+        { label: 'Payment Frequency', value: 'Weekly' },
+        { label: 'Minimum Volume', value: '10 Lots' },
+        { label: 'Commission Type', value: 'Per Trade' }
+      ],
+      benefits: [
+        'Competitive commission rates',
+        'Transparent pricing structure',
+        'Real-time commission tracking',
+        'Flexible payment options'
+      ]
     },
-    {
-      id: 2,
-      name: 'Referral Influencer',
-      description: 'To earn this badge and get rewarded with $20 refer us to 10 of your friends.',
-      progress: 0,
-      target: 10,
-      reward: '$20',
-      icon: (
-        <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-        </svg>
-      )
+    pip: {
+      title: 'Pip Commission',
+      description: 'Receive fixed commission per pip for every trade',
+      features: [
+        { label: 'Commission Rate', value: '$5 - $15 per pip' },
+        { label: 'Payment Frequency', value: 'Monthly' },
+        { label: 'Minimum Volume', value: '5 Lots' },
+        { label: 'Commission Type', value: 'Per Pip' }
+      ],
+      benefits: [
+        'Fixed commission per pip',
+        'Predictable earnings',
+        'Higher rates for major pairs',
+        'Volume-based bonuses'
+      ]
     },
-    {
-      id: 3,
-      name: 'Referral Expert',
-      description: 'To earn this badge and get rewarded with $30 refer us to 20 of your friends.',
-      progress: 0,
-      target: 20,
-      reward: '$30',
-      icon: (
-        <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-        </svg>
-      )
-    },
-    {
-      id: 4,
-      name: 'Referral Master',
-      description: 'To earn this badge and get rewarded with $40 refer us to 30 of your friends.',
-      progress: 0,
-      target: 30,
-      reward: '$40',
-      icon: (
-        <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-        </svg>
-      )
-    },
-    {
-      id: 5,
-      name: 'Referral Champion',
-      description: 'To earn this badge and get rewarded with $100 refer us to 50 of your friends.',
-      progress: 0,
-      target: 50,
-      reward: '$100',
-      icon: (
-        <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      )
+    fixedLot: {
+      title: 'Fixed Lot Commission',
+      description: 'Earn a fixed amount for each lot traded by your clients',
+      features: [
+        { label: 'Commission Rate', value: '$10 - $50 per lot' },
+        { label: 'Payment Frequency', value: 'Bi-weekly' },
+        { label: 'Minimum Volume', value: '20 Lots' },
+        { label: 'Commission Type', value: 'Per Lot' }
+      ],
+      benefits: [
+        'Fixed rate per lot',
+        'Simple calculation',
+        'No spread dependency',
+        'Tier-based rates'
+      ]
     }
-  ]
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen overflow-x-hidden">
       <div className="w-full max-w-[95%] mx-auto">
-        {/* Top Banner Section */}
-        <div className="bg-gradient-to-r from-gray-800 to-gray-600 rounded-lg text-white mt-5 p-4 sm:p-6" style={{ minHeight: '220px' }}>
-          <div className="w-full h-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-center min-h-full">
-              <div className="text-center lg:text-left">
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
-                  Refer Friends. Earn Rewards. Trade. Repeat.
+        {/* Top Image Banner Section */}
+        <div className="relative mt-5 rounded-lg overflow-hidden" style={{ minHeight: '300px' }}>
+          <div 
+            className="w-full h-full bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800"
+            style={{ 
+              minHeight: '300px',
+              backgroundImage: 'url(https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 to-gray-800/80"></div>
+            <div className="relative z-10 flex flex-col items-center justify-center h-full text-white p-6 sm:p-8">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                Partner's Cabinet
                 </h1>
-                <p className="text-sm sm:text-base mb-3 sm:mb-4 opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>
-                  Share your friends a new experience
-                </p>
-
-                {/* Referral Link */}
-                <div className="mb-2 sm:mb-3">
-                  <div className="flex flex-col sm:flex-row gap-2 mb-1 sm:mb-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={referralLink}
-                      className="flex-1 px-2 sm:px-3 py-2 bg-white text-gray-800 rounded-lg border border-gray-300 text-xs sm:text-sm"
-                      style={{ fontFamily: 'Roboto, sans-serif' }}
-                    />
-                    <button
-                      onClick={copyToClipboard}
-                      className="px-3 sm:px-4 py-2 bg-white text-blue-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors whitespace-nowrap text-xs sm:text-sm"
+              <p className="text-base sm:text-lg mb-6 text-center max-w-2xl opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>
+                Join our partner program and earn competitive commissions through multiple commission structures
+              </p>
+              <a
+                href="https://cabinet.solitaire.partners/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-brand-500 hover:bg-brand-600 text-dark-base px-8 py-3 rounded-lg font-semibold transition-colors text-base sm:text-lg"
                       style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}
                     >
-                      {copied ? 'Copied!' : 'Copy Link'}
-                    </button>
-                  </div>
-
-                  {/* Social Sharing Icons */}
-                  <div className="flex items-center justify-center lg:justify-start gap-2 mb-1 sm:mb-2">
-                    <button className="w-6 h-6 sm:w-8 sm:h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors">
-                      <span className="text-white font-bold text-xs sm:text-sm" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>f</span>
-                    </button>
-                    <button className="w-6 h-6 sm:w-8 sm:h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors">
-                      <span className="text-white font-bold text-xs sm:text-sm" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>X</span>
-                    </button>
-                    <button className="w-6 h-6 sm:w-8 sm:h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors">
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                      </svg>
-                    </button>
-                    <button className="w-6 h-6 sm:w-8 sm:h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors">
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  <p className="text-xs opacity-80 text-center lg:text-left" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>
-                    By using this link, you are deemed to have agreed to the applicable{' '}
-                    <a href="#" className="underline hover:opacity-70">Terms and Conditions</a>.
-                  </p>
-                </div>
-
-              </div>
-
-              {/* Right Side - How it works, QR and Download Buttons */}
-              <div className="flex flex-col items-center lg:items-end justify-center gap-3 sm:gap-4 mt-4 lg:mt-0 lg:pr-4">
-                {/* How it works Button */}
-                <button className="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-brand-500 hover:bg-brand-600 text-dark-base font-semibold rounded-lg transition-colors w-40 sm:w-44 lg:w-48 text-sm sm:text-base" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
-                  How it works
-                </button>
-
-                {/* QR and Download Section */}
-                <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-                  {/* QR Code */}
-                  <div className="w-16 h-16 sm:w-18 sm:h-18 lg:w-20 lg:h-20 bg-white rounded-lg p-1 sm:p-2 flex items-center justify-center">
-                    <div className="w-full h-full bg-black rounded" style={{
-                      backgroundImage: `url(/qr-scanner.png)`,
-                      backgroundSize: 'cover'
-                    }}>
-                    </div>
-                  </div>
-
-                  {/* Download Button */}
-                  <button className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 bg-white text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-colors text-sm" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
-                    Download
-                  </button>
-                </div>
-              </div>
+                Become Partner
+              </a>
             </div>
           </div>
         </div>
 
         <div className="w-full p-3 sm:p-4 lg:p-6">
-          {/* Referral Summary Section */}
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
-              <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-0" style={{ fontFamily: 'Roboto, sans-serif', color: '#000000', fontWeight: '700' }}>
-                Referral Summary
+          {/* Commission Structure Tabs */}
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 border border-gray-200">
+            <h2 className="text-xl sm:text-2xl font-bold mb-6" style={{ fontFamily: 'Roboto, sans-serif', color: '#000000', fontWeight: '700' }}>
+              Commission Structures
               </h2>
-              <div className="flex gap-2">
-                {['all', 'week', 'month'].map((filter) => (
+            
+            {/* Tab Buttons */}
+            <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
+              {Object.keys(commissionStructures).map((key) => (
                   <button
-                    key={filter}
-                    onClick={() => setSelectedTimeFilter(filter)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${selectedTimeFilter === filter
-                        ? 'bg-gray-800 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`px-4 py-2 font-semibold transition-colors border-b-2 ${
+                    activeTab === key
+                      ? 'border-brand-500 text-brand-500'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
                       }`}
                     style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '600' }}
                   >
-                    {filter === 'all' ? 'All Time' : filter === 'week' ? 'This Week' : 'This Month'}
+                  {commissionStructures[key].title}
                   </button>
                 ))}
-              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
+            {/* Active Tab Content */}
+            {activeTab && commissionStructures[activeTab] && (
+              <div className="space-y-6">
                   <div>
-                    <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
-                      Total Invited Friends
+                  <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ fontFamily: 'Roboto, sans-serif', color: '#000000', fontWeight: '700' }}>
+                    {commissionStructures[activeTab].title}
+                  </h3>
+                  <p className="text-gray-600 mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', fontWeight: '400' }}>
+                    {commissionStructures[activeTab].description}
+                  </p>
+              </div>
+
+                {/* Features Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  {commissionStructures[activeTab].features.map((feature, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
+                        {feature.label}
+                  </div>
+                      <div className="text-lg font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', color: '#000000', fontWeight: '700' }}>
+                        {feature.value}
                     </div>
-                    <div className="text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
-                      0
                     </div>
+                  ))}
+              </div>
+
+                {/* Benefits Section */}
+                <div className="bg-brand-50 rounded-lg p-6 border border-brand-200">
+                  <h4 className="text-lg font-bold mb-4" style={{ fontFamily: 'Roboto, sans-serif', color: '#000000', fontWeight: '700' }}>
+                    Key Benefits
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {commissionStructures[activeTab].benefits.map((benefit, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-brand-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                        <span className="text-gray-700" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
+                          {benefit}
+                        </span>
+                  </div>
+                    ))}
                   </div>
                 </div>
               </div>
-
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
-                      Rewarded Friends
-                    </div>
-                    <div className="text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
-                      0
-                    </div>
-                  </div>
-                </div>
+            )}
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
-                    <svg className="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
-                      Total Earning
-                    </div>
-                    <div className="text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
-                      $0
-                    </div>
-                  </div>
+          {/* Additional Information Section */}
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 border border-gray-200">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4" style={{ fontFamily: 'Roboto, sans-serif', color: '#000000', fontWeight: '700' }}>
+              Why Become a Partner?
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-brand-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center relative">
-                    <div className="w-6 h-6 bg-green-500 rounded"></div>
-                    <svg className="w-4 h-4 text-gray-600 absolute top-0 right-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '12px', fontWeight: '400' }}>
-                      Rewards in Progress
-                    </div>
-                    <div className="text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '700' }}>
-                      $0
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Collect Badges Section */}
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
-              <div>
-                <h2 className="text-xl font-bold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
-                  Collect Badges And Earn More
-                </h2>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
-                  Unlock all these badges to earn your place with us as Solitaire Influencer,{' '}
-                  <a href="#" className="text-[#00A896] hover:underline">Learn More</a>
+                <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', color: '#000000', fontWeight: '600' }}>
+                  Competitive Rates
+                </h3>
+                <p className="text-black text-sm" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
+                  Earn industry-leading commission rates with flexible payment options
                 </p>
               </div>
-              <div className="text-sm text-gray-600 mt-2 sm:mt-0" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
-                Number Of Earned Badges | 0 Badges
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-              {badges.map((badge) => (
-                <div key={badge.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div className="flex flex-col items-center text-center mb-3">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-2">
-                      {badge.icon}
-                    </div>
-                    <h3 className="font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', color: '#000000', fontWeight: '600' }}>
-                      {badge.name}
-                    </h3>
-                    <p className="text-xs text-gray-600 mb-3" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400', lineHeight: '1.4' }}>
-                      {badge.description}
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
-                      <div
-                        className="bg-[#00A896] h-2 rounded-full"
-                        style={{ width: `${(badge.progress / badge.target) * 100}%` }}
-                      ></div>
-                    </div>
-                    <div className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', fontWeight: '400' }}>
-                      {badge.progress}/{badge.target}
-                    </div>
-                  </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-brand-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
                 </div>
-              ))}
+                <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', color: '#000000', fontWeight: '600' }}>
+                  Real-time Tracking
+                </h3>
+                <p className="text-black text-sm" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
+                  Monitor your earnings and client activity in real-time through our partner dashboard
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-brand-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: 'Roboto, sans-serif', color: '#000000', fontWeight: '600' }}>
+                  Dedicated Support
+                </h3>
+                <p className="text-black text-sm" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}>
+                  Get dedicated support from our partner team to help you maximize your earnings
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Referrals List Section */}
-          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '700' }}>
-              Referrals List
+          {/* Call to Action */}
+          <div className="bg-gradient-to-r from-brand-500 to-brand-600 rounded-lg shadow-md p-6 sm:p-8 text-center text-black">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', color: '#000000' }}>
+              Ready to Start Earning?
             </h2>
-            <div className="h-14 flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
-              <p className="text-gray-500 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', fontWeight: '400' }}>
-                Refer your friends and share with them new trading experience
-              </p>
-            </div>
+            <p className="text-base sm:text-lg mb-6 max-w-2xl mx-auto" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '400', color: '#000000' }}>
+              Join thousands of partners already earning with Solitaire Markets. Get started today and unlock your earning potential.
+            </p>
+            <a
+              href="https://cabinet.solitaire.partners/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-white hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors text-base sm:text-lg"
+              style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600', color: '#000000' }}
+            >
+              Become Partner Now
+            </a>
           </div>
         </div>
       </div>

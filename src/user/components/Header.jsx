@@ -8,6 +8,7 @@ function Header({ onMenuClick }) {
   const [userName, setUserName] = useState('User')
   const languageRef = useRef(null)
   const profileRef = useRef(null)
+  const mobileProfileRef = useRef(null)
   const navigate = useNavigate()
 
   // Fetch user data on component mount
@@ -59,6 +60,9 @@ function Header({ onMenuClick }) {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false)
       }
+      if (mobileProfileRef.current && !mobileProfileRef.current.contains(event.target)) {
+        setProfileOpen(false)
+      }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
@@ -98,12 +102,66 @@ function Header({ onMenuClick }) {
           {/* Logo (Mobile - centered, Desktop - hidden) */}
           <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden">
             <Link to="/user/dashboard">
-              <img src="/logo.svg" alt="Solitaire Logo" className="h-20 w-auto" style={{ background: 'transparent' }} />
+              <img src="/logo.svg" alt="Solitaire Logo" className="h-12 w-auto" style={{ background: 'transparent' }} />
             </Link>
           </div>
 
           {/* Right side - Language, Profile, and 3-dots menu */}
           <div className="flex items-center gap-4 ml-auto">
+            {/* User Profile Icon - Mobile only */}
+            <div className="relative lg:hidden" ref={mobileProfileRef}>
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
+              
+              {profileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="py-2">
+                    <div className="px-4 py-2 text-gray-700 border-b border-gray-200">
+                      <span className="text-sm font-medium">{userName}</span>
+                    </div>
+                    <Link
+                      to="/user/documents"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      My Documents
+                    </Link>
+                    <Link
+                      to="/user/settings"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      My Settings
+                    </Link>
+                    <Link
+                      to="/user/support"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      Solitaire Support
+                    </Link>
+                    <div className="border-t border-gray-200 my-1"></div>
+                    <button
+                      className="block w-full text-left px-4 py-2 text-[#00A896] hover:bg-gray-50"
+                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Language Selector - Hidden on mobile */}
             <div className="relative hidden lg:flex items-center" ref={languageRef}>
               <button

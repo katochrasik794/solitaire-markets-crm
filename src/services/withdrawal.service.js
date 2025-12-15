@@ -29,6 +29,21 @@ class WithdrawalService {
     }
 
     /**
+     * Get user's wallet for withdrawal selection
+     */
+    async getWallet() {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/wallet`, {
+                headers: this.getHeaders()
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching wallet:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Create a new withdrawal request
      * @param {Object} withdrawalData 
      */

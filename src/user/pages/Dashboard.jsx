@@ -250,7 +250,7 @@ function Dashboard() {
                 className="bg-brand-500 hover:bg-brand-600 text-dark-base px-6 py-2 rounded-lg 
         whitespace-nowrap text-sm sm:text-base transition-colors z-10"
               >
-                Refer a Friend
+                Become Partner
               </Link>
             </div>
           </div>

@@ -449,6 +449,7 @@ function Reports() {
                     {
                       key: 'type', label: 'All Types', type: 'select', options: [
                         { value: 'deposit', label: 'Deposit' },
+                        { value: 'withdrawal', label: 'Withdrawal' },
                         { value: 'account_creation', label: 'Account Created' }
                       ]
                     },
@@ -478,9 +479,11 @@ function Reports() {
                       render: (value) => (
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${value === 'deposit'
                             ? 'bg-blue-100 text-blue-800'
-                            : 'bg-green-100 text-green-800'
+                            : value === 'withdrawal'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-green-100 text-green-800'
                           }`}>
-                          {value === 'deposit' ? 'Deposit' : 'Account Created'}
+                          {value === 'deposit' ? 'Deposit' : value === 'withdrawal' ? 'Withdrawal' : 'Account Created'}
                         </span>
                       )
                     },

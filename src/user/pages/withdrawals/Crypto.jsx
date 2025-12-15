@@ -4,7 +4,9 @@ import Swal from 'sweetalert2'
 
 function Crypto() {
   const [accounts, setAccounts] = useState([])
+  const [wallet, setWallet] = useState(null)
   const [selectedAccount, setSelectedAccount] = useState(null)
+  const [accountType, setAccountType] = useState('trading') // 'trading' or 'wallet'
   const [amount, setAmount] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -14,18 +16,35 @@ function Crypto() {
 
   useEffect(() => {
     fetchAccounts()
+    fetchWallet()
   }, [])
+
+  // Set default selection after accounts and wallet are loaded
+  useEffect(() => {
+    if (!selectedAccount) {
+      if (accounts.length > 0) {
+        setSelectedAccount({ ...accounts[0], type: 'trading' })
+        setAccountType('trading')
+      } else if (wallet) {
+        setSelectedAccount({ ...wallet, type: 'wallet' })
+        setAccountType('wallet')
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts, wallet])
 
   const fetchAccounts = async () => {
     try {
       const data = await withdrawalService.getAccounts()
       if (data && data.success && Array.isArray(data.data)) {
-        // Filter for active MT5 accounts only
-        const activeAccounts = data.data.filter(acc => acc.platform === 'MT5' && acc.account_status === 'active')
+        // Filter for active MT5 accounts only, exclude demo accounts
+        const activeAccounts = data.data.filter(acc => {
+          const isMT5 = acc.platform === 'MT5'
+          const isActive = acc.account_status === 'active'
+          const isNotDemo = !acc.is_demo && (!acc.trading_server || !acc.trading_server.toLowerCase().includes('demo'))
+          return isMT5 && isActive && isNotDemo
+        })
         setAccounts(activeAccounts)
-        if (activeAccounts.length > 0) {
-          setSelectedAccount(activeAccounts[0])
-        }
       }
     } catch (error) {
       console.error('Failed to fetch accounts', error)
@@ -34,6 +53,17 @@ function Crypto() {
         title: 'Error',
         text: 'Failed to load your trading accounts'
       })
+    }
+  }
+
+  const fetchWallet = async () => {
+    try {
+      const data = await withdrawalService.getWallet()
+      if (data && data.success && data.data) {
+        setWallet(data.data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch wallet', error)
     }
   }
 
@@ -64,7 +94,8 @@ function Crypto() {
 
     try {
       const withdrawalData = {
-        mt5AccountId: selectedAccount.account_number,
+        mt5AccountId: accountType === 'trading' ? selectedAccount.account_number : null,
+        walletId: accountType === 'wallet' ? selectedAccount.id : null,
         amount: parseFloat(amount),
         currency: selectedAccount.currency || 'USD',
         method: 'crypto',
@@ -86,8 +117,9 @@ function Crypto() {
         setAmount('')
         setPassword('')
         setCryptoAddress('')
-        // Refresh accounts to show updated balance
+        // Refresh accounts and wallet to show updated balance
         fetchAccounts()
+        fetchWallet()
       } else {
         throw new Error(response.message || 'Unknown error')
       }
@@ -123,14 +155,48 @@ function Crypto() {
 
               {/* Account List */}
               <div className="max-h-60 overflow-y-auto space-y-2">
-                {accounts.length === 0 ? (
-                  <p className="text-center text-gray-500 py-4">No active trading accounts found.</p>
+                {/* Wallet Account */}
+                {wallet && (
+                  <div
+                    onClick={() => {
+                      setSelectedAccount({ ...wallet, type: 'wallet' })
+                      setAccountType('wallet')
+                    }}
+                    className={`border rounded-xl p-3 flex justify-between items-start cursor-pointer transition-all ${accountType === 'wallet' && selectedAccount?.id === wallet.id ? 'border-[#009688] bg-white shadow-sm ring-1 ring-[#009688]' : 'border-gray-300 bg-white hover:border-gray-400'
+                      }`}
+                  >
+                    <div>
+                      <p className="text-gray-800 font-medium">{wallet.wallet_number}</p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="px-2 py-0.5 text-xs rounded-md bg-blue-100 text-blue-700">Wallet</span>
+                        <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md text-xs">
+                          <img src="https://flagsapi.com/US/flat/24.png" className="w-4 h-4" alt="USD" />
+                          {wallet.currency || 'USD'}
+                        </div>
+                      </div>
+                      <p className="text-gray-600 text-sm mt-2">Balance: {wallet.currency || 'USD'} {parseFloat(wallet.balance || 0).toFixed(2)}</p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${accountType === 'wallet' && selectedAccount?.id === wallet.id ? 'border-[#009688] bg-[#009688]' : 'border-gray-300'
+                        }`}>
+                        {accountType === 'wallet' && selectedAccount?.id === wallet.id && <div className="h-2.5 w-2.5 bg-white rounded-full"></div>}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Trading Accounts */}
+                {accounts.length === 0 && !wallet ? (
+                  <p className="text-center text-gray-500 py-4">No active accounts found.</p>
                 ) : (
                   accounts.map(acc => (
                     <div
                       key={acc.id}
-                      onClick={() => setSelectedAccount(acc)}
-                      className={`border rounded-xl p-3 flex justify-between items-start cursor-pointer transition-all ${selectedAccount?.id === acc.id ? 'border-[#009688] bg-white shadow-sm ring-1 ring-[#009688]' : 'border-gray-300 bg-white hover:border-gray-400'
+                      onClick={() => {
+                        setSelectedAccount({ ...acc, type: 'trading' })
+                        setAccountType('trading')
+                      }}
+                      className={`border rounded-xl p-3 flex justify-between items-start cursor-pointer transition-all ${accountType === 'trading' && selectedAccount?.id === acc.id ? 'border-[#009688] bg-white shadow-sm ring-1 ring-[#009688]' : 'border-gray-300 bg-white hover:border-gray-400'
                         }`}
                     >
                       <div>
@@ -146,9 +212,9 @@ function Crypto() {
                         <p className="text-gray-600 text-sm mt-2">Balance: {acc.currency} {parseFloat(acc.balance || 0).toFixed(2)}</p>
                       </div>
                       <div className="flex items-center">
-                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${selectedAccount?.id === acc.id ? 'border-[#009688] bg-[#009688]' : 'border-gray-300'
+                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${accountType === 'trading' && selectedAccount?.id === acc.id ? 'border-[#009688] bg-[#009688]' : 'border-gray-300'
                           }`}>
-                          {selectedAccount?.id === acc.id && <div className="h-2.5 w-2.5 bg-white rounded-full"></div>}
+                          {accountType === 'trading' && selectedAccount?.id === acc.id && <div className="h-2.5 w-2.5 bg-white rounded-full"></div>}
                         </div>
                       </div>
                     </div>
