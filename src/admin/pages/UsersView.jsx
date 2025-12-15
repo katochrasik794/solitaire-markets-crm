@@ -230,18 +230,26 @@ export default function UsersView() {
     all.forEach((a) => {
       const meta = mt5Map[a.accountId] || {};
       const groupName = meta.group || a.group || "";
-      const isDemo = String(groupName || "").toLowerCase().includes("demo") || a.isDemo;
+      const isDemo =
+        String(groupName || "")
+          .toLowerCase()
+          .includes("demo") || a.isDemo;
       if (isDemo) demo.push(a);
       else real.push(a);
     });
     return { real, demo };
   }, [data?.user?.MT5Account, mt5Map]);
 
-  // Real vs Demo split by group name
+  // Real vs Demo split by group name using API group
   const { realBalance, demoBalance, realEquity, demoEquity } = useMemo(() => {
-    let rb = 0, db = 0, re = 0, de = 0;
-    Object.values(mt5Map).forEach(v => {
-      const isDemo = String(v?.group || '').toLowerCase().includes('demo');
+    let rb = 0,
+      db = 0,
+      re = 0,
+      de = 0;
+    Object.values(mt5Map).forEach((v) => {
+      const isDemo = String(v?.group || "")
+        .toLowerCase()
+        .includes("demo");
       if (isDemo) {
         db += Number(v?.balance || 0);
         de += Number(v?.equity || 0);
@@ -291,7 +299,7 @@ export default function UsersView() {
     return () => { cancel = true; };
   }, [BASE, id]);
 
-  // Fetch MT5 balances/equity for each account id on page load
+  // Fetch MT5 profile (balance/equity/group/leverage) for each account id on page load
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (!data?.user?.MT5Account?.length) return;
@@ -300,13 +308,31 @@ export default function UsersView() {
       const entries = await Promise.all(
         data.user.MT5Account.map(async a => {
           try {
-            const res = await fetch(`${BASE}/admin/mt5/proxy/${a.accountId}/getClientProfile`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch(
+              `${BASE}/admin/mt5/proxy/${a.accountId}/getClientProfile`,
+              { headers: { 'Authorization': `Bearer ${token}` } }
+            );
             const j = await res.json();
             const d = j?.data?.Data || j?.data || {};
-            const levRaw = d.LeverageInCents ? Number(d.LeverageInCents) / 100 : (d.Leverage || null);
-            return [a.accountId, { balance: Number(d.Balance || 0), equity: Number(d.Equity || 0), group: d.Group || d.GroupName || '-', leverage: levRaw }];
+            const levRaw = d.LeverageInCents
+              ? Number(d.LeverageInCents) / 100
+              : d.Leverage || null;
+            return [
+              a.accountId,
+              {
+                balance: Number(d.Balance ?? 0),
+                equity: Number(d.Equity ?? 0),
+                credit: Number(d.Credit ?? 0),
+                margin: Number(d.Margin ?? 0),
+                marginFree: Number(d.MarginFree ?? 0),
+                marginLevel: Number(d.MarginLevel ?? 0),
+                profit: Number(d.Profit ?? 0),
+                group: d.Group || d.GroupName || a.group || '-',
+                leverage: levRaw,
+              },
+            ];
           } catch {
-            return [a.accountId, { balance: 0, equity: 0, group: '-', leverage: null }];
+            return [a.accountId, { balance: 0, equity: 0, credit: 0, margin: 0, marginFree: 0, marginLevel: 0, profit: 0, group: '-', leverage: null }];
           }
         })
       );
@@ -328,23 +354,113 @@ export default function UsersView() {
           <div>
             <div className="text-xl font-bold">{u.name || u.email}</div>
             <div className="text-sm text-gray-600">{u.email}</div>
-            <div className="text-xs text-gray-500 mt-1">Created {fmt(u.createdAt)} • Last login {fmt(u.lastLoginAt)}</div>
+            <div className="text-xs text-gray-500 mt-1">
+              Created {fmt(u.createdAt)} • Last login {fmt(u.lastLoginAt)}
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Link to="/admin/users/all" className="px-4 h-10 rounded-md border">Back to All Users</Link>
+          <div className="flex flex-col items-end gap-3">
+            <div className="inline-flex rounded-full border border-gray-200 bg-gray-50 p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setMt5Tab("real")}
+                className={`px-3 py-1 rounded-full transition ${
+                  mt5Tab === "real"
+                    ? "bg-white shadow-sm text-gray-900"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                Real Accounts
+              </button>
+              <button
+                type="button"
+                onClick={() => setMt5Tab("demo")}
+                className={`px-3 py-1 rounded-full transition ${
+                  mt5Tab === "demo"
+                    ? "bg-white shadow-sm text-gray-900"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                Demo Accounts
+              </button>
+            </div>
+            <Link
+              to="/admin/users/all"
+              className="px-4 h-10 rounded-md border text-sm"
+            >
+              Back to All Users
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-        <Stat icon={Wallet} label="Real Balance" value={`$${realBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} tone="bg-violet-100 text-violet-700" />
-        <Stat icon={Wallet} label="Demo Balance" value={`$${demoBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} tone="bg-fuchsia-100 text-fuchsia-700" />
-        <Stat icon={Wallet} label="Real Equity" value={`$${realEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} tone="bg-blue-100 text-blue-700" />
-        <Stat icon={Wallet} label="Demo Equity" value={`$${demoEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} tone="bg-cyan-100 text-cyan-700" />
-        <Stat icon={Download} label="Total Deposits" value={`$${t.deposits.amount.toLocaleString()} (${t.deposits.count})`} tone="bg-emerald-100 text-emerald-700" />
-        <Stat icon={Upload} label="Total Withdrawals" value={`$${t.withdrawals.amount.toLocaleString()} (${t.withdrawals.count})`} tone="bg-rose-100 text-rose-700" />
-        <Stat icon={ShieldCheck} label="Email Verified" value={u.emailVerified ? 'Yes' : 'No'} tone={u.emailVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'} />
+        {mt5Tab === "real" && (
+          <>
+            <Stat
+              icon={Wallet}
+              label="Real Balance"
+              value={`$${realBalance.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
+              tone="bg-violet-100 text-violet-700"
+            />
+            <Stat
+              icon={Wallet}
+              label="Real Equity"
+              value={`$${realEquity.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
+              tone="bg-blue-100 text-blue-700"
+            />
+          </>
+        )}
+        {mt5Tab === "demo" && (
+          <>
+            <Stat
+              icon={Wallet}
+              label="Demo Balance"
+              value={`$${demoBalance.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
+              tone="bg-fuchsia-100 text-fuchsia-700"
+            />
+            <Stat
+              icon={Wallet}
+              label="Demo Equity"
+              value={`$${demoEquity.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
+              tone="bg-cyan-100 text-cyan-700"
+            />
+          </>
+        )}
+        <Stat
+          icon={Download}
+          label="Total Deposits"
+          value={`$${t.deposits.amount.toLocaleString()} (${t.deposits.count})`}
+          tone="bg-emerald-100 text-emerald-700"
+        />
+        <Stat
+          icon={Upload}
+          label="Total Withdrawals"
+          value={`$${t.withdrawals.amount.toLocaleString()} (${t.withdrawals.count})`}
+          tone="bg-rose-100 text-rose-700"
+        />
+        <Stat
+          icon={ShieldCheck}
+          label="Email Verified"
+          value={u.emailVerified ? "Yes" : "No"}
+          tone={
+            u.emailVerified
+              ? "bg-emerald-100 text-emerald-700"
+              : "bg-amber-100 text-amber-800"
+          }
+        />
       </div>
 
       {/* KYC */}
@@ -374,33 +490,7 @@ export default function UsersView() {
 
       {/* MT5 Accounts full width using ProTable */}
       <div className="rounded-2xl bg-white border border-gray-200 shadow-sm">
-        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-          <span className="text-sm font-semibold">MT5 Accounts</span>
-          <div className="inline-flex rounded-full border border-gray-200 bg-gray-50 p-1 text-xs">
-            <button
-              type="button"
-              onClick={() => setMt5Tab("real")}
-              className={`px-3 py-1 rounded-full transition ${
-                mt5Tab === "real"
-                  ? "bg-white shadow-sm text-gray-900"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              Real Accounts
-            </button>
-            <button
-              type="button"
-              onClick={() => setMt5Tab("demo")}
-              className={`px-3 py-1 rounded-full transition ${
-                mt5Tab === "demo"
-                  ? "bg-white shadow-sm text-gray-900"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              Demo Accounts
-            </button>
-          </div>
-        </div>
+        <div className="px-5 pt-4 pb-2 text-sm font-semibold">MT5 Accounts</div>
         <div className="p-4">
           <ProTable
             rows={((mt5Tab === "real"
@@ -409,6 +499,7 @@ export default function UsersView() {
             ).map((a, idx) => ({
               __index: idx + 1,
               accountId: a.accountId,
+              // Prefer live group from MT5 API; fall back to DB only if API missing
               group: mt5Map[a.accountId]?.group || a.group || "-",
               leverage: mt5Map[a.accountId]?.leverage
                 ? `1:${Number(mt5Map[a.accountId]?.leverage).toFixed(0)}`
@@ -500,16 +591,6 @@ export default function UsersView() {
             searchPlaceholder="Search by account, group…"
             filters={{ searchKeys: ["accountId", "group"] }}
           />
-          <div className="px-4 pb-4 text-xs text-gray-600 flex items-center gap-4">
-            <span className="flex items-center gap-2">
-              <Badge tone="green">Demo</Badge>
-              <span>accounts are marked as demo</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <Badge tone="blue">Real</Badge>
-              <span>accounts are marked as real</span>
-            </span>
-          </div>
         </div>
       </div>
 
