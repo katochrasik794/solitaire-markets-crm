@@ -63,8 +63,12 @@ export default function AssignCountryPartner() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
-    fetch(`${BASE}/admin/countries`).then(r => r.json()).then(res => {
+    const BASE = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+    fetch(`${BASE}/admin/countries`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+      }
+    }).then(r => r.json()).then(res => {
       if (res.ok && Array.isArray(res.countries)) setCountries(res.countries.filter(Boolean));
     });
   }, []);
@@ -81,7 +85,7 @@ export default function AssignCountryPartner() {
   const handleSubmit = async e => {
     e.preventDefault(); setLoading(true);
     try {
-      const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+      const BASE = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || "http://localhost:5000/api";
       const token = localStorage.getItem('adminToken');
       const res = await fetch(`${BASE}/admin/country-admins`, {
         method: "POST",

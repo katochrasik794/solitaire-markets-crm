@@ -30,6 +30,7 @@ import AddUser from "../pages/AddUser.jsx";
 import UsersWithBalance from "../pages/UsersWithBalance.jsx";
 import MT5Users from "../pages/MT5Users.jsx";
 import MT5Assign from "../pages/MT5Assign.jsx";
+import MT5Transfer from "../pages/MT5Transfer.jsx";
 import DepositsPending from "../pages/DepositsPending.jsx";
 import DepositsApproved from "../pages/DepositsApproved.jsx";
 import DepositsRejected from "../pages/DepositsRejected.jsx";
@@ -97,7 +98,7 @@ export default [
   { path: "mt5",            element: <EmptyState title="MT5 Management" subtitle="Manager tools" /> },
   { path: "mt5/users",      element: <MT5Users /> },
   { path: "mt5/assign",     element: <MT5Assign /> },
-  { path: "mt5/transfer",   element: <EmptyState title="Internal Transfer" subtitle="Move funds internally" /> },
+  { path: "mt5/transfer",   element: <MT5Transfer /> },
   { path: "mt5/group-management", element: <GroupManagement /> },
 
   /* ----------------------- EMAIL MANAGEMENT ------------------------ */

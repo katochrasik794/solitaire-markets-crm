@@ -32,6 +32,7 @@ export default function UsersView() {
   const [actionModal, setActionModal] = useState(null); // { type, accountId, amount, comment }
   const [mt5Map, setMt5Map] = useState({}); // accountId -> {balance, equity}
   const [submitting, setSubmitting] = useState(false);
+  const [mt5Tab, setMt5Tab] = useState("real"); // 'real' | 'demo'
   // Backend base URL (Express server runs on 5000 with /api prefix)
   const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
@@ -222,6 +223,20 @@ export default function UsersView() {
     }
   }, [mt5Map]);
 
+  const splitMt5Accounts = useMemo(() => {
+    const all = data?.user?.MT5Account || [];
+    const real = [];
+    const demo = [];
+    all.forEach((a) => {
+      const meta = mt5Map[a.accountId] || {};
+      const groupName = meta.group || a.group || "";
+      const isDemo = String(groupName || "").toLowerCase().includes("demo") || a.isDemo;
+      if (isDemo) demo.push(a);
+      else real.push(a);
+    });
+    return { real, demo };
+  }, [data?.user?.MT5Account, mt5Map]);
+
   // Real vs Demo split by group name
   const { realBalance, demoBalance, realEquity, demoEquity } = useMemo(() => {
     let rb = 0, db = 0, re = 0, de = 0;
@@ -359,57 +374,131 @@ export default function UsersView() {
 
       {/* MT5 Accounts full width using ProTable */}
       <div className="rounded-2xl bg-white border border-gray-200 shadow-sm">
-        <div className="px-5 pt-4 pb-2 text-sm font-semibold">MT5 Accounts</div>
+        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+          <span className="text-sm font-semibold">MT5 Accounts</span>
+          <div className="inline-flex rounded-full border border-gray-200 bg-gray-50 p-1 text-xs">
+            <button
+              type="button"
+              onClick={() => setMt5Tab("real")}
+              className={`px-3 py-1 rounded-full transition ${
+                mt5Tab === "real"
+                  ? "bg-white shadow-sm text-gray-900"
+                  : "text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              Real Accounts
+            </button>
+            <button
+              type="button"
+              onClick={() => setMt5Tab("demo")}
+              className={`px-3 py-1 rounded-full transition ${
+                mt5Tab === "demo"
+                  ? "bg-white shadow-sm text-gray-900"
+                  : "text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              Demo Accounts
+            </button>
+          </div>
+        </div>
         <div className="p-4">
           <ProTable
-            rows={(u.MT5Account || []).map((a, idx) => ({
+            rows={((mt5Tab === "real"
+              ? splitMt5Accounts.real
+              : splitMt5Accounts.demo) || []
+            ).map((a, idx) => ({
               __index: idx + 1,
               accountId: a.accountId,
-              group: mt5Map[a.accountId]?.group || '-',
-              leverage: mt5Map[a.accountId]?.leverage ? `1:${Number(mt5Map[a.accountId]?.leverage).toFixed(0)}` : '-',
+              group: mt5Map[a.accountId]?.group || a.group || "-",
+              leverage: mt5Map[a.accountId]?.leverage
+                ? `1:${Number(mt5Map[a.accountId]?.leverage).toFixed(0)}`
+                : "-",
               balance: `$${(mt5Map[a.accountId]?.balance || 0).toFixed(2)}`,
               equity: `$${(mt5Map[a.accountId]?.equity || 0).toFixed(2)}`,
               createdAt: fmt(a.createdAt),
               _raw: a,
             }))}
             columns={[
-              { key: '__index', label: 'Sr No', sortable: false },
-              { key: 'accountId', label: 'Account ID' },
+              { key: "__index", label: "Sr No", sortable: false },
+              { key: "accountId", label: "Account ID" },
               {
-                key: 'group', label: 'Group', render: (v) => {
-                  const groupName = v || '-';
-                  const isDemo = String(groupName).toLowerCase().includes('demo');
-                  return <Badge tone={isDemo ? 'green' : 'blue'}>{groupName}</Badge>;
-                }
+                key: "group",
+                label: "Group",
+                render: (v) => {
+                  const groupName = v || "-";
+                  const isDemo = String(groupName)
+                    .toLowerCase()
+                    .includes("demo");
+                  return (
+                    <Badge tone={isDemo ? "green" : "blue"}>{groupName}</Badge>
+                  );
+                },
               },
-              { key: 'leverage', label: 'Leverage' },
-              { key: 'balance', label: 'Balance' },
-              { key: 'equity', label: 'Equity' },
-              { key: 'createdAt', label: 'Created' },
+              { key: "leverage", label: "Leverage" },
+              { key: "balance", label: "Balance" },
+              { key: "equity", label: "Equity" },
+              { key: "createdAt", label: "Created" },
               {
-                key: 'actions', label: 'Actions', sortable: false, render: (v, row) => (
+                key: "actions",
+                label: "Actions",
+                sortable: false,
+                render: (v, row) => (
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setActionModal({ type: 'deposit', accountId: row.accountId, amount: '', comment: 'Admin deposit' })}
-                      className="px-2 py-1 rounded-full bg-emerald-600 text-white text-xs hover:bg-emerald-700 shadow-sm">Deposit</button>
-                    <button onClick={() => setActionModal({ type: 'withdraw', accountId: row.accountId, amount: '', comment: 'Admin withdrawal', txId: '' })}
-                      className="px-2 py-1 rounded-full bg-rose-600 text-white text-xs hover:bg-rose-700 shadow-sm">Withdraw</button>
+                    <button
+                      onClick={() =>
+                        setActionModal({
+                          type: "deposit",
+                          accountId: row.accountId,
+                          amount: "",
+                          comment: "Admin deposit",
+                        })
+                      }
+                      className="px-2 py-1 rounded-full bg-emerald-600 text-white text-xs hover:bg-emerald-700 shadow-sm"
+                    >
+                      Deposit
+                    </button>
+                    <button
+                      onClick={() =>
+                        setActionModal({
+                          type: "withdraw",
+                          accountId: row.accountId,
+                          amount: "",
+                          comment: "Admin withdrawal",
+                          txId: "",
+                        })
+                      }
+                      className="px-2 py-1 rounded-full bg-rose-600 text-white text-xs hover:bg-rose-700 shadow-sm"
+                    >
+                      Withdraw
+                    </button>
                   </div>
-                )
+                ),
               },
               {
-                key: 'bonus', label: 'Bonus Actions', sortable: false, render: (v, row) => (
+                key: "bonus",
+                label: "Bonus Actions",
+                sortable: false,
+                render: (v, row) => (
                   <div className="flex items-center gap-2">
-                    <button onClick={() => handleAddBonus(row.accountId)}
-                      className="px-2 py-1 rounded-full bg-brand-500 text-dark-base text-xs hover:bg-brand-600 shadow-sm">Add Bonus</button>
-                    <button onClick={() => handleWithdrawBonus(row.accountId)}
-                      className="px-2 py-1 rounded-full bg-gray-700 text-white text-xs hover:bg-gray-800 shadow-sm">Withdraw Bonus</button>
+                    <button
+                      onClick={() => handleAddBonus(row.accountId)}
+                      className="px-2 py-1 rounded-full bg-brand-500 text-dark-base text-xs hover:bg-brand-600 shadow-sm"
+                    >
+                      Add Bonus
+                    </button>
+                    <button
+                      onClick={() => handleWithdrawBonus(row.accountId)}
+                      className="px-2 py-1 rounded-full bg-gray-700 text-white text-xs hover:bg-gray-800 shadow-sm"
+                    >
+                      Withdraw Bonus
+                    </button>
                   </div>
-                )
+                ),
               },
             ]}
             pageSize={5}
             searchPlaceholder="Search by account, group…"
-            filters={{ searchKeys: ['accountId', 'group'] }}
+            filters={{ searchKeys: ["accountId", "group"] }}
           />
           <div className="px-4 pb-4 text-xs text-gray-600 flex items-center gap-4">
             <span className="flex items-center gap-2">
@@ -534,9 +623,10 @@ export default function UsersView() {
                   setSubmitting(true);
                   const token = localStorage.getItem('adminToken');
                   const url = actionModal.type === 'deposit' ? `${BASE}/admin/mt5/deposit` : `${BASE}/admin/mt5/withdraw`;
-                  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ login: actionModal.accountId, amount: amt, description: actionModal.comment }) });
+                  const payload = { mt5_login: actionModal.accountId, amount: amt, comment: actionModal.comment };
+                  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
                   const j = await r.json();
-                  if (!j?.ok) throw new Error(j?.error || 'Failed');
+                  if (!j?.success) throw new Error(j?.message || j?.error || 'Failed');
 
                   // Send email notification using external CRM API
                   let emailSent = false;

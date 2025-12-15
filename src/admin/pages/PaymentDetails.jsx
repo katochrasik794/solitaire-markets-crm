@@ -98,7 +98,7 @@ export default function PaymentDetails() {
       <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
         <CreditCard className="h-6 w-6" /> Payment Details
       </h1>
-      <p className="text-gray-600">Approve or reject submitted payment methods</p>
+      <p className="text-gray-600">Withdrawal details submitted by client</p>
     </div>
   );
 

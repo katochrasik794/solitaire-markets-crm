@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import ProTable from "../components/ProTable.jsx";
 import Modal from "../components/Modal.jsx";
 import { CheckCircle, XCircle, Eye, Loader2 } from "lucide-react";
+import Swal from "sweetalert2";
 
 function fmtDate(v) {
   if (!v) return "-";
@@ -26,6 +27,7 @@ export default function DepositsPending() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [toast, setToast] = useState(null);
+  const [approveComment, setApproveComment] = useState("");
 
   const BASE = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -168,20 +170,36 @@ export default function DepositsPending() {
     setApproving(true);
     setErrorMessage("");
     try {
-      // Approve the deposit (this will handle MT5 balance addition internally)
+      const methodLabel = row.bankDetails
+        ? "Bank Transfer"
+        : (row.paymentMethod || row.method || "-");
+
+      const autoComment = `Deposit approved via ${methodLabel}`;
+      const finalComment = approveComment?.trim()
+        ? approveComment.trim()
+        : autoComment;
+
       const r = await fetch(`${BASE}/admin/deposits/${row.id}/approve`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ comment: finalComment }),
       });
       const data = await r.json();
-      if (!data?.ok) throw new Error(data?.error || 'Failed to approve');
+      if (!data?.ok) throw new Error(data?.error || "Failed to approve");
 
-      setRows(list => list.filter(it => it.id !== row.id));
+      setRows((list) => list.filter((it) => it.id !== row.id));
       setConfirmApprove(null);
-      setToast({ type: 'success', message: data.message || 'Deposit approved successfully.' });
+      setApproveComment("");
+      setToast({
+        type: "success",
+        message: data.message || "Deposit approved successfully.",
+      });
       setTimeout(() => setToast(null), 5000);
     } catch (e) {
-      setToast({ type: 'error', message: e.message || String(e) });
+      setToast({ type: "error", message: e.message || String(e) });
       setTimeout(() => setToast(null), 5000);
     } finally {
       setApproving(false);
@@ -233,7 +251,37 @@ export default function DepositsPending() {
       <Modal open={!!confirmApprove} onClose={() => { if (!approving) setConfirmApprove(null); }} title="Approve Deposit">
         {confirmApprove && (
           <div className="space-y-4">
-            <p>Do you want to approve the deposit of <b>{fmtAmount(confirmApprove.amount)}</b> for <b>{confirmApprove.userEmail}</b>?</p>
+            <p>
+              Do you want to approve the deposit of{" "}
+              <b>{fmtAmount(confirmApprove.amount)}</b> for{" "}
+              <b>{confirmApprove.userEmail}</b>?
+            </p>
+            <p className="text-sm text-gray-600">
+              Default comment will be:{" "}
+              <span className="font-mono">
+                Deposit approved via{" "}
+                {confirmApprove.bankDetails
+                  ? "Bank Transfer"
+                  : confirmApprove.paymentMethod ||
+                    confirmApprove.method ||
+                    "-"}
+              </span>
+            </p>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Comment (optional)
+              </label>
+              <input
+                type="text"
+                value={approveComment}
+                onChange={(e) => setApproveComment(e.target.value)}
+                placeholder="Add your own comment for this approval"
+                className="w-full h-10 rounded-md border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <p className="text-xs text-gray-400">
+                If empty, system uses the default comment above.
+              </p>
+            </div>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmApprove(null)}
