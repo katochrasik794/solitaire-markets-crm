@@ -283,9 +283,6 @@ export const ADMIN_MENU = [
   {
     label: "SYSTEM",
     items: [
-      { icon: ServerCog, label: "MT5 Connection", to: "mt5-connection" },
-      { icon: Settings, label: "System Settings", to: "settings" },
-      { icon: ShieldCheck, label: "Roles", to: "roles" },
       { icon: KeySquare, label: "Assign Roles", to: "assign-roles" },
       { icon: UserCog, label: "Admin Profile", to: "profile" },
       { icon: Settings, label: "Logout", to: "logout" },
