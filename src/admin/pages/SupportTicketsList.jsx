@@ -13,12 +13,23 @@ export default function SupportTicketsList({ status }) {
     try {
       // Map 'opened' to 'open' for API
       const apiStatus = status === 'opened' ? 'open' : status === 'closed' ? 'closed' : '';
+      console.log('Fetching tickets with status:', apiStatus);
       const data = await supportService.getAllTickets(apiStatus);
+      console.log('Tickets response:', data);
       if (data.success) {
         setItems(data.data || []);
+        console.log('Set items count:', data.data?.length || 0);
+      } else {
+        console.error('API returned error:', data.error || data.message);
+        setItems([]);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching tickets:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
+      setItems([]);
     } finally {
       setLoading(false);
     }
