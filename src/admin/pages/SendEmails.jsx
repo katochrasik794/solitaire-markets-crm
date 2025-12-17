@@ -14,7 +14,7 @@ const RECIPIENT_TYPES = [
   { value: 'inactive', label: 'Inactive Users', icon: Users, gradient: 'from-gray-500 to-slate-500' },
   { value: 'kyc_verified', label: 'KYC Verified Users', icon: Mail, gradient: 'from-blue-500 to-cyan-500' },
   { value: 'kyc_unverified', label: 'KYC Unverified Users', icon: Mail, gradient: 'from-amber-500 to-yellow-500' },
-  { value: 'specific', label: 'Specific User(s)', icon: Search, gradient: 'from-neutral-600 to-neutral-800' },
+  { value: 'specific', label: 'Select Specific Users', icon: Search, gradient: 'from-neutral-600 to-neutral-800' },
 ];
 
 export default function SendEmails() {
@@ -44,8 +44,10 @@ export default function SendEmails() {
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [templateVariables, setTemplateVariables] = useState({});
+  const [availableVariables, setAvailableVariables] = useState([]);
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
   // Load templates on mount
   useEffect(() => {
@@ -61,7 +63,6 @@ export default function SendEmails() {
       });
       if (response.data.ok) {
         setTemplates(response.data.templates || []);
-        // Don't auto-select default template - let user choose manually
       }
     } catch (error) {
       console.error('Failed to load templates:', error);
@@ -70,7 +71,7 @@ export default function SendEmails() {
     }
   };
 
-  const loadTemplateContent = async (templateId) => {
+  const loadTemplateContent = async (templateId, currentVariables = {}) => {
     try {
       const token = localStorage.getItem('adminToken');
 
@@ -83,81 +84,73 @@ export default function SendEmails() {
         const template = templateResponse.data.template;
         const htmlCode = template.html_code || '';
 
+        // Set available variables for inputs (excluding auto-filled ones)
+        const vars = template.variables || [];
+        const autoFilled = ['logoUrl', 'companyEmail', 'currentYear', 'recipientName', 'recipientEmail'];
+        const manualVars = vars.filter(v => !autoFilled.includes(v));
+        setAvailableVariables(manualVars);
+
         // Extract subject from HTML
         let extractedSubject = '';
-
-        // Method 1: Try to find <title> tag
         const titleMatch = htmlCode.match(/<title[^>]*>([^<]+)<\/title>/i);
         if (titleMatch) {
           extractedSubject = titleMatch[1].trim();
-          // Remove variable syntax if present
           extractedSubject = extractedSubject.replace(/\{\{subject\}\}/gi, '').trim();
         }
-
-        // Method 2: If no title, try to find text near {{subject}} variable
-        if (!extractedSubject) {
-          const subjectVarMatch = htmlCode.match(/\{\{subject\}\}/i);
-          if (subjectVarMatch) {
-            // Look for text in the same line or nearby
-            const lines = htmlCode.split('\n');
-            for (let i = 0; i < lines.length; i++) {
-              if (lines[i].includes('{{subject}}')) {
-                // Try to extract text before {{subject}}
-                const beforeSubject = lines[i].substring(0, lines[i].indexOf('{{subject}}'));
-                const textMatch = beforeSubject.match(/>([^<]+)</);
-                if (textMatch) {
-                  extractedSubject = textMatch[1].trim();
-                  break;
-                }
-              }
-            }
-          }
-        }
-
-        // Method 3: Use template name as fallback
         if (!extractedSubject) {
           extractedSubject = template.name || 'Email Subject';
         }
 
-        // Get the PREVIEW (rendered HTML with sample data) to show in body
+        // Get the PREVIEW (rendered HTML with variables)
         const previewResponse = await axios.post(
           `${BASE}/admin/email-templates/preview`,
-          { html_code: htmlCode },
+          {
+            html_code: htmlCode,
+            variables: currentVariables
+          },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (previewResponse.data.ok && previewResponse.data.preview_html) {
-          // Set subject and body with preview content
+          console.log('✅ Preview loaded successfully');
           setSubject(extractedSubject);
           setBody(previewResponse.data.preview_html);
         } else {
-          // Fallback to raw HTML if preview fails
+          console.warn('⚠️ Preview failed or returned empty HTML, falling back to raw code', previewResponse.data);
           setSubject(extractedSubject);
           setBody(htmlCode);
         }
       }
     } catch (error) {
       console.error('Failed to load template content:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load template content',
-      });
     }
   };
 
   const handleTemplateChange = async (e) => {
     const templateId = e.target.value ? Number(e.target.value) : null;
     setSelectedTemplateId(templateId);
+    setTemplateVariables({}); // Reset variables
 
     if (templateId) {
-      // Load template content to show subject and body
-      await loadTemplateContent(templateId);
+      await loadTemplateContent(templateId, {});
     } else {
-      // Clear fields if no template selected
       setSubject('');
       setBody('');
+      setAvailableVariables([]);
     }
+  };
+
+  const handleVariableChange = async (key, value) => {
+    const newVariables = { ...templateVariables, [key]: value };
+    setTemplateVariables(newVariables);
+
+    // Debounce preview update
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
+      if (selectedTemplateId) {
+        loadTemplateContent(selectedTemplateId, newVariables);
+      }
+    }, 500);
   };
 
   // Close search results when clicking outside
@@ -427,6 +420,7 @@ export default function SendEmails() {
           isHtml: true,
           imageUrl: imageUrl.trim() || undefined,
           templateId: selectedTemplateId || null,
+          templateVariables: selectedTemplateId ? templateVariables : {},
         },
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
@@ -663,6 +657,9 @@ export default function SendEmails() {
                     );
                   })}
                 </div>
+                <p className="text-xs text-gray-500 mt-2 px-1">
+                  * Select <strong>Specific User(s)</strong> to search and add individual recipients.
+                </p>
 
                 {/* Specific User Selection */}
                 {recipientType === 'specific' && (
@@ -754,6 +751,35 @@ export default function SendEmails() {
                     <p className="text-xs text-gray-500 mt-1">Loading templates...</p>
                   )}
                 </div>
+
+                {/* Template Variables Inputs */}
+                {selectedTemplateId && availableVariables.length > 0 && (
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
+                    <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                      <Settings size={14} />
+                      Template Variables
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      Fill in the values below to update the email preview.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Array.isArray(availableVariables) && availableVariables.map(variable => (
+                        <div key={variable}>
+                          <label className="block text-xs font-medium text-gray-500 mb-1 capitalize">
+                            {variable.replace(/([A-Z])/g, ' $1').trim()}
+                          </label>
+                          <input
+                            type="text"
+                            value={templateVariables[variable] || ''}
+                            onChange={(e) => handleVariableChange(variable, e.target.value)}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            placeholder={`Enter ${variable}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Subject Field - Always visible, shows template subject when template is selected */}
                 <div>

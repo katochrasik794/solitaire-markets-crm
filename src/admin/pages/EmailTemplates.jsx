@@ -46,7 +46,7 @@ export default function EmailTemplates() {
   const [copiedVariable, setCopiedVariable] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
   // Load templates on mount
   useEffect(() => {

@@ -16,7 +16,7 @@ export default function KycList(){
   const [addrFile, setAddrFile] = useState(null);
   const [docLink, setDocLink] = useState("");
   const [addrLink, setAddrLink] = useState("");
-  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+  const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
   async function load(){
     setLoading(true); setErr("");

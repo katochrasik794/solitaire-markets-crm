@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 import { CreditCard, CheckCircle2, XCircle } from "lucide-react";
 import ProTable from "../components/ProTable.jsx";
 
-const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5003";
+const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
 export default function PaymentDetails() {
   const [loading, setLoading] = useState(true);
