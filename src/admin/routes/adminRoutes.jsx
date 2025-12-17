@@ -50,6 +50,7 @@ import AssignedCountryAdmins from "../pages/AssignedCountryAdmins.jsx";
 import GroupManagement from "../pages/GroupManagement.jsx";
 import SendEmails from "../pages/SendEmails.jsx";
 import EmailTemplates from "../pages/EmailTemplates.jsx";
+import Tickers from "../pages/ContentManagement/Tickers.jsx";
 /** Admin Dashboard */
 
 export default [
@@ -145,6 +146,9 @@ export default [
   { path: "assign-roles",        element: <AssignRoles /> },
   { path: "assign-country-partner", element: <AssignCountryPartner /> },
   { path: "assigned-country-admins", element: <AssignedCountryAdmins /> },
+
+  /* ------------------------ CONTENT MANAGEMENT ------------------------ */
+  { path: "content-management/tickers", element: <Tickers /> },
 
   /* ------------------------------ AUTH -------------------------------- */
   { path: "logout", element: <Logout /> },

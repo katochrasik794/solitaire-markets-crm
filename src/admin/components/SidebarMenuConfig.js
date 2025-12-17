@@ -281,6 +281,12 @@ export const ADMIN_MENU = [
     ],
   },
   {
+    label: "CONTENT MANAGEMENT",
+    items: [
+      { icon: Newspaper, label: "Manage Tickers", to: "content-management/tickers" },
+    ],
+  },
+  {
     label: "SYSTEM",
     items: [
       { icon: KeySquare, label: "Assign Roles", to: "assign-roles" },

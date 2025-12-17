@@ -90,7 +90,7 @@ function Header({ onMenuClick }) {
     <>
       {/* Header Bar - Fixed */}
       <div className="bg-white fixed top-0 left-0 right-0 z-50">
-        <div className="flex justify-between items-center px-6 py-7 relative">
+        <div className="flex justify-between items-center px-6 py-4 md:py-7 relative">
           {/* Left side - Hamburger menu (Mobile only) */}
           <div className="flex items-center gap-4 lg:hidden">
             <button

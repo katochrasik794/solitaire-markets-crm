@@ -46,8 +46,8 @@ function Sidebar({ isOpen, onClose }) {
       style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', width: '100%', maxWidth: '100%' }}
     >
       {/* Logo with Close Button */}
-      <div className="bg-transparent pt-4 pb-6 pl-8 pr-6 flex-shrink-0 flex items-center justify-between">
-        <img src="/logo.svg" alt="Solitaire Logo" className="h-20 w-auto" style={{ background: 'transparent' }} />
+      <div className="bg-transparent pt-4 pb-2 pl-8 pr-6 flex-shrink-0 flex items-center justify-between">
+        <img src="/logo.svg" alt="Solitaire Logo" className="h-14 w-auto " style={{ background: 'transparent' }} />
         {/* Close button for mobile */}
         <button
           onClick={onClose}
@@ -58,6 +58,9 @@ function Sidebar({ isOpen, onClose }) {
           </svg>
         </button>
       </div>
+      
+      {/* Separator Line - Aligned with navbar */}
+      <div className="border-b border-gray-200 mx-6"></div>
 
       {/* Navigation - Scrollable */}
       <nav className="flex-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
@@ -65,7 +68,7 @@ function Sidebar({ isOpen, onClose }) {
           {/* Dashboard */}
           <Link
             to="/user/dashboard"
-            className={`flex items-center px-4 py-3 transition-colors relative ${isActive('/dashboard')
+            className={`flex items-center px-4 py-3 transition-colors relative rounded-lg ${isActive('/dashboard')
               ? 'bg-brand-500 text-dark-base'
               : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
               }`}
@@ -80,7 +83,7 @@ function Sidebar({ isOpen, onClose }) {
           {/* Deposits */}
           <Link
             to="/user/deposits"
-            className={`flex items-center px-4 py-3 transition-colors relative ${isActive('/deposits')
+            className={`flex items-center px-4 py-3 transition-colors relative rounded-lg ${isActive('/deposits')
               ? 'bg-brand-500 text-dark-base'
               : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
               }`}
@@ -96,7 +99,7 @@ function Sidebar({ isOpen, onClose }) {
           {/* Withdrawals */}
           <Link
             to="/user/withdrawals"
-            className={`flex items-center px-4 py-3 transition-colors relative ${isActive('/withdrawals') || isActive('/withdrawals/crypto')
+            className={`flex items-center px-4 py-3 transition-colors relative rounded-lg ${isActive('/withdrawals') || isActive('/withdrawals/crypto')
               ? 'bg-brand-500 text-dark-base'
               : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
               }`}
@@ -113,7 +116,7 @@ function Sidebar({ isOpen, onClose }) {
           <Link
             to="/user/transfers"
 
-            className={`flex items-center px-4 py-3 transition-colors relative ${isActive('/transfers')
+            className={`flex items-center px-4 py-3 transition-colors relative rounded-lg ${isActive('/transfers')
               ? 'bg-brand-500 text-dark-base'
               : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
               }`}
@@ -128,7 +131,7 @@ function Sidebar({ isOpen, onClose }) {
           {/* Reports */}
           <Link
             to="/user/reports"
-            className={`flex items-center px-4 py-3 transition-colors relative ${isActive('/reports')
+            className={`flex items-center px-4 py-3 transition-colors relative rounded-lg ${isActive('/reports')
               ? 'bg-brand-500 text-dark-base'
               : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
               }`}
@@ -144,7 +147,7 @@ function Sidebar({ isOpen, onClose }) {
           <div>
             <button
               onClick={() => toggleSubmenu('analysis')}
-              className={`w-full flex items-center justify-between px-4 py-3 transition-colors relative ${isSubmenuActive(['/analysis', '/analysis/signal-centre', '/analysis/assets-overview', '/analysis/market-news', '/analysis/market-calendar', '/analysis/research-terminal'])
+              className={`w-full flex items-center justify-between px-4 py-3 transition-colors relative rounded-lg ${isSubmenuActive(['/analysis', '/analysis/signal-centre', '/analysis/assets-overview', '/analysis/market-news', '/analysis/market-calendar', '/analysis/research-terminal'])
                 ? 'bg-brand-500 text-dark-base'
                 : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
                 }`}
@@ -220,7 +223,7 @@ function Sidebar({ isOpen, onClose }) {
           {/* Platforms */}
           <Link
             to="/user/platforms"
-            className={`flex items-center px-4 py-3 transition-colors relative ${isActive('/platforms')
+            className={`flex items-center px-4 py-3 transition-colors relative rounded-lg ${isActive('/platforms')
               ? 'bg-brand-500 text-dark-base'
               : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
               }`}
@@ -235,7 +238,7 @@ function Sidebar({ isOpen, onClose }) {
           {/* Partner's Cabinet */}
           <Link
             to="/user/refer-a-friend"
-            className={`flex items-center px-4 py-3 transition-colors relative ${isActive('/refer-a-friend')
+            className={`flex items-center px-4 py-3 transition-colors relative rounded-lg ${isActive('/refer-a-friend')
               ? 'bg-brand-500 text-dark-base'
               : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
               }`}
@@ -250,7 +253,7 @@ function Sidebar({ isOpen, onClose }) {
           {/* Solitaire Support */}
           <Link
             to="/user/support"
-            className={`flex items-center px-4 py-3 transition-colors relative ${isActive('/support')
+            className={`flex items-center px-4 py-3 transition-colors relative rounded-lg ${isActive('/support')
               ? 'bg-brand-500 text-dark-base'
               : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
               }`}

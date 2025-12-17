@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import Footer from './Footer'
+import Ticker from './Ticker'
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import authService from '../../services/auth.js'
 
@@ -49,6 +50,9 @@ function UserLayout() {
     return false
   })
   const [kycStatus, setKycStatus] = useState(null)
+  const [topTickers, setTopTickers] = useState([])
+  const [middleTickers, setMiddleTickers] = useState([])
+  const [dismissedTickers, setDismissedTickers] = useState(new Set())
 
   // Update sidebar state on resize
   useEffect(() => {
@@ -98,6 +102,45 @@ function UserLayout() {
     checkKYCStatus()
   }, [])
 
+  // Fetch active tickers on mount
+  useEffect(() => {
+    const fetchTickers = async () => {
+      try {
+        // Fetch all active tickers (both positions)
+        const response = await fetch(`${API_BASE_URL}/tickers?is_active=true`)
+        const data = await response.json()
+        
+        console.log('Tickers API response:', data)
+        
+        if (data.success && Array.isArray(data.data)) {
+          // Separate by position and sort by priority
+          const top = data.data
+            .filter(t => t.position === 'top')
+            .sort((a, b) => (b.priority || 0) - (a.priority || 0))
+          const middle = data.data
+            .filter(t => t.position === 'middle')
+            .sort((a, b) => (b.priority || 0) - (a.priority || 0))
+          
+          console.log('Top tickers:', top)
+          console.log('Middle tickers:', middle)
+          
+          setTopTickers(top)
+          setMiddleTickers(middle)
+        } else {
+          console.error('Tickers API error:', data)
+        }
+      } catch (err) {
+        console.error('Error fetching tickers:', err)
+      }
+    }
+
+    fetchTickers()
+  }, [])
+
+  const handleTickerClose = (tickerId) => {
+    setDismissedTickers(prev => new Set([...prev, tickerId]))
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Overlay for mobile */}
@@ -120,7 +163,34 @@ function UserLayout() {
         }}
       >
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main className="overflow-x-hidden flex-1 pt-[77px] sm:pt-[77px]">
+        
+        {/* Tickers - Display directly below navbar */}
+        <div className="mt-[64px] md:mt-[77px]">
+          {/* Middle Position Tickers - Between navbar and content */}
+          {middleTickers
+            .filter(ticker => !dismissedTickers.has(ticker.id))
+            .map(ticker => (
+              <Ticker
+                key={ticker.id}
+                ticker={ticker}
+                onClose={() => handleTickerClose(ticker.id)}
+              />
+            ))}
+
+          {/* Top Position Tickers - Above verification banner */}
+          {topTickers
+            .filter(ticker => !dismissedTickers.has(ticker.id))
+            .map(ticker => (
+              <Ticker
+                key={ticker.id}
+                ticker={ticker}
+                onClose={() => handleTickerClose(ticker.id)}
+              />
+            ))}
+        </div>
+
+        <main className="overflow-x-hidden flex-1">
+
           {/* Deposit Banner - Hide when KYC is approved */}
           {kycStatus !== 'approved' && (
             <div className="w-full bg-[#FFF9E6] border-t border-[#f3e7b5] px-4 md:px-6 py-4">

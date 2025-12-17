@@ -239,7 +239,11 @@ function DepositRequest() {
         formDataToSend.append('proof', formData.proof);
       }
 
-      const response = await fetch(`${API_BASE_URL}/deposits/request`, {
+      // Ensure API_BASE_URL doesn't have trailing slash
+      const apiUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const requestUrl = `${apiUrl}/deposits/request`;
+
+      const response = await fetch(requestUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -255,8 +259,27 @@ function DepositRequest() {
           throw new Error(data.error || 'Failed to submit deposit request');
         }
       } else {
+        // Handle 401 specifically
+        if (response.status === 401) {
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage = errorData.message || errorData.error || 'Authentication failed. Please log in again.';
+          // Clear token and redirect to login if token is invalid/expired
+          if (errorMessage.includes('expired') || errorMessage.includes('Invalid token') || errorMessage.includes('No token')) {
+            authService.logout();
+            Swal.fire({ 
+              icon: 'error', 
+              title: 'Session Expired', 
+              text: 'Your session has expired. Please log in again.',
+              confirmButtonText: 'Go to Login'
+            }).then(() => {
+              window.location.href = '/login';
+            });
+            return;
+          }
+          throw new Error(errorMessage);
+        }
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to submit deposit request');
+        throw new Error(errorData.error || errorData.message || 'Failed to submit deposit request');
       }
     } catch (error) {
       console.error('Error submitting deposit:', error);

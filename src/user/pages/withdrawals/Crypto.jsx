@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import withdrawalService from '../../../services/withdrawal.service'
+import authService from '../../../services/auth.js'
 import Swal from 'sweetalert2'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 function Crypto() {
+  const navigate = useNavigate()
   const [accounts, setAccounts] = useState([])
   const [wallet, setWallet] = useState(null)
   const [selectedAccount, setSelectedAccount] = useState(null)
@@ -13,11 +18,52 @@ function Crypto() {
   const [loading, setLoading] = useState(false)
   const [cryptoAddress, setCryptoAddress] = useState('')
   const [selectedNetwork, setSelectedNetwork] = useState('TRC20')
+  const [kycStatus, setKycStatus] = useState(null)
+  const [kycLoading, setKycLoading] = useState(true)
 
   useEffect(() => {
-    fetchAccounts()
-    fetchWallet()
+    checkKYCStatus()
   }, [])
+
+  useEffect(() => {
+    if (kycStatus === 'approved') {
+      fetchAccounts()
+      fetchWallet()
+    }
+  }, [kycStatus])
+
+  const checkKYCStatus = async () => {
+    try {
+      setKycLoading(true)
+      const token = authService.getToken()
+      if (!token) {
+        navigate('/login')
+        return
+      }
+
+      const response = await fetch(`${API_BASE_URL}/kyc/status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.data) {
+          setKycStatus(data.data.status || 'unverified')
+        } else {
+          setKycStatus('unverified')
+        }
+      } else {
+        setKycStatus('unverified')
+      }
+    } catch (error) {
+      console.error('Error checking KYC status:', error)
+      setKycStatus('unverified')
+    } finally {
+      setKycLoading(false)
+    }
+  }
 
   // Set default selection after accounts and wallet are loaded
   useEffect(() => {
@@ -136,9 +182,56 @@ function Crypto() {
     }
   }
 
+  const isKYCApproved = kycStatus === 'approved'
+
   return (
-    <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
-      <div className="w-full max-w-[95%] mx-auto bg-white rounded-lg">
+    <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden relative" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
+      {/* Loading State */}
+      {kycLoading && (
+        <div className="absolute inset-0 bg-white bg-opacity-75 backdrop-blur-sm z-40 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mb-4"></div>
+            <p className="text-gray-600">Checking verification status...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Blur Overlay - Show when KYC is not approved */}
+      {!kycLoading && !isKYCApproved && (
+        <div className="fixed inset-0 bg-white bg-opacity-75 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+          {/* KYC Verification Modal */}
+          <div className="bg-white rounded-lg shadow-2xl p-6 sm:p-8 w-full max-w-lg sm:max-w-xl md:max-w-2xl border border-gray-200">
+            <div className="text-center">
+              {/* Icon */}
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-4">
+                <svg className="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              
+              {/* Title */}
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                KYC Verification Required
+              </h2>
+              
+              {/* Message */}
+              <p className="text-gray-600 mb-6">
+                To proceed with withdrawals, please complete your KYC (Know Your Customer) verification. This is required for security and regulatory compliance.
+              </p>
+              
+              {/* Button */}
+              <button
+                onClick={() => navigate('/user/verification')}
+                className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base border border-brand-500 py-3 rounded-lg transition-colors font-semibold text-base"
+              >
+                Go to KYC Verification
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className={`w-full max-w-[95%] mx-auto bg-white rounded-lg ${!isKYCApproved && !kycLoading ? 'opacity-50 pointer-events-none' : ''}`}>
         <h1 className="text-left p-4 md:p-6 pb-0 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '400' }}>
           Withdraw through Crypto
         </h1>
