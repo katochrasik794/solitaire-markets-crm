@@ -640,14 +640,17 @@ function PaymentDetails() {
                     </>
                   )}
                 </div>
-                <div className="flex justify-center mt-6">
+                <div className="flex flex-col items-center mt-6 gap-2">
+                  <p className="text-xs text-gray-500 text-center italic">
+                    Please select a method to add your payment method to place withdrawals
+                  </p>
                   <button
                     onClick={() => {
                       setShowForm(false);
                       setStep(1);
                       setSelectedMethod('');
                     }}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-900"
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-black rounded-lg font-medium transition-colors"
                   >
                     Cancel
                   </button>
@@ -879,142 +882,149 @@ function PaymentDetails() {
             )}
           </div>
         ) : (
-          <ProTable
-            rows={paymentDetails.map(detail => ({
-              id: detail.id,
-              method: getMethodLabel(detail.payment_method),
-              details: detail.payment_method === 'bank_transfer' 
-                ? `${detail.payment_details.bankName || ''} • ${detail.payment_details.accountName || ''} • ${detail.payment_details.accountNumber || ''}`
-                : detail.payment_details.walletAddress || '',
-              status: detail.status,
-              submittedDate: detail.created_at,
-              reviewedDate: detail.reviewed_at,
-              rejectionReason: detail.rejection_reason,
-              paymentMethod: detail.payment_method,
-              paymentDetails: detail.payment_details,
-              detail: detail
-            }))}
-            columns={[
-              {
-                key: 'method',
-                label: 'Method',
-                render: (value) => <span className="font-medium text-gray-900">{value}</span>
-              },
-              {
-                key: 'details',
-                label: 'Details',
-                render: (value, row) => {
-                  if (row.paymentMethod === 'bank_transfer') {
-                    return (
-                      <div className="text-sm text-gray-900 text-left whitespace-normal">
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-1 min-w-max">
-                          {row.paymentDetails.name && (
-                            <>
-                              <div className="font-medium text-gray-600 whitespace-nowrap">Name:</div>
-                              <div className="text-gray-900 whitespace-nowrap">{row.paymentDetails.name}</div>
-                            </>
-                          )}
-                          <div className="font-medium text-gray-600 whitespace-nowrap">Bank:</div>
-                          <div className="text-gray-900 whitespace-nowrap">{row.paymentDetails.bankName}</div>
-                          <div className="font-medium text-gray-600 whitespace-nowrap">Account Name:</div>
-                          <div className="text-gray-900 whitespace-nowrap">{row.paymentDetails.accountName}</div>
-                          <div className="font-medium text-gray-600 whitespace-nowrap">Account Number:</div>
-                          <div className="text-gray-900 font-mono text-xs whitespace-nowrap">{row.paymentDetails.accountNumber}</div>
-                          <div className="font-medium text-gray-600 whitespace-nowrap">IFSC/SWIFT:</div>
-                          <div className="text-gray-900 font-mono text-xs whitespace-nowrap">{row.paymentDetails.ifscSwiftCode}</div>
-                          {row.paymentDetails.accountType && (
-                            <>
-                              <div className="font-medium text-gray-600 whitespace-nowrap">Account Type:</div>
-                              <div className="text-gray-900 capitalize whitespace-nowrap">{row.paymentDetails.accountType}</div>
-                            </>
-                          )}
+          <>
+            <ProTable
+              rows={paymentDetails.map(detail => ({
+                id: detail.id,
+                method: getMethodLabel(detail.payment_method),
+                details: detail.payment_method === 'bank_transfer' 
+                  ? `${detail.payment_details.bankName || ''} • ${detail.payment_details.accountName || ''} • ${detail.payment_details.accountNumber || ''}`
+                  : detail.payment_details.walletAddress || '',
+                status: detail.status,
+                submittedDate: detail.created_at,
+                reviewedDate: detail.reviewed_at,
+                rejectionReason: detail.rejection_reason,
+                paymentMethod: detail.payment_method,
+                paymentDetails: detail.payment_details,
+                detail: detail
+              }))}
+              columns={[
+                {
+                  key: 'method',
+                  label: 'Method',
+                  render: (value) => <span className="font-medium text-gray-900">{value}</span>
+                },
+                {
+                  key: 'details',
+                  label: 'Details',
+                  render: (value, row) => {
+                    if (row.paymentMethod === 'bank_transfer') {
+                      return (
+                        <div className="text-sm text-gray-900 text-left whitespace-normal">
+                          <div className="grid grid-cols-2 gap-x-6 gap-y-1 min-w-max">
+                            {row.paymentDetails.name && (
+                              <>
+                                <div className="font-medium text-gray-600 whitespace-nowrap">Name:</div>
+                                <div className="text-gray-900 whitespace-nowrap">{row.paymentDetails.name}</div>
+                              </>
+                            )}
+                            <div className="font-medium text-gray-600 whitespace-nowrap">Bank:</div>
+                            <div className="text-gray-900 whitespace-nowrap">{row.paymentDetails.bankName}</div>
+                            <div className="font-medium text-gray-600 whitespace-nowrap">Account Name:</div>
+                            <div className="text-gray-900 whitespace-nowrap">{row.paymentDetails.accountName}</div>
+                            <div className="font-medium text-gray-600 whitespace-nowrap">Account Number:</div>
+                            <div className="text-gray-900 font-mono text-xs whitespace-nowrap">{row.paymentDetails.accountNumber}</div>
+                            <div className="font-medium text-gray-600 whitespace-nowrap">IFSC/SWIFT:</div>
+                            <div className="text-gray-900 font-mono text-xs whitespace-nowrap">{row.paymentDetails.ifscSwiftCode}</div>
+                            {row.paymentDetails.accountType && (
+                              <>
+                                <div className="font-medium text-gray-600 whitespace-nowrap">Account Type:</div>
+                                <div className="text-gray-900 capitalize whitespace-nowrap">{row.paymentDetails.accountType}</div>
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  } else {
-                    return (
-                      <div className="text-left whitespace-normal">
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-1 min-w-max">
-                          <div className="font-medium text-gray-600 whitespace-nowrap">Wallet Address:</div>
-                          <div className="text-gray-900 font-mono text-xs whitespace-nowrap">{row.paymentDetails.walletAddress}</div>
+                      );
+                    } else {
+                      return (
+                        <div className="text-left whitespace-normal">
+                          <div className="grid grid-cols-2 gap-x-6 gap-y-1 min-w-max">
+                            <div className="font-medium text-gray-600 whitespace-nowrap">Wallet Address:</div>
+                            <div className="text-gray-900 font-mono text-xs whitespace-nowrap">{row.paymentDetails.walletAddress}</div>
+                          </div>
                         </div>
-                      </div>
-                    );
+                      );
+                    }
                   }
-                }
-              },
-              {
-                key: 'status',
-                label: 'Status',
-                render: (value, row) => (
-                  <div className="flex flex-col items-start gap-1">
-                    {getStatusBadge(value)}
-                    {row.rejectionReason && (
-                      <div className="mt-1 text-xs text-red-600 max-w-xs bg-red-50 px-2 py-1 rounded">
-                        {row.rejectionReason}
-                      </div>
-                    )}
-                  </div>
-                )
-              },
-              {
-                key: 'submittedDate',
-                label: 'Date',
-                render: (value, row) => (
-                  <div className="text-sm text-gray-500 text-left space-y-2">
-                    <div>
-                      <div className="font-medium text-gray-700">Submitted:</div>
-                      <div className="text-xs">{new Date(value).toLocaleDateString()}</div>
-                      <div className="text-xs">{new Date(value).toLocaleTimeString()}</div>
-                    </div>
-                    {row.reviewedDate && (
-                      <div>
-                        <div className="font-medium text-gray-700">
-                          {row.status === 'approved' ? 'Approved:' : 'Rejected:'}
-                        </div>
-                        <div className="text-xs">{new Date(row.reviewedDate).toLocaleDateString()}</div>
-                        <div className="text-xs">{new Date(row.reviewedDate).toLocaleTimeString()}</div>
-                      </div>
-                    )}
-                  </div>
-                )
-              },
-              {
-                key: 'actions',
-                label: 'Actions',
-                render: (value, row) => (
-                  <div className="text-center">
-                    {row.status !== 'approved' && (
-                      <button
-                        onClick={() => handleDelete(row.id, row.status)}
-                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} className="mr-1" />
-                        <span className="hidden sm:inline">Delete</span>
-                      </button>
-                    )}
-                    {row.status === 'approved' && (
-                      <span className="text-xs text-gray-400 italic">Locked</span>
-                    )}
-                  </div>
-                ),
-                sortable: false
-              }
-            ]}
-            filters={{
-              searchKeys: ['method', 'details'],
-              selects: [
+                },
                 {
                   key: 'status',
-                  label: 'All Statuses',
-                  options: ['pending', 'approved', 'rejected']
+                  label: 'Status',
+                  render: (value, row) => (
+                    <div className="flex flex-col items-start gap-1">
+                      {getStatusBadge(value)}
+                      {row.rejectionReason && (
+                        <div className="mt-1 text-xs text-red-600 max-w-xs bg-red-50 px-2 py-1 rounded">
+                          {row.rejectionReason}
+                        </div>
+                      )}
+                    </div>
+                  )
+                },
+                {
+                  key: 'submittedDate',
+                  label: 'Date',
+                  render: (value, row) => (
+                    <div className="text-sm text-gray-500 text-left space-y-2">
+                      <div>
+                        <div className="font-medium text-gray-700">Submitted:</div>
+                        <div className="text-xs">{new Date(value).toLocaleDateString()}</div>
+                        <div className="text-xs">{new Date(value).toLocaleTimeString()}</div>
+                      </div>
+                      {row.reviewedDate && (
+                        <div>
+                          <div className="font-medium text-gray-700">
+                            {row.status === 'approved' ? 'Approved:' : 'Rejected:'}
+                          </div>
+                          <div className="text-xs">{new Date(row.reviewedDate).toLocaleDateString()}</div>
+                          <div className="text-xs">{new Date(row.reviewedDate).toLocaleTimeString()}</div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                },
+                {
+                  key: 'actions',
+                  label: 'Actions',
+                  render: (value, row) => (
+                    <div className="text-center">
+                      {row.status !== 'approved' && (
+                        <button
+                          onClick={() => handleDelete(row.id, row.status)}
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} className="mr-1" />
+                          <span className="hidden sm:inline">Delete</span>
+                        </button>
+                      )}
+                      {row.status === 'approved' && (
+                        <span className="text-xs text-gray-400 italic">Locked</span>
+                      )}
+                    </div>
+                  ),
+                  sortable: false
                 }
-              ]
-            }}
-            pageSize={10}
-            searchPlaceholder="Search payment methods..."
-          />
+              ]}
+              filters={{
+                searchKeys: ['method', 'details'],
+                selects: [
+                  {
+                    key: 'status',
+                    label: 'All Statuses',
+                    options: ['pending', 'approved', 'rejected']
+                  }
+                ]
+              }}
+              pageSize={10}
+              searchPlaceholder="Search payment methods..."
+            />
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-700 text-center italic">
+                Funds will be only credited to approved payment methods
+              </p>
+            </div>
+          </>
         )}
       </div>
     </div>

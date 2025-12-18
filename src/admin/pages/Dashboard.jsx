@@ -65,7 +65,7 @@ function StatCard({ title, value, subtitle, icon: Icon, color = "blue", progress
         </div>
         {progress !== null && (
           <div className="text-sm font-medium text-gray-600">
-            {progress}%
+            {Number(progress).toFixed(1)}%
           </div>
         )}
       </div>
@@ -415,9 +415,12 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">Real-time overview of your platform</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span>Realtime overview</span>
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span>Realtime overview</span>
+          </div>
+          <p className="text-xs text-gray-400 italic">*Percentage shown is average of users per card</p>
         </div>
       </div>
 
@@ -435,7 +438,7 @@ export default function AdminDashboard() {
         <StatCard
           title="Email Unverified"
           value={dashboardData.emailUnverified}
-          subtitle={`Of total users (${dashboardData.totalUsers > 0 ? ((dashboardData.emailUnverified / dashboardData.totalUsers) * 100).toFixed(0) : 0}%)`}
+          subtitle={`Of total users (${dashboardData.totalUsers > 0 ? ((dashboardData.emailUnverified / dashboardData.totalUsers) * 100).toFixed(1) : 0}%)`}
           icon={Mail}
           color="red"
           progress={dashboardData.totalUsers > 0 ? (dashboardData.emailUnverified / dashboardData.totalUsers) * 100 : 0}
@@ -444,7 +447,7 @@ export default function AdminDashboard() {
         <StatCard
           title="KYC Pending"
           value={dashboardData.kycPending}
-          subtitle={`Pending vs users (${dashboardData.totalUsers > 0 ? ((dashboardData.kycPending / dashboardData.totalUsers) * 100).toFixed(0) : 0}%)`}
+          subtitle={`Pending vs users (${dashboardData.totalUsers > 0 ? ((dashboardData.kycPending / dashboardData.totalUsers) * 100).toFixed(1) : 0}%)`}
           icon={Shield}
           color="purple"
           progress={dashboardData.totalUsers > 0 ? (dashboardData.kycPending / dashboardData.totalUsers) * 100 : 0}

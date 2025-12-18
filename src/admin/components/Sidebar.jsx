@@ -115,7 +115,7 @@ function Header({ role }) {
   return (
     <div className="p-4">
       <div className="flex items-center justify-center">
-        <img src="/dark.png" alt="Equiti Admin" className="h-12 w-auto" />
+        <img src="/logo.svg" alt="Equiti Admin" className="h-12 w-auto" />
       </div>
     </div>
   );

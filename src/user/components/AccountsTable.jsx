@@ -143,7 +143,7 @@ const AccountsTable = ({
                                     <td className="px-4 py-2 text-center text-gray-800" style={{ fontFamily: "Roboto, sans-serif", fontSize: "13px" }}>
                                         {(() => {
                                             const bal = accountBalances[account.account_number];
-                                            return bal?.balance !== undefined ? parseFloat(bal.balance).toFixed(4) : (account.balance ? parseFloat(account.balance).toFixed(4) : '0.0000');
+                                            return bal?.balance !== undefined ? parseFloat(bal.balance).toFixed(2) : (account.balance ? parseFloat(account.balance).toFixed(2) : '0.00');
                                         })()}
                                     </td>
                                     <td className="px-4 py-2 text-center text-gray-800" style={{ fontFamily: "Roboto, sans-serif", fontSize: "13px" }}>
@@ -243,7 +243,7 @@ const AccountsTable = ({
                                             const bal = accountBalances[acc.account_number];
                                             return sum + (bal?.balance || parseFloat(acc.balance || 0));
                                         }, 0);
-                                        return total.toFixed(4);
+                                        return total.toFixed(2);
                                     })()}
                                 </td>
                                 <td className="px-4 py-2 text-center text-gray-800 font-semibold" style={{ fontFamily: "Roboto, sans-serif", fontSize: "13px", fontWeight: "600", color: "#374151" }}>
@@ -310,7 +310,7 @@ const AccountsTable = ({
                                 <p className="text-gray-500 text-xs">Balance</p>
                                 <p className="text-gray-800 font-semibold text-sm">{(() => {
                                     const bal = accountBalances[account.account_number];
-                                    return bal?.balance !== undefined ? parseFloat(bal.balance).toFixed(4) : '0.0000';
+                                    return bal?.balance !== undefined ? parseFloat(bal.balance).toFixed(2) : '0.00';
                                 })()}</p>
                             </div>
                         </div>

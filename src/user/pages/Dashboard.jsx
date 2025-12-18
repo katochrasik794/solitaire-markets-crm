@@ -986,8 +986,8 @@ function Dashboard() {
                 {loadingWallet
                   ? '...'
                   : (wallet?.balance != null
-                    ? Number(wallet.balance).toFixed(3)
-                    : '0.000')}
+                    ? Number(wallet.balance).toFixed(2)
+                    : '0.00')}
               </span>
             </div>
 
@@ -1056,8 +1056,8 @@ function Dashboard() {
                 {loadingWallet
                   ? '...'
                   : (wallet?.balance != null
-                    ? Number(wallet.balance).toFixed(3)
-                    : '0.000')}
+                    ? Number(wallet.balance).toFixed(2)
+                    : '0.00')}
               </span>
             </div>
 
@@ -1265,7 +1265,7 @@ function Dashboard() {
                     {wallet && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Current Balance:</span>
-                        <span className="font-semibold text-gray-900">${Number(wallet.balance).toFixed(3)}</span>
+                        <span className="font-semibold text-gray-900">${Number(wallet.balance).toFixed(2)}</span>
                       </div>
                     )}
                   </div>
