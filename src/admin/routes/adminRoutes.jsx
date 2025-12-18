@@ -48,6 +48,7 @@ import SupportTicketView from "../pages/SupportTicketView.jsx";
 import AssignCountryPartner from "../pages/AssignCountryPartner.jsx";
 import AssignedCountryAdmins from "../pages/AssignedCountryAdmins.jsx";
 import GroupManagement from "../pages/GroupManagement.jsx";
+import GroupReport from "../pages/GroupReport.jsx";
 import SendEmails from "../pages/SendEmails.jsx";
 import EmailTemplates from "../pages/EmailTemplates.jsx";
 import Tickers from "../pages/ContentManagement/Tickers.jsx";
@@ -101,6 +102,7 @@ export default [
   { path: "mt5/assign",     element: <MT5Assign /> },
   { path: "mt5/transfer",   element: <MT5Transfer /> },
   { path: "mt5/group-management", element: <GroupManagement /> },
+  { path: "mt5/group-report", element: <GroupReport /> },
 
   /* ----------------------- EMAIL MANAGEMENT ------------------------ */
   { path: "send-emails", element: <SendEmails /> },

@@ -194,6 +194,7 @@ export const ADMIN_MENU = [
           { label: "MT5 Users List", to: "mt5/users" },
           { label: "Assign MT5 to Email", to: "mt5/assign" },
           { label: "Group Management", to: "mt5/group-management" },
+          { label: "Group Report", to: "mt5/group-report" },
           { label: "Internal Transfer", to: "mt5/transfer" },
         ],
       },
