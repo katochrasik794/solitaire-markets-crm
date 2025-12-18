@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import ProTable from "../components/ProTable.jsx";
 import Modal from "../components/Modal.jsx";
-import { Pencil, Trash2, MailCheck, MailX, Eye, UserX, UserCheck } from "lucide-react";
+import { Pencil, Trash2, MailCheck, MailX, Eye, Lock, Unlock } from "lucide-react";
 import Swal from "sweetalert2";
 
 function fmtDate(v) {
@@ -126,11 +126,11 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
           <button
             onClick={() => setConfirmBan({ row, next: row.status === 'banned' ? 'active' : 'banned' })}
             className="h-8 w-8 grid place-items-center rounded-md border border-violet-200 text-violet-700 hover:bg-violet-50"
-            title={row.status === 'banned' ? 'Unban User' : 'Ban User'}
+            title={row.status === 'banned' ? 'Unlock User' : 'Lock User'}
           >
-            {row.status === 'banned' ? <UserCheck size={16} /> : <UserX size={16} />}
+            {row.status === 'banned' ? <Unlock size={16} /> : <Lock size={16} />}
           </button>
-          <span className="text-xs text-gray-500">{row.status === 'banned' ? 'Unban' : 'Ban'}</span>
+          <span className="text-xs text-gray-500">{row.status === 'banned' ? 'Unlock' : 'Lock'}</span>
         </div>
         <div className="flex flex-col items-center gap-1">
           <button
@@ -306,7 +306,7 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
       Swal.fire({
         icon: 'success',
         title: 'Success!',
-        text: `User ${next === 'banned' ? 'banned' : 'unbanned'} successfully`,
+        text: `User ${next === 'banned' ? 'locked' : 'unlocked'} successfully`,
         timer: 2000,
         showConfirmButton: false
       });
@@ -358,17 +358,17 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
         )}
       </Modal>
 
-      {/* Ban/Unban Confirm */}
-      <Modal open={!!confirmBan} onClose={()=>setConfirmBan(null)} title={confirmBan?.next==='banned'? 'Ban User' : 'Unban User'}>
+      {/* Lock/Unlock Confirm */}
+      <Modal open={!!confirmBan} onClose={()=>setConfirmBan(null)} title={confirmBan?.next==='banned'? 'Lock User' : 'Unlock User'}>
         {confirmBan && (
           <div className="space-y-4">
             <p>
-              Do you want to {confirmBan.next === 'banned' ? 'ban' : 'unban'} user <b>{confirmBan.row.email}</b>?
+              Do you want to {confirmBan.next === 'banned' ? 'lock' : 'unlock'} user <b>{confirmBan.row.email}</b>?
             </p>
             <div className="flex justify-end gap-2">
               <button onClick={()=>setConfirmBan(null)} className="px-4 h-10 rounded-md border">Cancel</button>
               <button onClick={()=>onToggleBan(confirmBan.row, confirmBan.next)} className={`px-4 h-10 rounded-md ${confirmBan.next==='banned' ? 'bg-rose-600' : 'bg-emerald-600'} text-white`}>
-                Confirm
+                {confirmBan.next === 'banned' ? 'Lock' : 'Unlock'}
               </button>
             </div>
           </div>

@@ -143,17 +143,17 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
         <style>{`
           .protable-scroll-wrapper {
             width: 100%;
-            max-width: 100%;
             position: relative;
           }
           .protable-scroll-container {
             width: 100%;
-            overflow-x: scroll !important;
+            overflow-x: auto !important;
             overflow-y: visible !important;
             scrollbar-width: thin !important;
             scrollbar-color: #94a3b8 #f1f5f9 !important;
             -ms-overflow-style: scrollbar !important;
             display: block !important;
+            -webkit-overflow-scrolling: touch;
           }
           .protable-scroll-container::-webkit-scrollbar {
             height: 14px !important;
@@ -178,18 +178,32 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
             background: #64748b !important;
           }
           .protable-scroll-container table {
-            width: 100% !important;
+            width: auto !important;
+            min-width: 100%;
             table-layout: auto;
           }
           .protable-scroll-container th,
           .protable-scroll-container td {
-            white-space: nowrap;
             padding: 0.75rem 1rem !important;
+            white-space: nowrap !important;
+          }
+          .protable-scroll-container th {
+            white-space: nowrap !important;
+          }
+          .protable-scroll-container td {
+            white-space: nowrap !important;
+          }
+          @media (max-width: 768px) {
+            .protable-scroll-container th,
+            .protable-scroll-container td {
+              font-size: 0.75rem;
+              padding: 0.5rem 0.75rem !important;
+            }
           }
         `}</style>
         <div className="protable-scroll-wrapper">
-          <div className="protable-scroll-container" style={{ width: '100%', overflowX: 'auto' }}>
-            <table className="text-sm w-full" style={{ tableLayout: 'auto' }}>
+          <div className="protable-scroll-container">
+            <table className="text-sm" style={{ tableLayout: 'auto', width: 'auto', minWidth: '100%' }}>
               <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-[1]">
                 <tr>
                   {columns.map(col => (

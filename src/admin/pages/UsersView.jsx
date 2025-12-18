@@ -1,7 +1,7 @@
 // src/pages/admin/UsersView.jsx
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Users, Wallet, Download, Upload, ShieldCheck, CreditCard } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Users, Wallet, Download, Upload, ShieldCheck, CreditCard, LogIn, Key } from "lucide-react";
 import ProTable from "../components/ProTable.jsx";
 import Modal from "../components/Modal.jsx";
 import Badge from "../components/Badge.jsx";
@@ -33,6 +33,33 @@ export default function UsersView() {
   const [mt5Map, setMt5Map] = useState({}); // accountId -> {balance, equity}
   const [submitting, setSubmitting] = useState(false);
   const [mt5Tab, setMt5Tab] = useState("real"); // 'real' | 'demo'
+  
+  // Reset modal when tab changes
+  const handleTabChange = (tab) => {
+    setMt5Tab(tab);
+    if (createAccountModal) {
+      setCreateAccountModal(false);
+      setCreateAccountForm({ mt5GroupId: '', leverage: 2000, masterPassword: '' });
+    }
+  };
+  const [createAccountModal, setCreateAccountModal] = useState(false);
+  const [mt5Groups, setMt5Groups] = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [createAccountForm, setCreateAccountForm] = useState({
+    mt5GroupId: '',
+    leverage: 2000,
+    masterPassword: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loggingInAsUser, setLoggingInAsUser] = useState(false);
+  const [passwordModal, setPasswordModal] = useState(null); // { accountId, accountNumber }
+  const [newPassword, setNewPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [userPasswordModal, setUserPasswordModal] = useState(false);
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [showNewUserPassword, setShowNewUserPassword] = useState(false);
+  const [changingUserPassword, setChangingUserPassword] = useState(false);
   // Backend base URL (Express server runs on 5000 with /api prefix)
   const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
@@ -341,6 +368,149 @@ export default function UsersView() {
     return () => { stop = true; };
   }, [BASE, data?.user?.MT5Account]);
 
+  // Fetch MT5 groups when modal opens
+  useEffect(() => {
+    if (!createAccountModal) return;
+    const fetchGroups = async () => {
+      setLoadingGroups(true);
+      try {
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch(`${BASE}/accounts/groups`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success && data.data.length > 0) {
+          // Filter groups based on current tab (real/demo)
+          const filtered = data.data.filter(g => {
+            const name = (g.group_name || '').toLowerCase();
+            const isDemoGroup = name.includes('demo');
+            return mt5Tab === 'demo' ? isDemoGroup : !isDemoGroup;
+          });
+          setMt5Groups(filtered);
+          if (filtered.length > 0) {
+            setCreateAccountForm(prev => ({ ...prev, mt5GroupId: filtered[0].id.toString() }));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching MT5 groups:', err);
+        Swal.fire({ icon: 'error', title: 'Failed to load MT5 groups' });
+      } finally {
+        setLoadingGroups(false);
+      }
+    };
+    fetchGroups();
+  }, [createAccountModal, mt5Tab, BASE]);
+
+  // Handle create account submission
+  const handleCreateAccount = async () => {
+    if (!createAccountForm.mt5GroupId || !createAccountForm.leverage || !createAccountForm.masterPassword) {
+      Swal.fire({ icon: 'error', title: 'Please fill all required fields' });
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${BASE}/admin/users/${id}/accounts/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          mt5GroupId: parseInt(createAccountForm.mt5GroupId),
+          leverage: parseInt(createAccountForm.leverage),
+          masterPassword: createAccountForm.masterPassword,
+          isDemo: mt5Tab === 'demo'
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to create account');
+      }
+
+      Swal.fire({ icon: 'success', title: 'Account created successfully', timer: 2000 });
+      setCreateAccountModal(false);
+      setCreateAccountForm({ mt5GroupId: '', leverage: 2000, masterPassword: '' });
+      fetchUser();
+      // Refresh MT5 data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Failed to create account', text: err.message || String(err) });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle login as user
+  const handleLoginAsUser = async () => {
+    const result = await Swal.fire({
+      title: 'Login as User?',
+      text: `You are about to login as ${data?.user?.name || data?.user?.email}. The user dashboard will open in a new tab.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, login as user',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      setLoggingInAsUser(true);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${BASE}/admin/users/${id}/login-as`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to login as user');
+      }
+
+      // Encode token for URL (base64 encoding)
+      const encodedToken = btoa(encodeURIComponent(data.data.token));
+      const encodedUserData = data.data.user ? btoa(encodeURIComponent(JSON.stringify(data.data.user))) : '';
+
+      // Open user dashboard in new tab with token
+      const dashboardUrl = `/auth/admin-login-as?token=${encodedToken}${encodedUserData ? `&userData=${encodedUserData}` : ''}`;
+      const newWindow = window.open(dashboardUrl, '_blank');
+
+      if (newWindow) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Opening user dashboard',
+          text: 'User dashboard is opening in a new tab...',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } else {
+        // If popup blocked, show error
+        Swal.fire({
+          icon: 'warning',
+          title: 'Popup blocked',
+          text: 'Please allow popups for this site to open the user dashboard in a new tab.',
+          confirmButtonText: 'OK'
+        });
+      }
+      
+      setLoggingInAsUser(false);
+    } catch (err) {
+      setLoggingInAsUser(false);
+      Swal.fire({ icon: 'error', title: 'Failed to login as user', text: err.message || String(err) });
+    }
+  };
+
   if (err) return <div className="rounded-xl bg-white border border-rose-200 text-rose-700 p-4">{err}</div>;
   if (!data) return <div className="rounded-xl bg-white border border-gray-200 p-4">Loading…</div>;
 
@@ -362,7 +532,7 @@ export default function UsersView() {
             <div className="inline-flex rounded-full border border-gray-200 bg-gray-50 p-1 text-xs">
               <button
                 type="button"
-                onClick={() => setMt5Tab("real")}
+                onClick={() => handleTabChange("real")}
                 className={`px-3 py-1 rounded-full transition ${
                   mt5Tab === "real"
                     ? "bg-white shadow-sm text-gray-900"
@@ -373,7 +543,7 @@ export default function UsersView() {
               </button>
               <button
                 type="button"
-                onClick={() => setMt5Tab("demo")}
+                onClick={() => handleTabChange("demo")}
                 className={`px-3 py-1 rounded-full transition ${
                   mt5Tab === "demo"
                     ? "bg-white shadow-sm text-gray-900"
@@ -383,12 +553,29 @@ export default function UsersView() {
                 Demo Accounts
               </button>
             </div>
-            <Link
-              to="/admin/users/all"
-              className="px-4 h-10 rounded-md border text-sm"
-            >
-              Back to All Users
-            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setUserPasswordModal(true)}
+                className="px-4 h-10 rounded-md bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium flex items-center gap-2 transition"
+              >
+                <Key className="w-4 h-4" />
+                Change Password
+              </button>
+              <button
+                onClick={handleLoginAsUser}
+                disabled={loggingInAsUser}
+                className="px-4 h-10 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transition"
+              >
+                <LogIn className="w-4 h-4" />
+                {loggingInAsUser ? 'Logging in...' : 'Login as User'}
+              </button>
+              <Link
+                to="/admin/users/all"
+                className="px-4 h-10 rounded-md border text-sm flex items-center"
+              >
+                Back to All Users
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -490,7 +677,15 @@ export default function UsersView() {
 
       {/* MT5 Accounts full width using ProTable */}
       <div className="rounded-2xl bg-white border border-gray-200 shadow-sm">
-        <div className="px-5 pt-4 pb-2 text-sm font-semibold">MT5 Accounts</div>
+        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+          <div className="text-sm font-semibold">MT5 Accounts</div>
+          <button
+            onClick={() => setCreateAccountModal(true)}
+            className="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-dark-base rounded-lg text-sm font-medium transition"
+          >
+            Create {mt5Tab === 'real' ? 'Live' : 'Demo'} Account
+          </button>
+        </div>
         <div className="p-4">
           <ProTable
             rows={((mt5Tab === "real"
@@ -586,6 +781,21 @@ export default function UsersView() {
                   </div>
                 ),
               },
+              {
+                key: "password",
+                label: "Password",
+                sortable: false,
+                render: (v, row) => (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setPasswordModal({ accountId: row.accountId, accountNumber: row.accountId })}
+                      className="px-2 py-1 rounded-full bg-blue-600 text-white text-xs hover:bg-blue-700 shadow-sm"
+                    >
+                      Change Password
+                    </button>
+                  </div>
+                ),
+              },
             ]}
             pageSize={5}
             searchPlaceholder="Search by account, group…"
@@ -666,6 +876,145 @@ export default function UsersView() {
           />
         </div>
       </div>
+
+      {/* Create Account Modal */}
+      <Modal open={createAccountModal} onClose={() => {
+        setCreateAccountModal(false);
+        setCreateAccountForm({ mt5GroupId: '', leverage: 2000, masterPassword: '' });
+      }} title={`Create ${mt5Tab === 'real' ? 'Live' : 'Demo'} MT5 Account`}>
+        <div className="space-y-4">
+          {/* Trading Group Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Trading Group <span className="text-red-500">*</span>
+            </label>
+            {loadingGroups ? (
+              <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-center">
+                <svg className="animate-spin h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="ml-2 text-sm text-gray-600">Loading groups...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {mt5Groups.length === 0 ? (
+                  <div className="col-span-full text-center py-4 text-gray-500">
+                    No {mt5Tab} groups available currently.
+                  </div>
+                ) : (
+                  mt5Groups.map((group) => (
+                    <label key={group.id} className="cursor-pointer">
+                      <input
+                        type="radio"
+                        name="mt5GroupId"
+                        value={group.id}
+                        checked={createAccountForm.mt5GroupId === group.id.toString()}
+                        onChange={(e) => setCreateAccountForm(prev => ({ ...prev, mt5GroupId: e.target.value }))}
+                        className="sr-only"
+                      />
+                      <div className={`border-2 rounded-lg p-3 transition-all ${
+                        createAccountForm.mt5GroupId === group.id.toString()
+                          ? 'border-brand-500 bg-brand-500 bg-opacity-5'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className={`w-4 h-4 rounded-full ${
+                            createAccountForm.mt5GroupId === group.id.toString() ? 'bg-brand-500' : 'bg-gray-300'
+                          }`}></div>
+                          <span className="font-semibold text-gray-900 text-sm">
+                            {group.dedicated_name || 'Unnamed Group'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-600 ml-6">
+                          • Currency: {group.currency}
+                        </div>
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Leverage Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Leverage <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={createAccountForm.leverage}
+              onChange={(e) => setCreateAccountForm(prev => ({ ...prev, leverage: parseInt(e.target.value) }))}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+            >
+              <option value="50">1:50</option>
+              <option value="100">1:100</option>
+              <option value="200">1:200</option>
+              <option value="500">1:500</option>
+              <option value="1000">1:1000</option>
+              <option value="1500">1:1500</option>
+              <option value="2000">1:2000</option>
+            </select>
+          </div>
+
+          {/* Master Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Master Password (MT5 Login Password) <span className="text-red-500">*</span>
+            </label>
+            <p className="text-xs text-gray-600 mb-2">
+              This will be the main password to login to MT5. Keep it strong and do not share it with anyone.
+            </p>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={createAccountForm.masterPassword}
+                onChange={(e) => setCreateAccountForm(prev => ({ ...prev, masterPassword: e.target.value }))}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 pr-10"
+                placeholder="Set your MT5 master password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <button
+              onClick={() => {
+                setCreateAccountModal(false);
+                setCreateAccountForm({ mt5GroupId: '', leverage: 2000, masterPassword: '' });
+              }}
+              disabled={submitting}
+              className="px-4 h-10 rounded-md border disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateAccount}
+              disabled={submitting || loadingGroups || !createAccountForm.mt5GroupId || !createAccountForm.masterPassword}
+              className="px-4 h-10 rounded-md bg-brand-500 hover:bg-brand-600 text-dark-base disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Creating...' : 'Create Account'}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Deposit/Withdraw Modal for MT5 accounts */}
       <Modal open={!!actionModal} onClose={() => setActionModal(null)} title={actionModal ? (actionModal.type === 'deposit' ? 'Add Balance' : 'Deduct Balance') : ''}>
@@ -775,6 +1124,229 @@ export default function UsersView() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Change Password Modal */}
+      <Modal open={!!passwordModal} onClose={() => {
+        setPasswordModal(null);
+        setNewPassword('');
+        setShowNewPassword(false);
+      }} title="Change MT5 Password">
+        {passwordModal && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Account ID: <span className="font-semibold">{passwordModal.accountId}</span>
+              </label>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                New Password <span className="text-red-500">*</span>
+              </label>
+              <p className="text-xs text-gray-600 mb-2">
+                Password must be at least 8 characters long. This will update the password in MT5 and the database.
+              </p>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 pr-10"
+                  placeholder="Enter new password (min 8 characters)"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showNewPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <button
+                onClick={() => {
+                  setPasswordModal(null);
+                  setNewPassword('');
+                  setShowNewPassword(false);
+                }}
+                disabled={changingPassword}
+                className="px-4 h-10 rounded-md border disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!newPassword || newPassword.length < 8) {
+                    Swal.fire({ icon: 'error', title: 'Invalid Password', text: 'Password must be at least 8 characters long' });
+                    return;
+                  }
+
+                  try {
+                    setChangingPassword(true);
+                    const token = localStorage.getItem('adminToken');
+                    const response = await fetch(`${BASE}/admin/mt5/account/${passwordModal.accountId}/password`, {
+                      method: 'PUT',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                      },
+                      body: JSON.stringify({ newPassword })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data?.ok) {
+                      throw new Error(data?.error || 'Failed to change password');
+                    }
+
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Password Changed!',
+                      text: 'MT5 password has been updated successfully',
+                      timer: 2000
+                    });
+
+                    setPasswordModal(null);
+                    setNewPassword('');
+                    setShowNewPassword(false);
+                  } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'Failed to Change Password', text: err.message || String(err) });
+                  } finally {
+                    setChangingPassword(false);
+                  }
+                }}
+                disabled={changingPassword || !newPassword || newPassword.length < 8}
+                className="px-4 h-10 rounded-md bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {changingPassword ? 'Changing...' : 'Change Password'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Change User Password Modal */}
+      <Modal open={userPasswordModal} onClose={() => {
+        setUserPasswordModal(false);
+        setNewUserPassword('');
+        setShowNewUserPassword(false);
+      }} title="Change User Password">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              User: <span className="font-semibold">{u.name || u.email}</span>
+            </label>
+            <p className="text-xs text-gray-600">
+              This will change the CRM login password for this user. The user will need to use this new password to log in.
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              New Password <span className="text-red-500">*</span>
+            </label>
+            <p className="text-xs text-gray-600 mb-2">
+              Password must be at least 8 characters long.
+            </p>
+            <div className="relative">
+              <input
+                type={showNewUserPassword ? 'text' : 'password'}
+                value={newUserPassword}
+                onChange={(e) => setNewUserPassword(e.target.value)}
+                required
+                minLength={8}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 pr-10"
+                placeholder="Enter new password (min 8 characters)"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewUserPassword(!showNewUserPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showNewUserPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <button
+              onClick={() => {
+                setUserPasswordModal(false);
+                setNewUserPassword('');
+                setShowNewUserPassword(false);
+              }}
+              disabled={changingUserPassword}
+              className="px-4 h-10 rounded-md border disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                if (!newUserPassword || newUserPassword.length < 8) {
+                  Swal.fire({ icon: 'error', title: 'Invalid Password', text: 'Password must be at least 8 characters long' });
+                  return;
+                }
+
+                try {
+                  setChangingUserPassword(true);
+                  const token = localStorage.getItem('adminToken');
+                  const response = await fetch(`${BASE}/admin/users/${id}/password`, {
+                    method: 'PATCH',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ newPassword: newUserPassword })
+                  });
+
+                  const data = await response.json();
+
+                  if (!response.ok || !data?.ok) {
+                    throw new Error(data?.error || 'Failed to change password');
+                  }
+
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Password Changed!',
+                    text: 'User password has been updated successfully',
+                    timer: 2000
+                  });
+
+                  setUserPasswordModal(false);
+                  setNewUserPassword('');
+                  setShowNewUserPassword(false);
+                } catch (err) {
+                  Swal.fire({ icon: 'error', title: 'Failed to Change Password', text: err.message || String(err) });
+                } finally {
+                  setChangingUserPassword(false);
+                }
+              }}
+              disabled={changingUserPassword || !newUserPassword || newUserPassword.length < 8}
+              className="px-4 h-10 rounded-md bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {changingUserPassword ? 'Changing...' : 'Change Password'}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

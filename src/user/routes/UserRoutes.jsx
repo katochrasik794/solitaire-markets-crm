@@ -12,6 +12,7 @@ import Platforms from '../pages/Platforms'
 import ReferAFriend from '../pages/ReferAFriend'
 import Legal from '../pages/Legal'
 import Support from '../pages/Support'
+import PaymentDetails from '../pages/PaymentDetails'
 
 // Withdrawal Pages
 import Crypto from '../pages/withdrawals/Crypto'
@@ -66,7 +67,8 @@ const userRoutes = [
   { path: 'platforms', element: <Platforms /> },
   { path: 'refer-a-friend', element: <ReferAFriend /> },
   { path: 'legal', element: <Legal /> },
-  { path: 'support', element: <Support /> }
+  { path: 'support', element: <Support /> },
+  { path: 'payment-details', element: <PaymentDetails /> }
 ]
 
 // Function to render routes
