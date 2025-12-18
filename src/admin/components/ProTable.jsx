@@ -2,6 +2,24 @@ import { useMemo, useState } from "react";
 import { Inbox, Download, FileText, FileSpreadsheet } from "lucide-react";
 import Badge from "./Badge.jsx";
 
+// Pre-import jspdf and jspdf-autotable to ensure they're loaded
+let jsPDFLib = null;
+let autoTableLoaded = false;
+
+// Load libraries on first use
+const loadPDFLibs = async () => {
+  if (!jsPDFLib) {
+    const jsPDFModule = await import('jspdf');
+    jsPDFLib = jsPDFModule.default || jsPDFModule.jsPDF || jsPDFModule;
+    
+    if (!autoTableLoaded) {
+      await import('jspdf-autotable');
+      autoTableLoaded = true;
+    }
+  }
+  return jsPDFLib;
+};
+
 /**
  * rows: [{...}], columns: [{key,label,render?}]
  * filters: {
@@ -76,43 +94,108 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
 
   const baseIndex = (page - 1) * pageSize;
 
+  // Automatically add SR No column if not present
+  const hasIndexColumn = columns.some(col => col.key === '__index' || col.key === 'sr_no' || col.key === 'srNo');
+  const displayColumns = hasIndexColumn 
+    ? columns 
+    : [{ key: '__index', label: 'SR No', sortable: false }, ...columns];
+
   // Export to PDF
-  const exportToPDF = () => {
-    Promise.all([
-      import('jspdf'),
-      import('jspdf-autotable')
-    ]).then(([{ jsPDF }, autoTable]) => {
+  const exportToPDF = async () => {
+    try {
+      // Load PDF libraries
+      const jsPDF = await loadPDFLibs();
       const doc = new jsPDF();
       const tableData = filtered.map((row, idx) => {
-        return columns.map(col => {
+        return displayColumns.map(col => {
           if (col.key === '__index') return idx + 1;
           const content = col.render ? col.render(row[col.key], row, Badge, idx) : row[col.key];
           // Extract text from React elements
           if (typeof content === 'object' && content?.props?.children) {
-            return String(content.props.children).replace(/[^\w\s]/gi, '');
+            // Try to extract text recursively
+            const extractText = (node) => {
+              if (typeof node === 'string' || typeof node === 'number') return String(node);
+              if (Array.isArray(node)) return node.map(extractText).join(' ');
+              if (node?.props?.children) return extractText(node.props.children);
+              return '';
+            };
+            return extractText(content).replace(/[^\w\s]/gi, '').trim();
           }
           return String(content || '');
         });
       });
 
-      // Add headers
-      const headers = columns.map(col => col.label);
+      // Add headers (use displayColumns to include SR No)
+      const headers = displayColumns.map(col => col.label);
       
-      // Use autoTable for better formatting
-      doc.autoTable({
-        head: [headers],
-        body: tableData,
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0], fontStyle: 'bold' },
-        margin: { top: 20 },
-        startY: 20
-      });
+      // Use autoTable - it should be available on doc after importing jspdf-autotable
+      if (doc.autoTable && typeof doc.autoTable === 'function') {
+        doc.autoTable({
+          head: [headers],
+          body: tableData,
+          styles: { fontSize: 8, cellPadding: 2 },
+          headStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0], fontStyle: 'bold' },
+          margin: { top: 20 },
+          startY: 20
+        });
+      } else {
+        // Fallback: simple text table if autoTable not available
+        let yPos = 20;
+        doc.setFontSize(10);
+        doc.text(headers.join(' | '), 10, yPos);
+        yPos += 10;
+        
+        tableData.forEach((row) => {
+          if (yPos > 280) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFontSize(8);
+          const rowText = row.map(cell => String(cell || '').substring(0, 30)).join(' | ');
+          doc.text(rowText, 10, yPos, { maxWidth: 190 });
+          yPos += 8;
+        });
+      }
       
       doc.save(`${title || 'table'}-${new Date().toISOString().split('T')[0]}.pdf`);
-    }).catch(err => {
+    } catch (err) {
       console.error('Error exporting PDF:', err);
-      alert('PDF export failed. Please refresh the page and try again.');
-    });
+      console.error('Error details:', err.message, err.stack);
+      // Fallback: Create CSV download instead
+      const csvContent = [
+        displayColumns.map(col => col.label).join(','),
+        ...filtered.map((row, idx) => {
+          return displayColumns.map(col => {
+            if (col.key === '__index') return idx + 1;
+            const content = col.render ? col.render(row[col.key], row, Badge, idx) : row[col.key];
+            let text = '';
+            if (typeof content === 'object' && content?.props?.children) {
+              const extractText = (node) => {
+                if (typeof node === 'string' || typeof node === 'number') return String(node);
+                if (Array.isArray(node)) return node.map(extractText).join(' ');
+                if (node?.props?.children) return extractText(node.props.children);
+                return '';
+              };
+              text = extractText(content).replace(/[^\w\s]/gi, '').trim();
+            } else {
+              text = String(content || '');
+            }
+            // Escape commas and quotes for CSV
+            return `"${text.replace(/"/g, '""')}"`;
+          }).join(',');
+        })
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title || 'table'}-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      alert('PDF export failed. Downloaded CSV file instead. Check console for details.');
+    }
   };
 
   // Export to Excel
@@ -120,10 +203,10 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
     import('xlsx').then((XLSX) => {
       const worksheetData = [
         // Headers
-        columns.map(col => col.label),
+        displayColumns.map(col => col.label),
         // Data rows
         ...filtered.map((row, idx) => {
-          return columns.map(col => {
+          return displayColumns.map(col => {
             if (col.key === '__index') return idx + 1;
             const content = col.render ? col.render(row[col.key], row, Badge, idx) : row[col.key];
             // Extract text from React elements
@@ -286,7 +369,7 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
             <table className="text-sm" style={{ tableLayout: 'auto', width: 'auto', minWidth: '100%' }}>
               <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-[1]">
                 <tr>
-                  {columns.map(col => (
+                  {displayColumns.map(col => (
                     <th key={col.key}
                       onClick={() => {
                         if (col.key === '__index' || col.sortable === false) return;
@@ -303,7 +386,7 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
               <tbody className="divide-y divide-gray-200">
                 {slice.map((r, i) => (
                   <tr key={i} className="hover:bg-gray-50 transition-colors">
-                    {columns.map(c => {
+                    {displayColumns.map(c => {
                       const content = c.key === '__index'
                         ? (baseIndex + i + 1)
                         : (c.render ? c.render(r[c.key], r, Badge, baseIndex + i) : r[c.key]);
@@ -317,7 +400,7 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
                 ))}
                 {!slice.length && (
                   <tr>
-                    <td colSpan={columns.length} className="px-6 py-12 text-center text-gray-500 bg-gray-50">
+                    <td colSpan={displayColumns.length} className="px-6 py-12 text-center text-gray-500 bg-gray-50">
                       <div className="flex items-center justify-center gap-2 text-gray-500">
                         <Inbox size={18} />
                         <span>No data found</span>

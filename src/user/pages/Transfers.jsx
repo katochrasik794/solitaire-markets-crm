@@ -1,6 +1,9 @@
 import { useEffect, useState, useMemo } from 'react'
+import { ArrowLeftRight } from 'lucide-react'
 import authService from '../../services/auth.js'
 import Toast from '../../components/Toast.jsx'
+import PageHeader from '../components/PageHeader.jsx'
+import ProTable from '../../admin/components/ProTable.jsx'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -604,6 +607,11 @@ function Transfers() {
           onClose={() => setToast(null)}
         />
       )}
+      <PageHeader
+        icon={ArrowLeftRight}
+        title="Transfers"
+        subtitle="Transfer funds between your wallet and MT5 trading accounts."
+      />
 
       <div className="w-full">
         <h1
@@ -968,682 +976,146 @@ function Transfers() {
 
         {/* Transactions Datatable */}
         <div className="w-full pb-8 md:pb-10">
-          <h2
-            className="text-left mt-6 mb-3"
-            style={{
-              fontFamily: 'Roboto, sans-serif',
-              fontSize: '16px',
-              color: '#000000',
-              fontWeight: '500',
+          <ProTable
+            title="Wallet Transactions"
+            rows={allTransactions.map(tx => ({
+              ...tx,
+              sourceTarget: `${tx.source} → ${tx.target}`,
+              amountFormatted: `$${Number(tx.amount).toFixed(2)}`
+            }))}
+            columns={[
+              { key: 'created_at', label: 'Time', sortable: true, render: (value) => formatDateTime(value) },
+              { key: 'type', label: 'Type', sortable: true, render: (value) => <span className="capitalize">{String(value).replace('_', ' ')}</span> },
+              { key: 'sourceTarget', label: 'Source → Target', sortable: false },
+              { key: 'amountFormatted', label: 'Amount', sortable: true, render: (value) => <span className="text-right font-medium">{value}</span> },
+              { key: 'mt5_account_number', label: 'MT5 Account', sortable: false, render: (value) => value || '-' },
+              { key: 'reference', label: 'Reference', sortable: false, render: (value) => value || '-' }
+            ]}
+            filters={{
+              searchKeys: ['type', 'source', 'target', 'mt5_account_number', 'reference', 'amount'],
+              selects: [
+                { key: 'type', label: 'All Types', options: ['deposit', 'withdrawal', 'transfer_in', 'transfer_out'] },
+                { key: 'source', label: 'All Sources', options: ['wallet', 'mt5'] },
+                { key: 'target', label: 'All Targets', options: ['wallet', 'mt5'] }
+              ],
+              dateKey: 'created_at'
             }}
-          >
-            Wallet Transactions
-          </h2>
-
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            {/* Filters and Search Bar */}
-            <div className="p-4 border-b border-gray-200 space-y-4">
-              {/* Search and Filters Row */}
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Search */}
-                <div className="flex-1">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value)
-                        setCurrentPage(1)
-                      }}
-                      placeholder="Search transactions..."
-                      className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none"
-                    />
-                    <svg
-                      className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Filter Dropdowns */}
-                <div className="flex flex-wrap gap-2">
-                  <select
-                    value={filterType}
-                    onChange={(e) => {
-                      setFilterType(e.target.value)
-                      setCurrentPage(1)
-                    }}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none text-sm"
-                  >
-                    <option value="">All Types</option>
-                    <option value="deposit">Deposit</option>
-                    <option value="withdrawal">Withdrawal</option>
-                    <option value="transfer_in">Transfer In</option>
-                    <option value="transfer_out">Transfer Out</option>
-                  </select>
-
-                  <select
-                    value={filterSource}
-                    onChange={(e) => {
-                      setFilterSource(e.target.value)
-                      setCurrentPage(1)
-                    }}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none text-sm"
-                  >
-                    <option value="">All Sources</option>
-                    <option value="wallet">Wallet</option>
-                    <option value="mt5">MT5</option>
-                  </select>
-
-                  <select
-                    value={filterTarget}
-                    onChange={(e) => {
-                      setFilterTarget(e.target.value)
-                      setCurrentPage(1)
-                    }}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none text-sm"
-                  >
-                    <option value="">All Targets</option>
-                    <option value="wallet">Wallet</option>
-                    <option value="mt5">MT5</option>
-                  </select>
-
-                  <input
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => {
-                      setDateFrom(e.target.value)
-                      setCurrentPage(1)
-                    }}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none text-sm"
-                    placeholder="From Date"
-                  />
-
-                  <input
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => {
-                      setDateTo(e.target.value)
-                      setCurrentPage(1)
-                    }}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none text-sm"
-                    placeholder="To Date"
-                  />
-
-                  <button
-                    onClick={resetFilters}
-                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm"
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
-
-              {/* Results count and page size */}
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>
-                  Showing {paginatedTransactions.length} of {filteredAndSorted.length} transactions
-                </span>
-                <div className="flex items-center gap-2">
-                  <span>Rows per page:</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => {
-                      setPageSize(Number(e.target.value))
-                      setCurrentPage(1)
-                    }}
-                    className="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#00A896] outline-none text-sm"
-                  >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Desktop table */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="min-w-full border-collapse">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('created_at')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Time
-                        {getSortIcon('created_at')}
-                      </div>
-                    </th>
-                    <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('type')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Type
-                        {getSortIcon('type')}
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                      Source → Target
-                    </th>
-                    <th
-                      className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('amount')}
-                    >
-                      <div className="flex items-center justify-end gap-2">
-                        Amount
-                        {getSortIcon('amount')}
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                      MT5 Account
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                      Reference
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedTransactions.length === 0 ? (
-                    <tr>
-                      <td
-                        className="px-4 py-4 text-center text-gray-500"
-                        colSpan={6}
-                      >
-                        No transactions found
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedTransactions.map((tx) => (
-                      <tr key={tx.id} className="border-t border-gray-100 hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {formatDateTime(tx.created_at)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700 capitalize">
-                          {tx.type.replace('_', ' ')}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {tx.source} → {tx.target}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">
-                          ${Number(tx.amount).toFixed(2)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {tx.mt5_account_number || '-'}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-500">
-                          {tx.reference || '-'}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="md:hidden divide-y divide-gray-100">
-              {paginatedTransactions.length === 0 ? (
-                <div className="p-4 text-center text-gray-500 text-sm">
-                  No transactions found
-                </div>
-              ) : (
-                paginatedTransactions.map((tx) => (
-                  <div key={tx.id} className="p-4 space-y-1">
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>{formatDateTime(tx.created_at)}</span>
-                      <span className="capitalize">{tx.type.replace('_', ' ')}</span>
-                    </div>
-                    <div className="text-sm text-gray-700">
-                      {tx.source} → {tx.target}
-                    </div>
-                    <div className="text-sm text-gray-900 font-semibold">
-                      ${Number(tx.amount).toFixed(2)} {tx.currency}
-                    </div>
-                    {tx.mt5_account_number && (
-                      <div className="text-xs text-gray-500">
-                        MT5: {tx.mt5_account_number}
-                      </div>
-                    )}
-                    {tx.reference && (
-                      <div className="text-xs text-gray-500">{tx.reference}</div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
-              <div className="text-sm text-gray-600">
-                Page {currentPage} of {totalPages}
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage <= 1}
-                  className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-white transition disabled:opacity-40 disabled:cursor-not-allowed text-sm"
-                >
-                  Prev
-                </button>
-                <div className="flex gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum
-                    if (totalPages <= 5) {
-                      pageNum = i + 1
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i
-                    } else {
-                      pageNum = currentPage - 2 + i
-                    }
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`px-3 py-1 border rounded-lg text-sm ${
-                          currentPage === pageNum
-                            ? 'bg-[#00A896] text-white border-[#00A896]'
-                            : 'border-gray-300 hover:bg-white'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    )
-                  })}
-                </div>
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage >= totalPages}
-                  className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-white transition disabled:opacity-40 disabled:cursor-not-allowed text-sm"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </div>
+            pageSize={pageSize}
+            searchPlaceholder="Search transactions..."
+          />
         </div>
 
         {/* Internal Transfers Table */}
         <div className="w-full pb-8 md:pb-10">
-          <h2
-            className="text-left mt-6 mb-3"
-            style={{
-              fontFamily: 'Roboto, sans-serif',
-              fontSize: '16px',
-              color: '#000000',
-              fontWeight: '500',
-            }}
-          >
-            Internal Transfer Transactions
-          </h2>
-
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            {loadingInternalTransfers ? (
-              <div className="p-8 text-center text-gray-500">Loading transfers...</div>
-            ) : (
-              <>
-                {/* Filters and Search Bar */}
-                <div className="p-4 border-b border-gray-200 space-y-4">
-                  {/* Search and Filters Row */}
-                  <div className="flex flex-col lg:flex-row gap-4">
-                    {/* Search */}
-                    <div className="flex-1">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={internalSearchQuery}
-                          onChange={(e) => {
-                            setInternalSearchQuery(e.target.value)
-                            setInternalCurrentPage(1)
-                          }}
-                          placeholder="Search transfers..."
-                          className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none"
-                        />
-                        <svg
-                          className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-
-                    {/* Filter Dropdowns */}
-                    <div className="flex flex-wrap gap-2">
-                      <select
-                        value={internalFilterFrom}
-                        onChange={(e) => {
-                          setInternalFilterFrom(e.target.value)
-                          setInternalCurrentPage(1)
-                        }}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none text-sm"
-                      >
-                        <option value="">All From</option>
-                        <option value="wallet">Wallet</option>
-                        <option value="mt5">MT5</option>
-                      </select>
-
-                      <select
-                        value={internalFilterTo}
-                        onChange={(e) => {
-                          setInternalFilterTo(e.target.value)
-                          setInternalCurrentPage(1)
-                        }}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none text-sm"
-                      >
-                        <option value="">All To</option>
-                        <option value="wallet">Wallet</option>
-                        <option value="mt5">MT5</option>
-                      </select>
-
-                      <input
-                        type="date"
-                        value={internalDateFrom}
-                        onChange={(e) => {
-                          setInternalDateFrom(e.target.value)
-                          setInternalCurrentPage(1)
-                        }}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none text-sm"
-                        placeholder="From Date"
-                      />
-
-                      <input
-                        type="date"
-                        value={internalDateTo}
-                        onChange={(e) => {
-                          setInternalDateTo(e.target.value)
-                          setInternalCurrentPage(1)
-                        }}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00A896] focus:border-transparent outline-none text-sm"
-                        placeholder="To Date"
-                      />
-
-                      <button
-                        onClick={resetInternalFilters}
-                        className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm"
-                      >
-                        Reset
-                      </button>
-                    </div>
+          {loadingInternalTransfers ? (
+            <div className="p-8 text-center text-gray-500">Loading transfers...</div>
+          ) : (
+            <ProTable
+              title="Internal Transfer Transactions"
+              rows={internalTransfers.map(transfer => ({
+                ...transfer,
+                fromDisplay: (
+                  <div>
+                    <span className="capitalize font-medium">{transfer.from_type}</span>
+                    <br />
+                    <span className="text-gray-500 text-xs">{transfer.from_account}</span>
                   </div>
-
-                  {/* Results count and page size */}
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span>
-                      Showing {paginatedInternalTransfers.length} of {filteredAndSortedInternal.length} transfers
+                ),
+                toDisplay: (
+                  <div>
+                    <span className="capitalize font-medium">{transfer.to_type}</span>
+                    <br />
+                    <span className="text-gray-500 text-xs">{transfer.to_account}</span>
+                  </div>
+                ),
+                amountFormatted: `$${Number(transfer.amount).toFixed(2)} ${transfer.currency || 'USD'}`,
+                dateTime: transfer.created_at
+              }))}
+              columns={[
+                { 
+                  key: 'dateTime', 
+                  label: 'Date & Time', 
+                  sortable: true, 
+                  render: (value) => (
+                    <div className="flex flex-col">
+                      <span className="font-medium">{new Date(value).toLocaleDateString()}</span>
+                      <span className="text-xs text-gray-500">{new Date(value).toLocaleTimeString()}</span>
+                    </div>
+                  )
+                },
+                { 
+                  key: 'from_type', 
+                  label: 'From', 
+                  sortable: true, 
+                  render: (value, row) => (
+                    <div>
+                      <span className="capitalize font-medium">{row.from_type}</span>
+                      <br />
+                      <span className="text-gray-500 text-xs">{row.from_account}</span>
+                    </div>
+                  )
+                },
+                { 
+                  key: 'to_type', 
+                  label: 'To', 
+                  sortable: true, 
+                  render: (value, row) => (
+                    <div>
+                      <span className="capitalize font-medium">{row.to_type}</span>
+                      <br />
+                      <span className="text-gray-500 text-xs">{row.to_account}</span>
+                    </div>
+                  )
+                },
+                { 
+                  key: 'amount', 
+                  label: 'Amount', 
+                  sortable: true, 
+                  render: (value, row) => (
+                    <span className="text-right font-medium whitespace-nowrap">
+                      ${Number(value).toFixed(2)} <span className="text-gray-500 text-xs">{row.currency || 'USD'}</span>
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span>Rows per page:</span>
-                      <select
-                        value={internalPageSize}
-                        onChange={(e) => {
-                          setInternalPageSize(Number(e.target.value))
-                          setInternalCurrentPage(1)
-                        }}
-                        className="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#00A896] outline-none text-sm"
-                      >
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Desktop table */}
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="min-w-full border-collapse">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th
-                          className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
-                          onClick={() => handleInternalSort('created_at')}
-                        >
-                          <div className="flex items-center gap-2">
-                            Date & Time
-                            {getInternalSortIcon('created_at')}
-                          </div>
-                        </th>
-                        <th
-                          className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
-                          onClick={() => handleInternalSort('from_type')}
-                        >
-                          <div className="flex items-center gap-2">
-                            From
-                            {getInternalSortIcon('from_type')}
-                          </div>
-                        </th>
-                        <th
-                          className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
-                          onClick={() => handleInternalSort('to_type')}
-                        >
-                          <div className="flex items-center gap-2">
-                            To
-                            {getInternalSortIcon('to_type')}
-                          </div>
-                        </th>
-                        <th
-                          className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
-                          onClick={() => handleInternalSort('amount')}
-                        >
-                          <div className="flex items-center justify-end gap-2">
-                            Amount
-                            {getInternalSortIcon('amount')}
-                          </div>
-                        </th>
-                        <th
-                          className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
-                          onClick={() => handleInternalSort('status')}
-                        >
-                          <div className="flex items-center gap-2">
-                            Status
-                            {getInternalSortIcon('status')}
-                          </div>
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                          Reference
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paginatedInternalTransfers.length === 0 ? (
-                        <tr>
-                          <td
-                            className="px-4 py-4 text-center text-gray-500"
-                            colSpan={6}
-                          >
-                            <div className="flex flex-col items-center justify-center">
-                              <svg className="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                              <p className="text-gray-600 font-medium">No transfers found</p>
-                              <p className="text-gray-400 text-xs mt-1">Try adjusting your filters</p>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : (
-                        paginatedInternalTransfers.map((transfer) => (
-                          <tr key={transfer.id} className="border-t border-gray-100 hover:bg-gray-50">
-                            <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
-                              <div className="flex flex-col">
-                                <span className="font-medium">{new Date(transfer.created_at).toLocaleDateString()}</span>
-                                <span className="text-xs text-gray-500">{new Date(transfer.created_at).toLocaleTimeString()}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-700">
-                              <span className="capitalize font-medium">{transfer.from_type}</span>
-                              <br />
-                              <span className="text-gray-500 text-xs">{transfer.from_account}</span>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-700">
-                              <span className="capitalize font-medium">{transfer.to_type}</span>
-                              <br />
-                              <span className="text-gray-500 text-xs">{transfer.to_account}</span>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium whitespace-nowrap">
-                              ${Number(transfer.amount).toFixed(2)}
-                              <span className="text-gray-500 text-xs ml-1">{transfer.currency || 'USD'}</span>
-                            </td>
-                            <td className="px-4 py-3 text-sm whitespace-nowrap">
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  transfer.status === 'completed'
-                                    ? 'bg-green-100 text-green-800'
-                                    : transfer.status === 'pending'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}
-                              >
-                                {transfer.status}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-500">
-                              <span className="truncate max-w-xs block" title={transfer.reference || '-'}>
-                                {transfer.reference || '-'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mobile cards */}
-                <div className="md:hidden divide-y divide-gray-100 bg-white">
-                  {paginatedInternalTransfers.length === 0 ? (
-                    <div className="p-8 text-center">
-                      <svg className="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <p className="text-gray-600 font-medium">No transfers found</p>
-                      <p className="text-gray-400 text-xs mt-1">Try adjusting your filters</p>
-                    </div>
-                  ) : (
-                    paginatedInternalTransfers.map((transfer) => (
-                      <div key={transfer.id} className="p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm font-medium text-gray-900">
-                                <span className="capitalize">{transfer.from_type}</span> → <span className="capitalize">{transfer.to_type}</span>
-                              </span>
-                              <span className="text-xs text-gray-500">{new Date(transfer.created_at).toLocaleDateString()}</span>
-                            </div>
-                            <div className="text-xs text-gray-500 mb-1">
-                              {transfer.from_account} → {transfer.to_account}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-semibold text-gray-900">
-                              ${Number(transfer.amount).toFixed(2)}
-                            </div>
-                            <span
-                              className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${
-                                transfer.status === 'completed'
-                                  ? 'bg-green-100 text-green-800'
-                                  : transfer.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}
-                            >
-                              {transfer.status}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-2 text-xs text-gray-500 mt-2">
-                          {transfer.reference && (
-                            <span className="truncate max-w-full" title={transfer.reference}>
-                              {transfer.reference}
-                            </span>
-                          )}
-                          <span className="ml-auto text-gray-400">
-                            {new Date(transfer.created_at).toLocaleTimeString()}
-                          </span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {/* Pagination */}
-                <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50 gap-3">
-                  <div className="text-sm text-gray-600 order-2 sm:order-1">
-                    Showing <span className="font-medium">{((internalCurrentPage - 1) * internalPageSize) + 1}</span> to{' '}
-                    <span className="font-medium">{Math.min(internalCurrentPage * internalPageSize, filteredAndSortedInternal.length)}</span> of{' '}
-                    <span className="font-medium">{filteredAndSortedInternal.length}</span> transfers
-                  </div>
-                  <div className="flex items-center gap-2 order-1 sm:order-2">
-                    <button
-                      onClick={() => setInternalCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={internalCurrentPage <= 1}
-                      className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-white hover:border-gray-400 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-50 text-sm font-medium"
-                    >
-                      <span className="hidden sm:inline">Previous</span>
-                      <span className="sm:hidden">Prev</span>
-                    </button>
-                    <div className="flex gap-1">
-                      {Array.from({ length: Math.min(5, internalTotalPages) }, (_, i) => {
-                        let pageNum
-                        if (internalTotalPages <= 5) {
-                          pageNum = i + 1
-                        } else if (internalCurrentPage <= 3) {
-                          pageNum = i + 1
-                        } else if (internalCurrentPage >= internalTotalPages - 2) {
-                          pageNum = internalTotalPages - 4 + i
-                        } else {
-                          pageNum = internalCurrentPage - 2 + i
-                        }
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => setInternalCurrentPage(pageNum)}
-                            className={`px-3 py-1.5 border rounded-lg text-sm font-medium transition ${
-                              internalCurrentPage === pageNum
-                                ? 'bg-[#00A896] text-white border-[#00A896] shadow-sm'
-                                : 'border-gray-300 hover:bg-white hover:border-gray-400'
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        )
-                      })}
-                    </div>
-                    <button
-                      onClick={() => setInternalCurrentPage((p) => Math.min(internalTotalPages, p + 1))}
-                      disabled={internalCurrentPage >= internalTotalPages}
-                      className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-white hover:border-gray-400 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-50 text-sm font-medium"
-                    >
-                      <span className="hidden sm:inline">Next</span>
-                      <span className="sm:hidden">Next</span>
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+                  )
+                },
+                { 
+                  key: 'status', 
+                  label: 'Status', 
+                  sortable: true, 
+                  render: (value) => (
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                      value === 'completed'
+                        ? 'bg-green-100 text-green-800'
+                        : value === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {value}
+                    </span>
+                  )
+                },
+                { 
+                  key: 'reference', 
+                  label: 'Reference', 
+                  sortable: false, 
+                  render: (value) => (
+                    <span className="truncate max-w-xs block" title={value || '-'}>
+                      {value || '-'}
+                    </span>
+                  )
+                }
+              ]}
+              filters={{
+                searchKeys: ['from_type', 'to_type', 'from_account', 'to_account', 'reference', 'amount', 'status'],
+                selects: [
+                  { key: 'from_type', label: 'All From', options: ['wallet', 'mt5'] },
+                  { key: 'to_type', label: 'All To', options: ['wallet', 'mt5'] }
+                ],
+                dateKey: 'created_at'
+              }}
+              pageSize={internalPageSize}
+              searchPlaceholder="Search transfers..."
+            />
+          )}
         </div>
       </div>
     </div>

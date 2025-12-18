@@ -416,13 +416,13 @@ function Register() {
         <div className="w-full flex flex-col items-center mb-6">
           {/* Logo - Centered */}
           <div className="mb-4">
-            <img
-              src="/logo.svg"
-              alt="Logo"
+          <img
+            src="/logo.svg"
+            alt="Logo"
               className="h-14 w-auto mx-auto"
-              style={{ filter: 'none' }}
-            />
-          </div>
+            style={{ filter: 'none' }}
+          />
+        </div>
 
           {/* Navigation Tabs */}
           <div className="flex items-center gap-6">
@@ -446,7 +446,7 @@ function Register() {
             >
               Create an account
             </Link>
-          </div>
+            </div>
         </div>
         <div className="w-full max-w-lg">
 

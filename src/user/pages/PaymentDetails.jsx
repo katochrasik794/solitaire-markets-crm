@@ -3,6 +3,7 @@ import { Plus, Trash2, CheckCircle, XCircle, Clock, ChevronRight, ChevronLeft, C
 import authService from '../../services/auth.js';
 import Swal from 'sweetalert2';
 import ProTable from '../../admin/components/ProTable.jsx';
+import PageHeader from '../components/PageHeader.jsx';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -549,13 +550,11 @@ function PaymentDetails() {
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
       <div className="w-full max-w-full">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <CreditCard className="w-5 h-5 text-brand-500" />
-            <h1 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Payment Details</h1>
-          </div>
-          <p className="text-gray-600 text-sm">Manage your payment methods for withdrawals. Maximum 3 payment details allowed.</p>
-        </div>
+        <PageHeader
+          icon={CreditCard}
+          title="Payment Details"
+          subtitle="Manage your payment methods for withdrawals. Maximum 3 payment details allowed."
+        />
 
         {/* Add Button */}
         {canAddMore && (

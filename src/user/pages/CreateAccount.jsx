@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { PlusCircle } from 'lucide-react'
 import authService from '../../services/auth.js'
 import AuthLoader from '../../components/AuthLoader.jsx'
 import Toast from '../../components/Toast.jsx'
+import PageHeader from '../components/PageHeader.jsx'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -211,6 +213,12 @@ function CreateAccount() {
       )}
 
       <div className="max-w-2xl mx-auto">
+        <PageHeader
+          icon={PlusCircle}
+          title="Create Trading Account"
+          subtitle="Create a new live or demo MT5 trading account with your preferred settings."
+        />
+        
         {/* Back Button */}
         <div className="mb-6 flex justify-end">
           <button

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
+import { MessageCircle } from 'lucide-react'
 import supportService from '../../services/support.service'
 import Swal from 'sweetalert2'
 import AuthLoader from '../../components/AuthLoader'
+import PageHeader from '../components/PageHeader.jsx'
 
 function Support() {
     const [tickets, setTickets] = useState([])
@@ -155,8 +157,12 @@ function Support() {
         <div className="min-h-screen bg-gray-50 p-4 sm:p-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
             {loading && !activeTicket && <AuthLoader message="Loading support..." />}
 
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Support Center</h1>
+            <div className="flex justify-between items-start mb-6">
+                <PageHeader
+                  icon={MessageCircle}
+                  title="Support Center"
+                  subtitle="Get help from our support team. Create a ticket or view existing tickets."
+                />
                 <button
                     onClick={() => setShowCreateModal(true)}
                     className="bg-[#d4b000] hover:bg-[#c2a000] text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"

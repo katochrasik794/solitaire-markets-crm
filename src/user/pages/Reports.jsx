@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { FileText } from 'lucide-react'
 import authService from '../../services/auth.js'
-import Datatable from '../../components/Datatable.jsx'
+import ProTable from '../../admin/components/ProTable.jsx'
+import PageHeader from '../components/PageHeader.jsx'
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -409,9 +411,11 @@ function Reports() {
     <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
       <div className="w-full max-w-[95%] mx-auto bg-gray-100 rounded-lg">
         <div className="w-full mx-auto p-4 md:p-6">
-          <h1 className="mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
-            Reports
-          </h1>
+          <PageHeader
+            icon={FileText}
+            title="Reports"
+            subtitle="View and download your transaction history and MT5 account statements."
+          />
 
           {/* Main Content Card */}
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
@@ -495,29 +499,9 @@ function Reports() {
             {/* MT5 Account Statement Datatable */}
             {selectedReport === 'account-statement-mt5' && (
               <div className="mt-6">
-                <Datatable
-                  data={mt5TableData}
-                  loading={loadingMt5}
-                  searchPlaceholder="Search transactions..."
-                  filters={[
-                    {
-                      key: 'type', label: 'All Types', type: 'select', options: [
-                        { value: 'deposit', label: 'Deposit' },
-                        { value: 'withdrawal', label: 'Withdrawal' }
-                      ]
-                    },
-                    {
-                      key: 'status', label: 'All Status', type: 'select', options: [
-                        { value: 'completed', label: 'Completed' },
-                        { value: 'approved', label: 'Approved' },
-                        { value: 'pending', label: 'Pending' },
-                        { value: 'rejected', label: 'Rejected' },
-                        { value: 'cancelled', label: 'Cancelled' }
-                      ]
-                    },
-                    { key: 'dateFrom', label: 'From Date', type: 'date', range: 'from' },
-                    { key: 'dateTo', label: 'To Date', type: 'date', range: 'to' }
-                  ]}
+                <ProTable
+                  title="MT5 Account Statement"
+                  rows={mt5TableData}
                   columns={[
                     {
                       key: 'dateTime',
@@ -597,11 +581,16 @@ function Reports() {
                       )
                     }
                   ]}
-                  onDownloadPDF={handleDownloadPDF}
-                  onDownloadExcel={handleDownloadExcel}
-                  downloadingPDF={downloadingPDF}
-                  downloadingExcel={downloadingExcel}
-                  emptyMessage="No MT5 transactions found"
+                  filters={{
+                    searchKeys: ['type', 'description', 'account', 'status'],
+                    selects: [
+                      { key: 'type', label: 'All Types', options: ['deposit', 'withdrawal'] },
+                      { key: 'status', label: 'All Status', options: ['completed', 'approved', 'pending', 'rejected', 'cancelled'] }
+                    ],
+                    dateKey: 'dateTime'
+                  }}
+                  pageSize={10}
+                  searchPlaceholder="Search transactions..."
                 />
               </div>
             )}
@@ -609,30 +598,9 @@ function Reports() {
             {/* Transaction History Datatable */}
             {selectedReport === 'transaction-history' && (
               <div className="mt-6">
-                <Datatable
-                  data={transactionTableData}
-                  loading={loading}
-                  searchPlaceholder="Search transactions..."
-                  filters={[
-                    {
-                      key: 'type', label: 'All Types', type: 'select', options: [
-                        { value: 'deposit', label: 'Deposit' },
-                        { value: 'withdrawal', label: 'Withdrawal' },
-                        { value: 'account_creation', label: 'Account Created' }
-                      ]
-                    },
-                    {
-                      key: 'status', label: 'All Status', type: 'select', options: [
-                        { value: 'approved', label: 'Approved' },
-                        { value: 'pending', label: 'Pending' },
-                        { value: 'rejected', label: 'Rejected' },
-                        { value: 'completed', label: 'Completed' },
-                        { value: 'cancelled', label: 'Cancelled' }
-                      ]
-                    },
-                    { key: 'dateFrom', label: 'From Date', type: 'date', range: 'from' },
-                    { key: 'dateTo', label: 'To Date', type: 'date', range: 'to' }
-                  ]}
+                <ProTable
+                  title="Transaction History"
+                  rows={transactionTableData}
                   columns={[
                     {
                       key: 'date',
@@ -701,11 +669,16 @@ function Reports() {
                       }
                     }
                   ]}
-                  onDownloadPDF={handleDownloadTransactionHistoryPDF}
-                  onDownloadExcel={handleDownloadTransactionHistoryExcel}
-                  downloadingPDF={downloadingTransactionPDF}
-                  downloadingExcel={downloadingTransactionExcel}
-                  emptyMessage="No transactions found"
+                  filters={{
+                    searchKeys: ['type', 'description', 'account', 'status'],
+                    selects: [
+                      { key: 'type', label: 'All Types', options: ['deposit', 'withdrawal', 'account_creation'] },
+                      { key: 'status', label: 'All Status', options: ['approved', 'pending', 'rejected', 'completed', 'cancelled'] }
+                    ],
+                    dateKey: 'date'
+                  }}
+                  pageSize={10}
+                  searchPlaceholder="Search transactions..."
                 />
               </div>
             )}

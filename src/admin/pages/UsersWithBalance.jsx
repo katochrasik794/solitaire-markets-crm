@@ -76,10 +76,10 @@ export default function UsersWithBalance() {
 
     const token = localStorage.getItem("adminToken");
     const accounts = [];
-    for (let i = 0; i < row.MT5Account.length; i++) {
-      const account = row.MT5Account[i];
-      setLoadingProgress({ current: i + 1, total: row.MT5Account.length });
-
+      for (let i = 0; i < row.MT5Account.length; i++) {
+        const account = row.MT5Account[i];
+        setLoadingProgress({ current: i + 1, total: row.MT5Account.length });
+        
       // Start with DB values as fallback
       let accData = {
         accountId: account.accountId || account.accountNumber,
@@ -131,8 +131,8 @@ export default function UsersWithBalance() {
     }
 
     setViewModal({ user: row, accounts });
-    setAccountsLoading(false);
-    setLoadingProgress({ current: 0, total: 0 });
+      setAccountsLoading(false);
+      setLoadingProgress({ current: 0, total: 0 });
   }, [BASE]);
 
   const columns = useMemo(() => [
@@ -186,12 +186,12 @@ export default function UsersWithBalance() {
                 </div>
                 <div className="mt-4">
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      style={{ 
                         width:
                           loadingProgress.total > 0
-                            ? `${(loadingProgress.current / loadingProgress.total) * 100}%`
+                          ? `${(loadingProgress.current / loadingProgress.total) * 100}%` 
                             : "0%",
                       }}
                     ></div>
@@ -257,22 +257,22 @@ export default function UsersWithBalance() {
                               <span className="text-right font-mono">{account.marginLevel.toFixed(2)}%</span>
                               <span className="text-gray-500">Profit</span>
                               <span className={`text-right font-mono ${
-                                account.profit > 0 ? 'text-green-600' : account.profit < 0 ? 'text-red-600' : ''
-                              }`}>
-                                ${account.profit.toFixed(2)}
+                          account.profit > 0 ? 'text-green-600' : account.profit < 0 ? 'text-red-600' : ''
+                        }`}>
+                          ${account.profit.toFixed(2)}
                               </span>
                               <span className="text-gray-500">Currency</span>
                               <span className="text-right">{account.currency}</span>
                             </div>
                             <div className="pt-2 flex gap-2">
-                              <button
-                                onClick={()=> setActionModal({ type:'deposit', accountId: account.accountId, amount:'', comment:'Admin deposit' })}
+                            <button
+                              onClick={()=> setActionModal({ type:'deposit', accountId: account.accountId, amount:'', comment:'Admin deposit' })}
                                 className="flex-1 py-2 rounded-md bg-emerald-600 text-white text-xs font-medium"
                               >
                                 Deposit
                               </button>
-                              <button
-                                onClick={()=> setActionModal({ type:'withdraw', accountId: account.accountId, amount:'', comment:'Admin withdrawal' })}
+                            <button
+                              onClick={()=> setActionModal({ type:'withdraw', accountId: account.accountId, amount:'', comment:'Admin withdrawal' })}
                                 className="flex-1 py-2 rounded-md bg-rose-600 text-white text-xs font-medium"
                               >
                                 Withdraw
@@ -283,7 +283,7 @@ export default function UsersWithBalance() {
                       </div>
                     );
                   })}
-                </div>
+              </div>
               </>
             )}
             {viewModal.accounts.length === 0 && (

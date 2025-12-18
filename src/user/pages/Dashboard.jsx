@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlinePlus } from "react-icons/ai";
 import { RiLoginBoxLine } from "react-icons/ri";
@@ -8,7 +8,9 @@ import { AiOutlineInfoCircle } from "react-icons/ai";
 import { LuWallet } from "react-icons/lu";
 import { MdOutlineAccountBalanceWallet } from "react-icons/md";
 import { RiArrowDownCircleLine, RiArrowUpCircleLine } from "react-icons/ri";
+import { LayoutDashboard } from "lucide-react";
 import authService from "../../services/auth.js";
+import PageHeader from "../components/PageHeader.jsx";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 import AccountsTable from '../components/AccountsTable.jsx';
@@ -30,6 +32,20 @@ function Dashboard() {
   const [activityPage, setActivityPage] = useState(1);
   const [wallet, setWallet] = useState(null);
   const [loadingWallet, setLoadingWallet] = useState(true);
+  
+  // Account Summary state
+  const [summaryTotals, setSummaryTotals] = useState({
+    totalBalance: 0,
+    totalCredit: 0,
+    totalEquity: 0,
+    totalDeposits: 0,
+    totalWithdrawals: 0,
+    loading: true
+  });
+  
+  // Refs to prevent multiple calculations
+  const isCalculatingRef = useRef(false);
+  const hasCalculatedRef = useRef(false);
 
 
 
@@ -79,6 +95,109 @@ function Dashboard() {
     await Promise.all(promises);
   };
 
+  // Calculate summary totals from real accounts only
+  const calculateSummaryTotals = useCallback(async (balances = null, showLoading = false) => {
+    // Prevent multiple simultaneous calculations
+    if (isCalculatingRef.current) {
+      return;
+    }
+    
+    try {
+      isCalculatingRef.current = true;
+      
+      // Only show loading on initial calculation
+      if (showLoading && !hasCalculatedRef.current) {
+        setSummaryTotals(prev => ({ ...prev, loading: true }));
+      }
+      
+      const token = authService.getToken();
+      if (!token) {
+        isCalculatingRef.current = false;
+        return;
+      }
+
+      // Use provided balances or current state
+      const currentBalances = balances || accountBalances;
+      
+      // Get real accounts only (not demo)
+      const realAccounts = accounts.filter(acc => !acc.is_demo);
+      
+      // Calculate totals from account balances
+      let totalBalance = 0;
+      let totalCredit = 0;
+      let totalEquity = 0;
+
+      realAccounts.forEach(acc => {
+        const accountNumber = acc.account_number;
+        const balance = currentBalances[accountNumber];
+        if (balance) {
+          totalBalance += parseFloat(balance.balance || 0);
+          totalCredit += parseFloat(balance.credit || 0);
+          totalEquity += parseFloat(balance.equity || 0);
+        } else {
+          // Fallback to account data if balance not fetched yet
+          totalBalance += parseFloat(acc.balance || 0);
+          totalCredit += parseFloat(acc.credit || 0);
+          totalEquity += parseFloat(acc.equity || 0);
+        }
+      });
+
+      // Fetch approved deposits and withdrawals in parallel
+      const [depositsRes, withdrawalsRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/deposits/my?status=approved&limit=1000`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(() => ({ ok: false })),
+        fetch(`${API_BASE_URL}/withdrawals/my?status=approved&limit=1000`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(() => ({ ok: false }))
+      ]);
+
+      let totalDeposits = 0;
+      if (depositsRes.ok) {
+        try {
+          const depositsData = await depositsRes.json();
+          if (depositsData.success && Array.isArray(depositsData.items)) {
+            totalDeposits = depositsData.items.reduce((sum, dep) => {
+              return sum + parseFloat(dep.amount || 0);
+            }, 0);
+          }
+        } catch (err) {
+          console.error('Error parsing deposits:', err);
+        }
+      }
+
+      let totalWithdrawals = 0;
+      if (withdrawalsRes.ok) {
+        try {
+          const withdrawalsData = await withdrawalsRes.json();
+          if (withdrawalsData.ok && Array.isArray(withdrawalsData.items)) {
+            totalWithdrawals = withdrawalsData.items.reduce((sum, wd) => {
+              return sum + parseFloat(wd.amount || 0);
+            }, 0);
+          }
+        } catch (err) {
+          console.error('Error parsing withdrawals:', err);
+        }
+      }
+
+      setSummaryTotals({
+        totalBalance,
+        totalCredit,
+        totalEquity,
+        totalDeposits,
+        totalWithdrawals,
+        loading: false
+      });
+      
+      hasCalculatedRef.current = true;
+    } catch (error) {
+      console.error('Error calculating summary totals:', error);
+      setSummaryTotals(prev => ({ ...prev, loading: false }));
+    } finally {
+      isCalculatingRef.current = false;
+    }
+  }, [accounts, accountBalances]);
+
   // Fetch accounts from API
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -103,9 +222,24 @@ function Dashboard() {
           });
           setAccounts(activeAccounts);
 
-          // Fetch balance for all accounts
-          if (activeAccounts.length > 0) {
-            await fetchAllAccountBalances(activeAccounts);
+          // Fetch balance for all real accounts only
+          const realAccounts = activeAccounts.filter(acc => !acc.is_demo);
+          if (realAccounts.length > 0) {
+            // Fetch all balances and collect results
+            const balanceResults = {};
+            const balancePromises = realAccounts.map(async (acc) => {
+              const result = await fetchAccountBalance(acc.account_number);
+              if (result) {
+                balanceResults[acc.account_number] = result;
+              }
+            });
+            await Promise.all(balancePromises);
+            
+            // Calculate summary with fetched balances (show loading only on first calculation)
+            await calculateSummaryTotals(balanceResults, true);
+          } else {
+            // Still calculate summary for deposits/withdrawals even if no accounts
+            await calculateSummaryTotals(null, true);
           }
         }
       } catch (error) {
@@ -117,6 +251,22 @@ function Dashboard() {
 
     fetchAccounts();
   }, []);
+
+  // Recalculate summary when accountBalances change (only if already calculated once)
+  // This prevents blinking on initial load
+  useEffect(() => {
+    if (hasCalculatedRef.current && accounts.length > 0 && Object.keys(accountBalances).length > 0) {
+      const realAccounts = accounts.filter(acc => !acc.is_demo);
+      if (realAccounts.length > 0) {
+        // Debounce to prevent multiple rapid recalculations
+        const timeoutId = setTimeout(() => {
+          calculateSummaryTotals(null, false);
+        }, 300);
+        
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [accountBalances, accounts, calculateSummaryTotals]);
 
   // Fetch wallet from API
   useEffect(() => {
@@ -202,6 +352,13 @@ function Dashboard() {
   return (
     <div className="bg-gray-100 min-h-screen overflow-x-hidden">
       <div className="px-4 sm:px-14 pb-4 sm:pb-6 space-y-4 sm:space-y-6 max-w-full">
+        {/* Page Header */}
+        <PageHeader
+          icon={LayoutDashboard}
+          title="Dashboard"
+          subtitle="Overview of your trading accounts, wallet balance, and recent activities."
+        />
+        
         {/* Promotional Banners */}
         {showReferBanner && (
           <div className="mt-8 sm:mt-10 relative rounded-lg overflow-hidden p-6 sm:p-8 bg-[#1e3a47]">
@@ -330,7 +487,9 @@ function Dashboard() {
               <div className="text-gray-700 font-medium text-xs mb-2">
                 Total Balance
               </div>
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+              <div className="text-gray-900 font-bold text-xs">
+                {summaryTotals.loading ? '...' : `${summaryTotals.totalBalance.toFixed(2)} USD`}
+              </div>
             </div>
 
             {/* Icon (mobile on right, desktop stays same) */}
@@ -353,7 +512,9 @@ function Dashboard() {
               <div className="text-gray-700 font-medium text-xs mb-2">
                 Total Credit
               </div>
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+              <div className="text-gray-900 font-bold text-xs">
+                {summaryTotals.loading ? '...' : `${summaryTotals.totalCredit.toFixed(2)} USD`}
+              </div>
             </div>
             <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
               <LuWallet className="text-gray-600 text-xl" />
@@ -371,7 +532,9 @@ function Dashboard() {
               <div className="text-gray-700 font-medium text-xs mb-2">
                 Total Equity
               </div>
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+              <div className="text-gray-900 font-bold text-xs">
+                {summaryTotals.loading ? '...' : `${summaryTotals.totalEquity.toFixed(2)} USD`}
+              </div>
             </div>
             <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
               <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl md:text-2xl" />
@@ -389,7 +552,9 @@ function Dashboard() {
               <div className="text-gray-700 font-medium text-xs mb-2">
                 Total Deposits
               </div>
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+              <div className="text-gray-900 font-bold text-xs">
+                {summaryTotals.loading ? '...' : `${summaryTotals.totalDeposits.toFixed(2)} USD`}
+              </div>
             </div>
             <div className="flex items-center justify-center bg-[#dff8f4] md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
               <RiArrowUpCircleLine className="text-teal-600 text-xl" />
@@ -407,7 +572,9 @@ function Dashboard() {
               <div className="text-gray-700 font-medium text-xs mb-2">
                 Total Withdrawals
               </div>
-              <div className="text-gray-900 font-bold text-xs">0.00 USD</div>
+              <div className="text-gray-900 font-bold text-xs">
+                {summaryTotals.loading ? '...' : `${summaryTotals.totalWithdrawals.toFixed(2)} USD`}
+              </div>
             </div>
             <div className="flex items-center justify-center bg-[#ffecec] md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
               <RiArrowDownCircleLine className="text-red-500 text-xl" />
@@ -419,58 +586,86 @@ function Dashboard() {
         </div>
 
         {/* Recent Activity */}
-        <div className="flex items-center justify-between mb-0">
-          <h2 className="text-sm md:text-md font-medium text-gray-800">
-            Recent Activity
-          </h2>
+        <div className="w-full">
+          {/* Header with Icon */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-3 h-3 rounded-full bg-brand-500 flex-shrink-0"></div>
+            <h2 className="text-sm md:text-md font-bold text-gray-800">
+              Recent Activity
+            </h2>
+          </div>
 
-          <button
-            className="border border-gray-300 bg-white px-3 py-1 rounded-md text-sm hover:bg-gray-50 transition"
-            onClick={() => {
-              setActivityModalOpen(true);
-              loadActivityPage(1);
-            }}
-          >
-            View More
-          </button>
-        </div>
+          {/* Activity Card */}
+          <div className="bg-white border border-gray-200 rounded-lg w-full overflow-hidden">
+            {loadingActivities ? (
+              <div className="flex items-center justify-center text-gray-500 text-sm p-6">
+                Loading activity…
+              </div>
+            ) : recentActivities.length === 0 ? (
+              <div className="flex items-center justify-center text-gray-500 text-sm p-6">
+                No recent activity
+              </div>
+            ) : (
+              <>
+                {/* Activity List */}
+                <div className="divide-y divide-gray-200">
+                  {recentActivities.map((item, index) => (
+                    <div
+                      key={item.id || index}
+                      className="p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        {/* Left Section */}
+                        <div className="flex-1">
+                          {/* Description */}
+                          <div className="font-semibold text-gray-900 text-sm mb-1">
+                            {item.title}{" "}
+                            {item.accountNumber ? `#${item.accountNumber}` : ""}
+                          </div>
+                          {/* Date and Time */}
+                          <div className="text-gray-500 text-xs">
+                            {new Date(item.time).toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}, {new Date(item.time).toLocaleTimeString('en-GB', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                              hour12: false
+                            })}
+                          </div>
+                        </div>
 
-        {/* Activity Card */}
-        <div className="bg-white border border-gray-200 rounded-lg w-full p-4 md:p-6">
-          {loadingActivities ? (
-            <div className="flex items-center justify-center text-gray-500 text-sm">
-              Loading activity…
-            </div>
-          ) : recentActivities.length === 0 ? (
-            <div className="flex items-center justify-center text-gray-500 text-sm">
-              No recent activity
-            </div>
-          ) : (
-            recentActivities.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between py-1.5 border-b last:border-b-0"
-              >
-                {/* Left Section */}
-                <div className="flex flex-col md:flex-row md:items-center gap-3">
-                  <span className="text-gray-700 text-xs md:text-sm">
-                    {new Date(item.time).toLocaleDateString()}{" "}
-                    {new Date(item.time).toLocaleTimeString()}
-                  </span>
-
-                  <span className="text-gray-700 text-xs md:text-sm">
-                    {item.title}{" "}
-                    {item.accountNumber ? `#${item.accountNumber}` : ""}
-                  </span>
+                        {/* Right Section - Status Badge */}
+                        <div className="flex-shrink-0">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Success
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                {/* Right Section */}
-                <span className="text-green-500 font-medium text-xs md:text-sm">
-                  Success
-                </span>
-              </div>
-            ))
-          )}
+                {/* Footer */}
+                <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                  <span className="text-gray-500 text-xs">
+                    Showing last {recentActivities.length} results
+                  </span>
+                  <button
+                    onClick={() => {
+                      setActivityModalOpen(true);
+                      loadActivityPage(1);
+                    }}
+                    className="text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors"
+                  >
+                    View all
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Live Accounts Section */}

@@ -283,16 +283,16 @@ function Sidebar({ isOpen, onClose }) {
       </nav>
 
       {/* Logout Button - Fixed at bottom */}
-      <div className="border-t border-gray-200 p-4 flex-shrink-0">
+      <div className="p-4 pb-0 flex-shrink-0">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-          style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '500' }}
+          className="w-full flex items-center justify-start px-4 py-3 bg-black hover:bg-gray-900 rounded-lg transition-colors"
+          style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '500', color: '#c8f300' }}
         >
-          <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#c8f300' }}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span>Logout</span>
+          <span style={{ color: '#c8f300' }}>Logout</span>
         </button>
       </div>
     </div>

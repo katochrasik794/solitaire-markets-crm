@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ArrowDownToLine } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../../services/auth.js';
+import PageHeader from '../components/PageHeader.jsx';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
@@ -82,9 +83,11 @@ function Deposits() {
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6 overflow-x-hidden">
       <div className="max-w-2xl w-full">
-        <h1 className="mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '24px', color: '#000000', fontWeight: '400' }}>
-          Deposit types
-        </h1>
+        <PageHeader
+          icon={ArrowDownToLine}
+          title="Deposit Types"
+          subtitle="Choose your preferred deposit method to fund your trading account."
+        />
 
         {loading ? (
           <div className="text-center py-8">Loading deposit methods...</div>

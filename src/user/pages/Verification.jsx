@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ShieldCheck } from 'lucide-react'
 import snsWebSdk from '@sumsub/websdk'
 import authService from '../../services/auth.js'
 import AuthLoader from '../../components/AuthLoader.jsx'
 import Toast from '../../components/Toast.jsx'
+import PageHeader from '../components/PageHeader.jsx'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -441,6 +443,12 @@ function Verification() {
       )}
       
       <div className="max-w-4xl mx-auto">
+        <PageHeader
+          icon={ShieldCheck}
+          title="KYC Verification"
+          subtitle="Complete your identity verification to enable withdrawals and access all features."
+        />
+        
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center gap-4">
