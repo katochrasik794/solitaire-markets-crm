@@ -12,7 +12,7 @@ import { LayoutDashboard } from "lucide-react";
 import authService from "../../services/auth.js";
 import PageHeader from "../components/PageHeader.jsx";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 import AccountsTable from '../components/AccountsTable.jsx';
 
 function Dashboard() {
@@ -64,13 +64,21 @@ function Dashboard() {
   const fetchAccountBalance = async (accountNumber) => {
     try {
       const token = authService.getToken();
-      if (!token) return;
+      if (!token) {
+        console.warn(`No token available for account ${accountNumber}`);
+        return null;
+      }
 
       const response = await fetch(`${API_BASE_URL}/accounts/${accountNumber}/balance`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+
+      if (!response.ok) {
+        console.warn(`Balance API returned ${response.status} for account ${accountNumber}`);
+        return null;
+      }
 
       const data = await response.json();
       if (data.success && data.data) {
@@ -79,6 +87,8 @@ function Dashboard() {
           [accountNumber]: data.data
         }));
         return data.data;
+      } else {
+        console.warn(`Balance API response not successful for account ${accountNumber}:`, data);
       }
     } catch (error) {
       console.error(`Error fetching balance for account ${accountNumber}:`, error);
@@ -105,8 +115,8 @@ function Dashboard() {
     try {
       isCalculatingRef.current = true;
       
-      // Only show loading on initial calculation
-      if (showLoading && !hasCalculatedRef.current) {
+      // Show loading on initial calculation
+      if (showLoading) {
         setSummaryTotals(prev => ({ ...prev, loading: true }));
       }
       
@@ -136,50 +146,91 @@ function Dashboard() {
           totalEquity += parseFloat(balance.equity || 0);
         } else {
           // Fallback to account data if balance not fetched yet
-          totalBalance += parseFloat(acc.balance || 0);
-          totalCredit += parseFloat(acc.credit || 0);
-          totalEquity += parseFloat(acc.equity || 0);
+          const accBalance = parseFloat(acc.balance || 0);
+          const accCredit = parseFloat(acc.credit || 0);
+          const accEquity = parseFloat(acc.equity || 0);
+          
+          totalBalance += accBalance;
+          totalCredit += accCredit;
+          totalEquity += accEquity;
+          
+          // If account has balance data, use it even if balance API call failed
+          if (accBalance > 0 || accCredit > 0 || accEquity > 0) {
+            console.log(`Using account data for ${accountNumber}:`, { balance: accBalance, credit: accCredit, equity: accEquity });
+          }
         }
       });
 
       // Fetch approved deposits and withdrawals in parallel
-      const [depositsRes, withdrawalsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/deposits/my?status=approved&limit=1000`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }).catch(() => ({ ok: false })),
-        fetch(`${API_BASE_URL}/withdrawals/my?status=approved&limit=1000`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }).catch(() => ({ ok: false }))
-      ]);
-
       let totalDeposits = 0;
-      if (depositsRes.ok) {
-        try {
-          const depositsData = await depositsRes.json();
-          if (depositsData.success && Array.isArray(depositsData.items)) {
-            totalDeposits = depositsData.items.reduce((sum, dep) => {
-              return sum + parseFloat(dep.amount || 0);
-            }, 0);
-          }
-        } catch (err) {
-          console.error('Error parsing deposits:', err);
-        }
-      }
-
       let totalWithdrawals = 0;
-      if (withdrawalsRes.ok) {
-        try {
-          const withdrawalsData = await withdrawalsRes.json();
-          if (withdrawalsData.ok && Array.isArray(withdrawalsData.items)) {
-            totalWithdrawals = withdrawalsData.items.reduce((sum, wd) => {
-              return sum + parseFloat(wd.amount || 0);
-            }, 0);
+      
+      try {
+        const [depositsRes, withdrawalsRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/deposits/my?status=approved&limit=1000`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }).catch((err) => {
+            console.error('Error fetching deposits:', err);
+            return { ok: false };
+          }),
+          fetch(`${API_BASE_URL}/withdrawals/my?status=approved&limit=1000`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }).catch((err) => {
+            console.error('Error fetching withdrawals:', err);
+            return { ok: false };
+          })
+        ]);
+
+        if (depositsRes.ok) {
+          try {
+            const depositsData = await depositsRes.json();
+            if (depositsData.success && Array.isArray(depositsData.items)) {
+              totalDeposits = depositsData.items.reduce((sum, dep) => {
+                return sum + parseFloat(dep.amount || 0);
+              }, 0);
+            } else if (depositsData.success && Array.isArray(depositsData.data)) {
+              // Fallback: check if data is in data array
+              totalDeposits = depositsData.data.reduce((sum, dep) => {
+                return sum + parseFloat(dep.amount || 0);
+              }, 0);
+            }
+          } catch (err) {
+            console.error('Error parsing deposits:', err);
           }
-        } catch (err) {
-          console.error('Error parsing withdrawals:', err);
+        } else {
+          console.warn('Deposits API returned non-OK status:', depositsRes.status);
         }
+
+        if (withdrawalsRes.ok) {
+          try {
+            const withdrawalsData = await withdrawalsRes.json();
+            if (withdrawalsData.success && Array.isArray(withdrawalsData.items)) {
+              totalWithdrawals = withdrawalsData.items.reduce((sum, wd) => {
+                return sum + parseFloat(wd.amount || 0);
+              }, 0);
+            } else if (withdrawalsData.success && Array.isArray(withdrawalsData.data)) {
+              // Fallback: check if data is in data array
+              totalWithdrawals = withdrawalsData.data.reduce((sum, wd) => {
+                return sum + parseFloat(wd.amount || 0);
+              }, 0);
+            } else if (withdrawalsData.ok && Array.isArray(withdrawalsData.items)) {
+              // Another fallback format
+              totalWithdrawals = withdrawalsData.items.reduce((sum, wd) => {
+                return sum + parseFloat(wd.amount || 0);
+              }, 0);
+            }
+          } catch (err) {
+            console.error('Error parsing withdrawals:', err);
+          }
+        } else {
+          console.warn('Withdrawals API returned non-OK status:', withdrawalsRes.status);
+        }
+      } catch (error) {
+        console.error('Error fetching deposits/withdrawals:', error);
       }
 
+      // Stop loading immediately - we're using stored data so it's instant
+      // No need to wait, data is already available from accounts list
       setSummaryTotals({
         totalBalance,
         totalCredit,
@@ -198,13 +249,20 @@ function Dashboard() {
     }
   }, [accounts, accountBalances]);
 
-  // Fetch accounts from API
+  // Fetch accounts from API - IMMEDIATELY on mount
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
+        // Set loading state IMMEDIATELY when user logs in
+        setSummaryTotals(prev => ({ ...prev, loading: true }));
+        
         const token = authService.getToken();
-        if (!token) return;
+        if (!token) {
+          setSummaryTotals(prev => ({ ...prev, loading: false }));
+          return;
+        }
 
+        // Fetch accounts first
         const response = await fetch(`${API_BASE_URL}/accounts`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -222,33 +280,58 @@ function Dashboard() {
           });
           setAccounts(activeAccounts);
 
-          // Fetch balance for all real accounts only
+          // Use stored balance data IMMEDIATELY - no waiting for API calls
           const realAccounts = activeAccounts.filter(acc => !acc.is_demo);
           if (realAccounts.length > 0) {
-            // Fetch all balances and collect results
+            // Use account's stored balance IMMEDIATELY (from accounts list)
             const balanceResults = {};
-            const balancePromises = realAccounts.map(async (acc) => {
-              const result = await fetchAccountBalance(acc.account_number);
-              if (result) {
-                balanceResults[acc.account_number] = result;
-              }
+            realAccounts.forEach(acc => {
+              // Use stored balance data right away - instant display
+              balanceResults[acc.account_number] = {
+                balance: parseFloat(acc.balance || 0),
+                credit: parseFloat(acc.credit || 0),
+                equity: parseFloat(acc.equity || 0)
+              };
             });
-            await Promise.all(balancePromises);
             
-            // Calculate summary with fetched balances (show loading only on first calculation)
-            await calculateSummaryTotals(balanceResults, true);
+            // Calculate and display IMMEDIATELY with stored data (no loading, instant)
+            await calculateSummaryTotals(balanceResults, false);
+            
+            // Fetch fresh balances in background (silent update, no loading state)
+            realAccounts.forEach(acc => {
+              fetchAccountBalance(acc.account_number).then(result => {
+                if (result) {
+                  // Update silently in background
+                  setAccountBalances(prev => ({
+                    ...prev,
+                    [acc.account_number]: result
+                  }));
+                  // Recalculate with fresh data silently
+                  calculateSummaryTotals({
+                    ...balanceResults,
+                    [acc.account_number]: result
+                  }, false);
+                }
+              }).catch(() => {
+                // Silent fail, keep using stored balance
+              });
+            });
           } else {
             // Still calculate summary for deposits/withdrawals even if no accounts
             await calculateSummaryTotals(null, true);
           }
+        } else {
+          setSummaryTotals(prev => ({ ...prev, loading: false }));
         }
       } catch (error) {
         console.error('Error fetching accounts:', error);
+        setSummaryTotals(prev => ({ ...prev, loading: false }));
       } finally {
         setLoadingAccounts(false);
       }
     };
 
+    // Fetch immediately on mount
     fetchAccounts();
   }, []);
 
@@ -488,7 +571,15 @@ function Dashboard() {
                 Total Balance
               </div>
               <div className="text-gray-900 font-bold text-xs">
-                {summaryTotals.loading ? '...' : `${summaryTotals.totalBalance.toFixed(2)} USD`}
+                {summaryTotals.loading ? (
+                  <span className="inline-flex items-center">
+                    <span className="animate-pulse">●</span>
+                    <span className="animate-pulse delay-75">●</span>
+                    <span className="animate-pulse delay-150">●</span>
+                  </span>
+                ) : (
+                  `${summaryTotals.totalBalance.toFixed(2)} USD`
+                )}
               </div>
             </div>
 
@@ -512,8 +603,16 @@ function Dashboard() {
               <div className="text-gray-700 font-medium text-xs mb-2">
                 Total Credit
               </div>
-              <div className="text-gray-900 font-bold text-xs">
-                {summaryTotals.loading ? '...' : `${summaryTotals.totalCredit.toFixed(2)} USD`}
+              <div className="text-gray-900 font-bold text-xs min-h-[16px]">
+                {summaryTotals.loading ? (
+                  <span className="inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                  </span>
+                ) : (
+                  `${summaryTotals.totalCredit.toFixed(2)} USD`
+                )}
               </div>
             </div>
             <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
@@ -532,8 +631,16 @@ function Dashboard() {
               <div className="text-gray-700 font-medium text-xs mb-2">
                 Total Equity
               </div>
-              <div className="text-gray-900 font-bold text-xs">
-                {summaryTotals.loading ? '...' : `${summaryTotals.totalEquity.toFixed(2)} USD`}
+              <div className="text-gray-900 font-bold text-xs min-h-[16px]">
+                {summaryTotals.loading ? (
+                  <span className="inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                  </span>
+                ) : (
+                  `${summaryTotals.totalEquity.toFixed(2)} USD`
+                )}
               </div>
             </div>
             <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
@@ -552,8 +659,16 @@ function Dashboard() {
               <div className="text-gray-700 font-medium text-xs mb-2">
                 Total Deposits
               </div>
-              <div className="text-gray-900 font-bold text-xs">
-                {summaryTotals.loading ? '...' : `${summaryTotals.totalDeposits.toFixed(2)} USD`}
+              <div className="text-gray-900 font-bold text-xs min-h-[16px]">
+                {summaryTotals.loading ? (
+                  <span className="inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                  </span>
+                ) : (
+                  `${summaryTotals.totalDeposits.toFixed(2)} USD`
+                )}
               </div>
             </div>
             <div className="flex items-center justify-center bg-[#dff8f4] md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
@@ -572,8 +687,16 @@ function Dashboard() {
               <div className="text-gray-700 font-medium text-xs mb-2">
                 Total Withdrawals
               </div>
-              <div className="text-gray-900 font-bold text-xs">
-                {summaryTotals.loading ? '...' : `${summaryTotals.totalWithdrawals.toFixed(2)} USD`}
+              <div className="text-gray-900 font-bold text-xs min-h-[16px]">
+                {summaryTotals.loading ? (
+                  <span className="inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                  </span>
+                ) : (
+                  `${summaryTotals.totalWithdrawals.toFixed(2)} USD`
+                )}
               </div>
             </div>
             <div className="flex items-center justify-center bg-[#ffecec] md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
