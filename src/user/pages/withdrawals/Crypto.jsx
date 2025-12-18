@@ -20,13 +20,16 @@ function Crypto() {
   const [selectedNetwork, setSelectedNetwork] = useState('TRC20')
   const [kycStatus, setKycStatus] = useState(null)
   const [kycLoading, setKycLoading] = useState(true)
+  const [amountError, setAmountError] = useState('')
 
   useEffect(() => {
     checkKYCStatus()
   }, [])
 
   useEffect(() => {
-    if (kycStatus === 'approved') {
+    // Only fetch accounts and wallet if KYC is approved (case-insensitive check)
+    const status = String(kycStatus || '').toLowerCase()
+    if (status === 'approved') {
       fetchAccounts()
       fetchWallet()
     }
@@ -50,7 +53,9 @@ function Crypto() {
       if (response.ok) {
         const data = await response.json()
         if (data.success && data.data) {
-          setKycStatus(data.data.status || 'unverified')
+          // Normalize status to lowercase for consistent checking
+          const status = (data.data.status || 'unverified').toLowerCase()
+          setKycStatus(status)
         } else {
           setKycStatus('unverified')
         }
@@ -126,6 +131,11 @@ function Crypto() {
       return
     }
 
+    if (amountError) {
+      Swal.fire('Error', amountError, 'error')
+      return
+    }
+
     if (!password) {
       Swal.fire('Error', 'Please enter your password', 'error')
       return
@@ -182,7 +192,58 @@ function Crypto() {
     }
   }
 
-  const isKYCApproved = kycStatus === 'approved'
+  // Check if KYC is approved (case-insensitive)
+  const isKYCApproved = String(kycStatus || '').toLowerCase() === 'approved'
+
+  // Get selected account limits
+  const getSelectedAccountLimits = () => {
+    if (accountType === 'trading' && selectedAccount) {
+      return {
+        min: selectedAccount.minimum_withdrawal ? parseFloat(selectedAccount.minimum_withdrawal) : null,
+        max: selectedAccount.maximum_withdrawal ? parseFloat(selectedAccount.maximum_withdrawal) : null
+      };
+    }
+    return { min: null, max: null };
+  };
+
+  // Format limits for display
+  const formatLimits = () => {
+    const limits = getSelectedAccountLimits();
+    if (limits.min === null && limits.max === null) {
+      return 'USD 10 - USD 20000';
+    }
+    if (limits.max === null) {
+      return `USD ${limits.min.toFixed(2)} - No maximum`;
+    }
+    return `USD ${limits.min.toFixed(2)} - USD ${limits.max.toFixed(2)}`;
+  };
+
+  // Validate amount
+  useEffect(() => {
+    if (!amount || amount === '') {
+      setAmountError('');
+      return;
+    }
+
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      setAmountError('Please enter a valid amount');
+      return;
+    }
+
+    const limits = getSelectedAccountLimits();
+    if (limits.min !== null && amountNum < limits.min) {
+      setAmountError(`Minimum withdrawal is $${limits.min.toFixed(2)}`);
+      return;
+    }
+
+    if (limits.max !== null && amountNum > limits.max) {
+      setAmountError(`Maximum withdrawal is $${limits.max.toFixed(2)}`);
+      return;
+    }
+
+    setAmountError('');
+  }, [amount, selectedAccount, accountType]);
 
   return (
     <div className="min-h-screen p-4 sm:p-6 overflow-x-hidden relative" style={{ background: 'linear-gradient(to right, #E5E7EB 0%, #FFFFFF 20%, #FFFFFF 80%, #E5E7EB 100%)' }}>
@@ -303,6 +364,11 @@ function Crypto() {
                           </div>
                         </div>
                         <p className="text-gray-600 text-sm mt-2">Balance: {acc.currency} {parseFloat(acc.balance || 0).toFixed(2)}</p>
+                        {accountType === 'trading' && selectedAccount?.id === acc.id && (acc.minimum_withdrawal !== null || acc.maximum_withdrawal !== null) && (
+                          <p className="text-gray-500 text-xs mt-1">
+                            Withdrawal limits: {acc.minimum_withdrawal ? `$${parseFloat(acc.minimum_withdrawal).toFixed(2)}` : '$0.00'} - {acc.maximum_withdrawal ? `$${parseFloat(acc.maximum_withdrawal).toFixed(2)}` : 'No maximum'}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center">
                         <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${accountType === 'trading' && selectedAccount?.id === acc.id ? 'border-[#009688] bg-[#009688]' : 'border-gray-300'
@@ -345,11 +411,11 @@ function Crypto() {
               {/* Amount Section */}
               <h3 className="text-lg font-semibold mt-4">Amount</h3>
               <p className="text-gray-500 text-sm mt-1">
-                Transaction limit: USD 10 - USD 20000
+                Transaction limit: {formatLimits()}
               </p>
 
               {/* Currency & Amount Input */}
-              <div className="mt-2 border rounded-xl flex items-center p-3 bg-white">
+              <div className={`mt-2 border rounded-xl flex items-center p-3 bg-white ${amountError ? 'border-red-500' : ''}`}>
                 <div className="flex items-center gap-2">
                   <img src="https://flagsapi.com/US/flat/24.png" className="w-5 h-5" alt="USD" />
                   <span className="font-medium text-gray-700">USD</span>
@@ -357,6 +423,8 @@ function Crypto() {
                 <div className="ml-auto">
                   <input
                     type="number"
+                    step="0.01"
+                    min="0"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     className="text-right bg-transparent outline-none w-32"
@@ -364,6 +432,9 @@ function Crypto() {
                   />
                 </div>
               </div>
+              {amountError && (
+                <p className="text-red-600 text-sm mt-1">{amountError}</p>
+              )}
 
               {/* Quick Amount Buttons */}
               <div className="flex gap-3 mt-2 flex-wrap">
@@ -423,8 +494,8 @@ function Crypto() {
               {/* Continue Button */}
               <button
                 type="submit"
-                disabled={loading}
-                className={`w-full mt-3 py-2.5 rounded-lg font-semibold transition-colors ${!loading
+                disabled={loading || !!amountError || !amount || parseFloat(amount) <= 0}
+                className={`w-full mt-3 py-2.5 rounded-lg font-semibold transition-colors ${!loading && !amountError && amount && parseFloat(amount) > 0
                   ? 'bg-brand-500 hover:bg-brand-600 text-dark-base cursor-pointer'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}

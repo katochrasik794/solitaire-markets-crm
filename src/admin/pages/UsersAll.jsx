@@ -73,7 +73,7 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
           role: u.role,
           status: u.status,
           emailVerified: u.emailVerified ? "Yes" : "No",
-          kycVerified: (u.KYC?.verificationStatus === 'Approved' || u.KYC?.verificationStatus === 'Verified') ? 'Yes' : 'No',
+          kycVerified: (u.KYC?.verificationStatus && String(u.KYC.verificationStatus).toLowerCase() === 'approved') ? 'Yes' : 'No',
           createdAt: u.createdAt,
           lastLoginAt: u.lastLoginAt,
         })));
@@ -251,15 +251,38 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
       const data = await r.json();
       if (!data?.ok) throw new Error(data?.error || 'Failed');
       setRows(list => list.map(it => it.id===state.id ? { ...it, name: state.name, phone: state.phone, country: state.country, status: state.status } : it));
-      // KYC verify if toggled
-      if (state.kycVerified) {
+      
+      // Update KYC verification status based on checkbox
+      const wasKycApproved = user.KYC?.verificationStatus && String(user.KYC.verificationStatus).toLowerCase() === 'approved';
+      if (state.kycVerified !== wasKycApproved) {
         try {
-          await fetch(`${BASE}/admin/users/${state.id}/kyc-verify`, {
+          const kycRes = await fetch(`${BASE}/admin/users/${state.id}/kyc-verify`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ verified: true })
+            body: JSON.stringify({ verified: state.kycVerified })
           });
-        } catch {}
+          const kycData = await kycRes.json();
+          if (kycData?.ok) {
+            // Update the row's KYC status in the list
+            setRows(list => list.map(it => {
+              if (it.id === state.id) {
+                return {
+                  ...it,
+                  KYC: {
+                    verificationStatus: state.kycVerified ? 'approved' : 'pending',
+                    isDocumentVerified: state.kycVerified,
+                    isAddressVerified: state.kycVerified
+                  },
+                  kycVerified: state.kycVerified ? 'Yes' : 'No'
+                };
+              }
+              return it;
+            }));
+          }
+        } catch (kycErr) {
+          console.error('KYC update error:', kycErr);
+          // Don't fail the whole update if KYC update fails
+        }
       }
       setEditing(null);
       
@@ -415,13 +438,16 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
 }
 
 function UserEditForm({ user, onCancel, onSubmit }) {
+  // Initialize KYC verified based on user's current KYC status
+  const isKycApproved = user.KYC?.verificationStatus && String(user.KYC.verificationStatus).toLowerCase() === 'approved';
+  
   const [state, setState] = useState({
     id: user.id,
     name: user.name || "",
     phone: user.phone || "",
     country: user.country || "",
     status: user.status || "active",
-    kycVerified: false,
+    kycVerified: isKycApproved,
   });
   return (
     <form onSubmit={e=>{e.preventDefault(); onSubmit(state);}} className="space-y-4">

@@ -58,7 +58,7 @@ export default function KycList(){
             country: u.country || '-',
             isDocumentVerified: false,
             isAddressVerified: false,
-            verificationStatus: 'Pending',
+            verificationStatus: 'pending',
             documentReference: null,
             addressReference: null,
             documentSubmittedAt: null,
@@ -112,11 +112,11 @@ export default function KycList(){
       }
 
       await applyChange(row.id, {
-        verificationStatus: next ? 'Approved' : 'Pending',
+        verificationStatus: next ? 'approved' : 'pending',
         ...(documentReference ? { documentReference } : {}),
         ...(addressReference ? { addressReference } : {}),
       });
-      setRows(list=> list.map(it=> it.id===row.id?{...it, verificationStatus: next?'Approved':'Pending', documentReference: documentReference||it.documentReference, addressReference: addressReference||it.addressReference}:it));
+      setRows(list=> list.map(it=> it.id===row.id?{...it, verificationStatus: next?'approved':'pending', documentReference: documentReference||it.documentReference, addressReference: addressReference||it.addressReference}:it));
       setConfirm(null);
       setDocFile(null); setAddrFile(null); setDocLink(""); setAddrLink("");
       
@@ -187,9 +187,9 @@ export default function KycList(){
   async function onRejectKyc(row){
     try{
       await applyChange(row.id, {
-        verificationStatus: 'Rejected'
+        verificationStatus: 'rejected'
       });
-      setRows(list=> list.map(it=> it.id===row.id?{...it, verificationStatus: 'Rejected'}:it));
+      setRows(list=> list.map(it=> it.id===row.id?{...it, verificationStatus: 'rejected'}:it));
       
       // Show success message
       Swal.fire({
@@ -224,10 +224,12 @@ export default function KycList(){
       let displayStatus = v;
       let badgeTone = 'amber';
       
-      if (v === 'Approved' || v === 'Verified') {
+      // Check lowercase for database consistency
+      const status = String(v || '').toLowerCase();
+      if (status === 'approved') {
         displayStatus = 'Verified';
         badgeTone = 'green';
-      } else if (v === 'Rejected') {
+      } else if (status === 'rejected') {
         displayStatus = 'Unverified';
         badgeTone = 'red';
       } else {
@@ -240,44 +242,57 @@ export default function KycList(){
     { key:'documentSubmittedAt', label:'Doc Submitted', render:(v,row)=> row.documentReference ? <a className="text-violet-700 hover:underline" href={row.documentReference} target="_blank" rel="noreferrer">{fmt(v)}</a> : fmt(v) },
     { key:'addressSubmittedAt', label:'Addr Submitted', render:(v,row)=> row.addressReference ? <a className="text-violet-700 hover:underline" href={row.addressReference} target="_blank" rel="noreferrer">{fmt(v)}</a> : fmt(v) },
     { key:'createdAt', label:'Created', render:fmt },
-    { key:'actions', label:'Actions', sortable:false, render:(v,row)=> (
-      <div className="flex items-center gap-3">
-        {row.verificationStatus === 'Approved' || row.verificationStatus === 'Verified' ? (
-          <div className="flex flex-col items-center gap-1">
-            <button onClick={()=>setConfirm({row, next: false})}
-                    className="h-8 px-3 rounded-md border border-amber-200 text-amber-700 hover:bg-amber-50 inline-flex items-center gap-1">
-              <ShieldX size={16}/> Unapprove
-            </button>
-            <span className="text-xs text-gray-500">Unapprove</span>
-          </div>
-        ) : (
-          <>
+    { key:'actions', label:'Actions', sortable:false, render:(v,row)=> {
+      // Check lowercase for database consistency
+      const status = String(row.verificationStatus || '').toLowerCase();
+      const isApproved = status === 'approved';
+      
+      return (
+        <div className="flex items-center gap-3">
+          {isApproved ? (
             <div className="flex flex-col items-center gap-1">
-              <button onClick={()=>setConfirm({row, next: true})}
-                      className="h-8 px-3 rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 inline-flex items-center gap-1">
-                <CheckCircle size={16}/> Approve
+              <button onClick={()=>setConfirm({row, next: false})}
+                      className="h-8 px-3 rounded-md border border-amber-200 text-amber-700 hover:bg-amber-50 inline-flex items-center gap-1">
+                <ShieldX size={16}/> Unapprove
               </button>
-              <span className="text-xs text-gray-500">Approve</span>
+              <span className="text-xs text-gray-500">Unapprove</span>
             </div>
-            <div className="flex flex-col items-center gap-1">
-              <button onClick={()=>onRejectKyc(row)}
-                      className="h-8 px-3 rounded-md border border-red-200 text-red-700 hover:bg-red-50 inline-flex items-center gap-1">
-                <XCircle size={16}/> Reject
-              </button>
-              <span className="text-xs text-gray-500">Reject</span>
-            </div>
-          </>
-        )}
-      </div>
-    )},
+          ) : (
+            <>
+              <div className="flex flex-col items-center gap-1">
+                <button onClick={()=>setConfirm({row, next: true})}
+                        className="h-8 px-3 rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 inline-flex items-center gap-1">
+                  <CheckCircle size={16}/> Approve
+                </button>
+                <span className="text-xs text-gray-500">Approve</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <button onClick={()=>onRejectKyc(row)}
+                        className="h-8 px-3 rounded-md border border-red-200 text-red-700 hover:bg-red-50 inline-flex items-center gap-1">
+                  <XCircle size={16}/> Reject
+                </button>
+                <span className="text-xs text-gray-500">Reject</span>
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }},
   ],[]);
 
   const filters = useMemo(()=>({
     searchKeys:['name','email','country','verificationStatus'],
   }),[]);
 
-  const verifiedRows = useMemo(() => rows.filter(r => r.verificationStatus === 'Approved' || r.verificationStatus === 'Verified'), [rows]);
-  const unverifiedRows = useMemo(() => rows.filter(r => r.verificationStatus !== 'Approved' && r.verificationStatus !== 'Verified'), [rows]);
+  // Filter rows based on lowercase status for database consistency
+  const verifiedRows = useMemo(() => rows.filter(r => {
+    const status = String(r.verificationStatus || '').toLowerCase();
+    return status === 'approved';
+  }), [rows]);
+  const unverifiedRows = useMemo(() => rows.filter(r => {
+    const status = String(r.verificationStatus || '').toLowerCase();
+    return status !== 'approved';
+  }), [rows]);
 
   if(loading) return <div className="rounded-xl bg-white border border-gray-200 p-4">Loading KYC…</div>;
   if(err) return <div className="rounded-xl bg-white border border-rose-200 text-rose-700 p-4">{err}</div>;

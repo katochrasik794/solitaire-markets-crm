@@ -22,6 +22,8 @@ export default function GroupManagement() {
   const [filterActive, setFilterActive] = useState("");
   const [editModal, setEditModal] = useState(null); // { id, group, dedicated_name }
   const [savingDedicatedName, setSavingDedicatedName] = useState(false);
+  const [limitsModal, setLimitsModal] = useState(null); // { id, group, minimum_deposit, maximum_deposit, minimum_withdrawal, maximum_withdrawal }
+  const [savingLimits, setSavingLimits] = useState(false);
 
   // Backend base URL (Express server runs on 5000 with /api prefix)
   const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
@@ -217,6 +219,114 @@ export default function GroupManagement() {
     }
   }, [BASE, editModal, loadGroups, savingDedicatedName]);
 
+  const handleEditLimits = useCallback((row) => {
+    setLimitsModal({
+      id: row.id,
+      group: row.group,
+      minimum_deposit: row.minimum_deposit || 0,
+      maximum_deposit: row.maximum_deposit || null,
+      minimum_withdrawal: row.minimum_withdrawal || 0,
+      maximum_withdrawal: row.maximum_withdrawal || null
+    });
+  }, []);
+
+  const handleSaveLimits = useCallback(async () => {
+    if (!limitsModal || savingLimits) return;
+
+    // Validate limits
+    if (limitsModal.minimum_deposit < 0 || limitsModal.minimum_withdrawal < 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Minimum values must be >= 0',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    if (limitsModal.maximum_deposit !== null && limitsModal.maximum_deposit < 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Maximum deposit must be >= 0',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    if (limitsModal.maximum_withdrawal !== null && limitsModal.maximum_withdrawal < 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Maximum withdrawal must be >= 0',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    if (limitsModal.maximum_deposit !== null && limitsModal.minimum_deposit > limitsModal.maximum_deposit) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Minimum deposit must be <= maximum deposit',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    if (limitsModal.maximum_withdrawal !== null && limitsModal.minimum_withdrawal > limitsModal.maximum_withdrawal) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Minimum withdrawal must be <= maximum withdrawal',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    try {
+      setSavingLimits(true);
+      const token = localStorage.getItem('adminToken');
+
+      const response = await axios.put(
+        `${BASE}/admin/group-management/${limitsModal.id}/limits`,
+        {
+          minimum_deposit: parseFloat(limitsModal.minimum_deposit) || 0,
+          maximum_deposit: limitsModal.maximum_deposit === '' || limitsModal.maximum_deposit === null ? null : parseFloat(limitsModal.maximum_deposit),
+          minimum_withdrawal: parseFloat(limitsModal.minimum_withdrawal) || 0,
+          maximum_withdrawal: limitsModal.maximum_withdrawal === '' || limitsModal.maximum_withdrawal === null ? null : parseFloat(limitsModal.maximum_withdrawal)
+        },
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      if (!response.data?.ok) {
+        throw new Error(response.data?.error || "Failed to update limits");
+      }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Group limits updated successfully',
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      setLimitsModal(null);
+      // Reload groups
+      await loadGroups();
+    } catch (e) {
+      console.error("Update limits failed:", e);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: e.message || "Failed to update limits",
+        confirmButtonText: 'OK'
+      });
+    } finally {
+      setSavingLimits(false);
+    }
+  }, [BASE, limitsModal, loadGroups, savingLimits]);
+
   const columns = useMemo(() => [
     { key: "__index", label: "Sr No", sortable: false },
     { key: "group", label: "Group Name" },
@@ -241,6 +351,26 @@ export default function GroupManagement() {
     },
     { key: "margin_call", label: "Margin Call", render: (v) => v ? `${v}%` : "-" },
     { key: "margin_stop_out", label: "Margin Stop Out", render: (v) => v ? `${v}%` : "-" },
+    { 
+      key: "minimum_deposit", 
+      label: "Min Deposit", 
+      render: (v) => v !== null && v !== undefined ? `$${parseFloat(v).toFixed(2)}` : "-" 
+    },
+    { 
+      key: "maximum_deposit", 
+      label: "Max Deposit", 
+      render: (v) => v !== null && v !== undefined ? `$${parseFloat(v).toFixed(2)}` : "No max" 
+    },
+    { 
+      key: "minimum_withdrawal", 
+      label: "Min Withdrawal", 
+      render: (v) => v !== null && v !== undefined ? `$${parseFloat(v).toFixed(2)}` : "-" 
+    },
+    { 
+      key: "maximum_withdrawal", 
+      label: "Max Withdrawal", 
+      render: (v) => v !== null && v !== undefined ? `$${parseFloat(v).toFixed(2)}` : "No max" 
+    },
     { key: "synced_at", label: "Last Synced", render: (v) => fmtDate(v) },
     {
       key: "is_active", label: "Status", render: (v) => (
@@ -262,6 +392,17 @@ export default function GroupManagement() {
             <span className="text-xs">View</span>
           </button>
           <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEditLimits(row);
+            }}
+            className="flex flex-col items-center gap-1 px-2 py-1 rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 transition-colors"
+            title="Edit Limits"
+          >
+            <Pencil size={16} />
+            <span className="text-xs">Limits</span>
+          </button>
+          <button
             onClick={() => handleToggleActive(row)}
             className={`flex flex-col items-center gap-1 px-2 py-1 rounded-md border transition-colors ${row.is_active
               ? 'border-orange-200 text-orange-700 hover:bg-orange-50'
@@ -275,7 +416,7 @@ export default function GroupManagement() {
         </div>
       )
     },
-  ], [handleView, handleToggleActive, handleEditDedicatedName]);
+  ], [handleView, handleToggleActive, handleEditDedicatedName, handleEditLimits]);
 
   const filters = useMemo(() => ({
     searchKeys: ["group", "company", "currency"],
@@ -451,6 +592,38 @@ export default function GroupManagement() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Created At</label>
                 <div className="px-3 py-2 bg-gray-50 rounded-md">{fmtDate(viewModal.created_at)}</div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Deposit</label>
+                <div className="px-3 py-2 bg-gray-50 rounded-md">
+                  {viewModal.minimum_deposit !== null && viewModal.minimum_deposit !== undefined 
+                    ? `$${parseFloat(viewModal.minimum_deposit).toFixed(2)}` 
+                    : "-"}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Deposit</label>
+                <div className="px-3 py-2 bg-gray-50 rounded-md">
+                  {viewModal.maximum_deposit !== null && viewModal.maximum_deposit !== undefined 
+                    ? `$${parseFloat(viewModal.maximum_deposit).toFixed(2)}` 
+                    : "No maximum"}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Withdrawal</label>
+                <div className="px-3 py-2 bg-gray-50 rounded-md">
+                  {viewModal.minimum_withdrawal !== null && viewModal.minimum_withdrawal !== undefined 
+                    ? `$${parseFloat(viewModal.minimum_withdrawal).toFixed(2)}` 
+                    : "-"}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Withdrawal</label>
+                <div className="px-3 py-2 bg-gray-50 rounded-md">
+                  {viewModal.maximum_withdrawal !== null && viewModal.maximum_withdrawal !== undefined 
+                    ? `$${parseFloat(viewModal.maximum_withdrawal).toFixed(2)}` 
+                    : "No maximum"}
+                </div>
+              </div>
             </div>
             <div className="flex justify-end gap-2">
               <button onClick={() => setViewModal(null)} className="px-4 h-10 rounded-md border">Close</button>
@@ -500,6 +673,96 @@ export default function GroupManagement() {
                   </svg>
                 )}
                 {savingDedicatedName ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Edit Limits Modal */}
+      <Modal
+        open={!!limitsModal}
+        onClose={savingLimits ? undefined : () => setLimitsModal(null)}
+        title={`Edit Limits: ${limitsModal?.group || ''}`}
+      >
+        {limitsModal && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Deposit ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={limitsModal.minimum_deposit}
+                  onChange={(e) => setLimitsModal({ ...limitsModal, minimum_deposit: e.target.value })}
+                  placeholder="0.00"
+                  disabled={savingLimits}
+                  className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Deposit ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={limitsModal.maximum_deposit || ''}
+                  onChange={(e) => setLimitsModal({ ...limitsModal, maximum_deposit: e.target.value === '' ? null : e.target.value })}
+                  placeholder="Leave empty for no max"
+                  disabled={savingLimits}
+                  className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">Leave empty for no maximum</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Withdrawal ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={limitsModal.minimum_withdrawal}
+                  onChange={(e) => setLimitsModal({ ...limitsModal, minimum_withdrawal: e.target.value })}
+                  placeholder="0.00"
+                  disabled={savingLimits}
+                  className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Withdrawal ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={limitsModal.maximum_withdrawal || ''}
+                  onChange={(e) => setLimitsModal({ ...limitsModal, maximum_withdrawal: e.target.value === '' ? null : e.target.value })}
+                  placeholder="Leave empty for no max"
+                  disabled={savingLimits}
+                  className="w-full rounded-md border border-gray-300 h-10 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">Leave empty for no maximum</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setLimitsModal(null)}
+                disabled={savingLimits}
+                className="px-4 h-10 rounded-md border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveLimits}
+                disabled={savingLimits}
+                className="px-4 h-10 rounded-md bg-brand-500 text-dark-base hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {savingLimits && (
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+                {savingLimits ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>

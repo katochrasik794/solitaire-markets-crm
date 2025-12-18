@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { ArrowLeftRight } from 'lucide-react'
 import authService from '../../services/auth.js'
 import Toast from '../../components/Toast.jsx'
@@ -6,6 +6,7 @@ import PageHeader from '../components/PageHeader.jsx'
 import ProTable from '../../admin/components/ProTable.jsx'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const DAILY_TRANSFER_LIMIT = 10000 // Default daily limit in USD
 
 function Transfers() {
   const [fromAccount, setFromAccount] = useState('')
@@ -44,6 +45,12 @@ function Transfers() {
   const [internalPageSize, setInternalPageSize] = useState(10)
 
   const [toast, setToast] = useState(null)
+  
+  // Daily transfer limit state
+  const [dailyTransferUsed, setDailyTransferUsed] = useState(0)
+  const [remainingTime, setRemainingTime] = useState(null)
+  const [limitExceeded, setLimitExceeded] = useState(false)
+  const countdownIntervalRef = useRef(null)
 
   // Fetch balance for a specific MT5 account from API
   const fetchAccountBalance = async (accountNumber) => {
@@ -89,6 +96,88 @@ function Transfers() {
     await Promise.all(promises)
     setMt5Balances(balances)
   }
+
+  // Calculate daily transfer used from internal transfers
+  const calculateDailyTransferUsed = (transfers) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    const todayTransfers = transfers.filter(transfer => {
+      const transferDate = new Date(transfer.created_at)
+      transferDate.setHours(0, 0, 0, 0)
+      return transferDate.getTime() === today.getTime()
+    })
+    
+    const totalUsed = todayTransfers.reduce((sum, transfer) => {
+      return sum + parseFloat(transfer.amount || 0)
+    }, 0)
+    
+    return totalUsed
+  }
+
+  // Calculate remaining time until next day
+  const calculateRemainingTime = () => {
+    const now = new Date()
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+    
+    const diff = tomorrow.getTime() - now.getTime()
+    return diff
+  }
+
+  // Format time remaining as HH:MM:SS
+  const formatTimeRemaining = (ms) => {
+    const totalSeconds = Math.floor(ms / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+  }
+
+  // Update countdown timer
+  useEffect(() => {
+    if (limitExceeded) {
+      const updateCountdown = () => {
+        const remaining = calculateRemainingTime()
+        setRemainingTime(remaining)
+        
+        if (remaining <= 0) {
+          // Reset limit for new day
+          setLimitExceeded(false)
+          setDailyTransferUsed(0)
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current)
+            countdownIntervalRef.current = null
+          }
+        }
+      }
+      
+      updateCountdown()
+      countdownIntervalRef.current = setInterval(updateCountdown, 1000)
+      
+      return () => {
+        if (countdownIntervalRef.current) {
+          clearInterval(countdownIntervalRef.current)
+        }
+      }
+    }
+  }, [limitExceeded])
+
+  // Check daily limit when internal transfers load
+  useEffect(() => {
+    if (internalTransfers.length > 0) {
+      const used = calculateDailyTransferUsed(internalTransfers)
+      setDailyTransferUsed(used)
+      
+      if (used >= DAILY_TRANSFER_LIMIT) {
+        setLimitExceeded(true)
+        setRemainingTime(calculateRemainingTime())
+      } else {
+        setLimitExceeded(false)
+      }
+    }
+  }, [internalTransfers])
 
   // Load wallet + MT5 accounts + all transactions for client-side filtering
   useEffect(() => {
@@ -427,6 +516,20 @@ function Transfers() {
       return
     }
 
+    // Check daily transfer limit
+    const transferAmount = parseFloat(amount)
+    const newTotal = dailyTransferUsed + transferAmount
+    
+    if (newTotal > DAILY_TRANSFER_LIMIT) {
+      const remaining = DAILY_TRANSFER_LIMIT - dailyTransferUsed
+      const timeRemaining = remainingTime ? formatTimeRemaining(remainingTime) : 'calculating...'
+      setToast({
+        message: `Daily transfer limit exceeded. You can transfer up to $${remaining.toFixed(2)} more today. Please wait for ${timeRemaining} for the limit to reset.`,
+        type: 'error',
+      })
+      return
+    }
+
     const mt5Account = isFromWallet ? toAccount : fromAccount
 
     setSubmitting(true)
@@ -494,7 +597,17 @@ function Transfers() {
       const internalRes = await fetch(`${API_BASE_URL}/wallet/internal-transfers?limit=1000&offset=0`, { headers })
       const internalData = await internalRes.json()
       if (internalData.success && internalData.data) {
-        setInternalTransfers(internalData.data.items || [])
+        const updatedTransfers = internalData.data.items || []
+        setInternalTransfers(updatedTransfers)
+        
+        // Update daily transfer used
+        const used = calculateDailyTransferUsed(updatedTransfers)
+        setDailyTransferUsed(used)
+        
+        if (used >= DAILY_TRANSFER_LIMIT) {
+          setLimitExceeded(true)
+          setRemainingTime(calculateRemainingTime())
+        }
       }
 
       // Reset form
@@ -625,6 +738,59 @@ function Transfers() {
         >
           Move Funds
         </h1>
+
+        {/* Daily Transfer Limit Indicator */}
+        <div className="mb-4 px-4 md:px-6">
+          <div className={`rounded-lg p-4 border-2 ${
+            limitExceeded 
+              ? 'bg-red-50 border-red-300' 
+              : dailyTransferUsed > DAILY_TRANSFER_LIMIT * 0.8
+              ? 'bg-yellow-50 border-yellow-300'
+              : 'bg-green-50 border-green-300'
+          }`}>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-gray-700">
+                  Daily Transfer Limit:
+                </span>
+                <span className={`text-sm font-bold ${
+                  limitExceeded ? 'text-red-600' : 'text-gray-900'
+                }`}>
+                  ${dailyTransferUsed.toFixed(2)} / ${DAILY_TRANSFER_LIMIT.toFixed(2)} USD
+                </span>
+                <span className="text-xs text-gray-500">
+                  ({((dailyTransferUsed / DAILY_TRANSFER_LIMIT) * 100).toFixed(1)}% used)
+                </span>
+              </div>
+              {limitExceeded && remainingTime && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-red-600">
+                    Limit Exceeded
+                  </span>
+                  <span className="text-sm font-mono font-bold text-red-700 bg-red-100 px-3 py-1 rounded">
+                    Reset in: {formatTimeRemaining(remainingTime)}
+                  </span>
+                </div>
+              )}
+            </div>
+            {!limitExceeded && (
+              <div className="mt-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all ${
+                      dailyTransferUsed > DAILY_TRANSFER_LIMIT * 0.8
+                        ? 'bg-yellow-500'
+                        : 'bg-green-500'
+                    }`}
+                    style={{
+                      width: `${Math.min((dailyTransferUsed / DAILY_TRANSFER_LIMIT) * 100, 100)}%`
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Transfer Form */}
         <div className="w-full pb-4 md:pb-6">
@@ -947,7 +1113,16 @@ function Transfers() {
                 <div className="flex justify-center">
                   <button
                     type="submit"
-                    disabled={submitting || !fromAccount || !toAccount || !amount || Number(amount) <= 0 || Number(amount) > availableBalance}
+                    disabled={
+                      submitting || 
+                      !fromAccount || 
+                      !toAccount || 
+                      !amount || 
+                      Number(amount) <= 0 || 
+                      Number(amount) > availableBalance ||
+                      limitExceeded ||
+                      (dailyTransferUsed + Number(amount)) > DAILY_TRANSFER_LIMIT
+                    }
                     className="bg-gradient-to-r from-[#e6c200] to-[#d4b000] hover:from-[#d4b000] hover:to-[#c2a000] text-gray-900 font-bold py-3 px-12 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
                     style={{
                       fontFamily: 'Roboto, sans-serif',

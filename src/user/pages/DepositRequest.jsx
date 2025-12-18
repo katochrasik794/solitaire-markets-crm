@@ -29,6 +29,7 @@ function DepositRequest() {
   const [mt5Accounts, setMt5Accounts] = useState([]);
   const [loadingAccounts, setLoadingAccounts] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
+  const [amountError, setAmountError] = useState('');
 
   useEffect(() => {
     if (gatewayId) {
@@ -111,6 +112,14 @@ function DepositRequest() {
             return platform === 'MT5' && !isDemo && (status === '' || status === 'active');
           });
           setMt5Accounts(live);
+          
+          // Debug: log accounts with limits
+          console.log('DepositRequest - Fetched accounts with limits:', live.map(acc => ({
+            account_number: acc.account_number,
+            account_type: acc.account_type,
+            minimum_deposit: acc.minimum_deposit,
+            maximum_deposit: acc.maximum_deposit
+          })));
         }
       }
     } catch (error) {
@@ -141,6 +150,79 @@ function DepositRequest() {
       currency: toCurrency
     };
   };
+
+  // Get selected account limits (accounting for current balance)
+  const getSelectedAccountLimits = () => {
+    if (formData.deposit_to === 'mt5' && formData.mt5_account_id) {
+      const selectedAccount = mt5Accounts.find(acc => acc.account_number === formData.mt5_account_id);
+      if (selectedAccount) {
+        const currentBalance = parseFloat(selectedAccount.balance || 0);
+        const maxDepositLimit = selectedAccount.maximum_deposit !== null && selectedAccount.maximum_deposit !== undefined 
+          ? parseFloat(selectedAccount.maximum_deposit) 
+          : null;
+        
+        // Effective max is the maximum deposit limit minus current balance
+        // If max is 3000 and balance is 900, user can only deposit 2100
+        let effectiveMax = maxDepositLimit;
+        if (maxDepositLimit !== null && currentBalance > 0) {
+          effectiveMax = Math.max(0, maxDepositLimit - currentBalance);
+        }
+        
+        return {
+          min: selectedAccount.minimum_deposit !== null && selectedAccount.minimum_deposit !== undefined 
+            ? parseFloat(selectedAccount.minimum_deposit) 
+            : null,
+          max: effectiveMax,
+          maxLimit: maxDepositLimit, // Store original max limit for display
+          currentBalance: currentBalance
+        };
+      }
+    }
+    return { min: null, max: null, maxLimit: null, currentBalance: 0 };
+  };
+
+  // Format limits for display (shows effective max after accounting for balance)
+  const formatLimits = () => {
+    const limits = getSelectedAccountLimits();
+    const min = limits.min !== null && limits.min !== undefined ? limits.min : 0;
+    const max = limits.max !== null && limits.max !== undefined ? limits.max : null;
+    
+    if (max === null) {
+      return `$${min.toFixed(2)} - No maximum`;
+    }
+    return `$${min.toFixed(2)} - $${max.toFixed(2)}`;
+  };
+
+  // Validate amount
+  useEffect(() => {
+    if (!formData.amount || formData.amount === '') {
+      setAmountError('');
+      return;
+    }
+
+    const amountNum = parseFloat(formData.amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      setAmountError('Please enter a valid amount');
+      return;
+    }
+
+    const limits = getSelectedAccountLimits();
+    if (limits.min !== null && amountNum < limits.min) {
+      setAmountError(`Minimum deposit is $${limits.min.toFixed(2)}`);
+      return;
+    }
+
+    if (limits.max !== null && amountNum > limits.max) {
+      if (limits.maxLimit !== null && limits.currentBalance > 0) {
+        setAmountError(`Maximum deposit is $${limits.max.toFixed(2)} (account balance + deposit cannot exceed $${limits.maxLimit.toFixed(2)})`);
+      } else {
+        setAmountError(`Only allowed to deposit $${limits.max.toFixed(2)}`);
+      }
+      return;
+    }
+
+    setAmountError('');
+  }, [formData.amount, formData.deposit_to, formData.mt5_account_id, mt5Accounts]);
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -176,6 +258,11 @@ function DepositRequest() {
 
     if (!formData.amount) {
       Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Please enter deposit amount' });
+      return;
+    }
+
+    if (amountError) {
+      Swal.fire({ icon: 'error', title: 'Validation Error', text: amountError });
       return;
     }
 
@@ -610,6 +697,24 @@ function DepositRequest() {
                       </option>
                     ))}
                   </select>
+                  {/* Show limits when MT5 account is selected */}
+                  {formData.deposit_to === 'mt5' && formData.mt5_account_id && (() => {
+                    const selectedAccount = mt5Accounts.find(acc => acc.account_number === formData.mt5_account_id);
+                    if (selectedAccount && (selectedAccount.minimum_deposit !== null || selectedAccount.maximum_deposit !== null)) {
+                      const limits = getSelectedAccountLimits();
+                      return (
+                        <p className="mt-2 text-xs text-gray-500">
+                          Deposit limits: {limits.min !== null ? `$${limits.min.toFixed(2)}` : '$0.00'} - {limits.max !== null ? `$${limits.max.toFixed(2)}` : 'No maximum'}
+                          {limits.maxLimit !== null && limits.currentBalance > 0 && (
+                            <span className="block mt-1 text-xs text-gray-400">
+                              (Max balance: ${limits.maxLimit.toFixed(2)}, Current: ${limits.currentBalance.toFixed(2)})
+                            </span>
+                          )}
+                        </p>
+                      );
+                    }
+                    return null;
+                  })()}
                   {mt5Accounts.length === 0 && (
                     <p className="mt-2 text-sm text-gray-500 italic">No MT5 accounts available</p>
                   )}
@@ -622,17 +727,33 @@ function DepositRequest() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Deposit Amount (USDT) *
             </label>
+            {formData.deposit_to === 'mt5' && formData.mt5_account_id ? (
+              <p className="text-gray-500 text-sm mb-2">
+                Transaction limit: {formatLimits()}
+              </p>
+            ) : (
+              <p className="text-gray-500 text-sm mb-2">
+                Transaction limit: No limits set
+              </p>
+            )}
             <input
               type="number"
               step="0.01"
               min="0"
               value={formData.amount}
               onChange={handleAmountChange}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all"
+              className={`w-full px-4 py-3 rounded-xl border-2 outline-none transition-all ${
+                amountError 
+                  ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200' 
+                  : 'border-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200'
+              }`}
               placeholder="0.00"
               required
             />
-            {convertedAmount && (
+            {amountError && (
+              <p className="text-red-600 text-sm mt-2">{amountError}</p>
+            )}
+            {convertedAmount && !amountError && (
               <p className="mt-2 text-xs text-gray-500">
                 ≈ {convertedAmount.amount} {convertedAmount.currency}
               </p>

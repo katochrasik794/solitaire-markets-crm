@@ -29,6 +29,7 @@ function CregisUSDTTRC20() {
   const [logoUrl, setLogoUrl] = useState('/tether.svg'); // Default logo
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [amountError, setAmountError] = useState('');
 
   useEffect(() => {
     fetchAccounts();
@@ -68,6 +69,80 @@ function CregisUSDTTRC20() {
       fetchAccountBalance(formData.mt5_account_id);
     }
   }, [formData.deposit_to, formData.mt5_account_id]);
+
+  // Get selected account limits (accounting for current balance)
+  const getSelectedAccountLimits = () => {
+    if (formData.deposit_to === 'mt5' && formData.mt5_account_id) {
+      const selectedAccount = mt5Accounts.find(acc => acc.account_number === formData.mt5_account_id);
+      if (selectedAccount) {
+        const currentBalance = parseFloat(selectedAccount.balance || 0);
+        const maxDepositLimit = selectedAccount.maximum_deposit !== null && selectedAccount.maximum_deposit !== undefined 
+          ? parseFloat(selectedAccount.maximum_deposit) 
+          : null;
+        
+        // Effective max is the maximum deposit limit minus current balance
+        // If max is 3000 and balance is 900, user can only deposit 2100
+        let effectiveMax = maxDepositLimit;
+        if (maxDepositLimit !== null && currentBalance > 0) {
+          effectiveMax = Math.max(0, maxDepositLimit - currentBalance);
+        }
+        
+        return {
+          min: selectedAccount.minimum_deposit !== null && selectedAccount.minimum_deposit !== undefined 
+            ? parseFloat(selectedAccount.minimum_deposit) 
+            : null,
+          max: effectiveMax,
+          maxLimit: maxDepositLimit, // Store original max limit for display
+          currentBalance: currentBalance
+        };
+      }
+    }
+    return { min: null, max: null, maxLimit: null, currentBalance: 0 };
+  };
+
+  // Format limits for display (shows effective max after accounting for balance)
+  const formatLimits = () => {
+    const limits = getSelectedAccountLimits();
+    if (limits.min === null && limits.max === null) {
+      return 'No limits set';
+    }
+    const min = limits.min !== null && limits.min !== undefined ? limits.min : 0;
+    if (limits.max === null) {
+      return `$${min.toFixed(2)} - No maximum`;
+    }
+    return `$${min.toFixed(2)} - $${limits.max.toFixed(2)}`;
+  };
+
+  // Validate amount
+  useEffect(() => {
+    if (!formData.amount || formData.amount === '') {
+      setAmountError('');
+      return;
+    }
+
+    const amountNum = parseFloat(formData.amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      setAmountError('Please enter a valid amount');
+      return;
+    }
+
+    const limits = getSelectedAccountLimits();
+    if (limits.min !== null && amountNum < limits.min) {
+      setAmountError(`Minimum deposit is $${limits.min.toFixed(2)}`);
+      return;
+    }
+
+    if (limits.max !== null && amountNum > limits.max) {
+      if (limits.maxLimit !== null && limits.currentBalance > 0) {
+        setAmountError(`Maximum deposit is $${limits.max.toFixed(2)} (account balance + deposit cannot exceed $${limits.maxLimit.toFixed(2)})`);
+      } else {
+        setAmountError(`Only allowed to deposit $${limits.max.toFixed(2)}`);
+      }
+      return;
+    }
+
+    setAmountError('');
+  }, [formData.amount, formData.deposit_to, formData.mt5_account_id, mt5Accounts]);
 
   // Cancel deposit request
   const handleCancelDeposit = async (reason = 'user') => {
@@ -255,6 +330,11 @@ function CregisUSDTTRC20() {
 
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       alert('Please enter a valid amount');
+      return;
+    }
+
+    if (amountError) {
+      alert(amountError);
       return;
     }
 
@@ -523,12 +603,34 @@ function CregisUSDTTRC20() {
                           );
                         })}
                       </select>
+                      {/* Show limits immediately when account is selected */}
+                      {formData.deposit_to === 'mt5' && formData.mt5_account_id && (() => {
+                        const selectedAccount = mt5Accounts.find(acc => acc.account_number === formData.mt5_account_id);
+                        if (selectedAccount) {
+                          const limits = getSelectedAccountLimits();
+                          // Always show limits if they exist (even if 0)
+                          if (selectedAccount.minimum_deposit !== null && selectedAccount.minimum_deposit !== undefined || 
+                              selectedAccount.maximum_deposit !== null && selectedAccount.maximum_deposit !== undefined) {
+                            return (
+                              <p className="mt-2 text-xs text-gray-500">
+                                Deposit limits: {limits.min !== null ? `$${limits.min.toFixed(2)}` : '$0.00'} - {limits.max !== null ? `$${limits.max.toFixed(2)}` : 'No maximum'}
+                                {limits.maxLimit !== null && limits.currentBalance > 0 && (
+                                  <span className="block mt-1 text-xs text-gray-400">
+                                    (Max balance: ${limits.maxLimit.toFixed(2)}, Current: ${limits.currentBalance.toFixed(2)})
+                                  </span>
+                                )}
+                              </p>
+                            );
+                          }
+                        }
+                        return null;
+                      })()}
                       {formData.deposit_to === 'mt5' && formData.mt5_account_id && accountBalances[formData.mt5_account_id] && (() => {
                         const selectedAccount = mt5Accounts.find(acc => acc.account_number === formData.mt5_account_id);
                         const balance = accountBalances[formData.mt5_account_id];
                         const currency = balance.currency || selectedAccount?.currency || 'USD';
                         return (
-                          <div className="mt-3 p-3 bg-gray-50 rounded-lg text-sm">
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg text-sm space-y-2">
                             <div className="grid grid-cols-2 gap-2">
                               <div>
                                 <span className="text-gray-600">Balance:</span>
@@ -563,22 +665,43 @@ function CregisUSDTTRC20() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Deposit Amount (USDT) *
                 </label>
+                {formData.deposit_to === 'mt5' && formData.mt5_account_id ? (
+                  <p className="text-gray-500 text-sm mb-2">
+                    Transaction limit: {formatLimits()}
+                  </p>
+                ) : (
+                  <p className="text-gray-500 text-sm mb-2">
+                    Transaction limit: No limits set
+                  </p>
+                )}
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all"
+                  className={`w-full px-4 py-3 rounded-xl border-2 outline-none transition-all ${
+                    amountError 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200' 
+                      : 'border-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200'
+                  }`}
                   placeholder="0.00"
                   required
                 />
+                {amountError && (
+                  <p className="text-red-600 text-sm mt-2">{amountError}</p>
+                )}
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-brand-500 text-dark-base py-3 rounded-xl font-medium hover:bg-brand-600 transition-colors shadow-lg hover:shadow-xl"
+                disabled={!!amountError || !formData.amount || parseFloat(formData.amount) <= 0}
+                className={`w-full py-3 rounded-xl font-medium transition-colors shadow-lg hover:shadow-xl ${
+                  amountError || !formData.amount || parseFloat(formData.amount) <= 0
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-brand-500 text-dark-base hover:bg-brand-600'
+                }`}
               >
                 Continue
               </button>
