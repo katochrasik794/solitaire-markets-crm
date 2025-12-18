@@ -441,7 +441,7 @@ export default function AdminDashboard() {
           subtitle={`Of total users (${dashboardData.totalUsers > 0 ? ((dashboardData.emailUnverified / dashboardData.totalUsers) * 100).toFixed(1) : 0}%)`}
           icon={Mail}
           color="red"
-          progress={dashboardData.totalUsers > 0 ? (dashboardData.emailUnverified / dashboardData.totalUsers) * 100 : 0}
+          progress={dashboardData.totalUsers > 0 ? Math.round((dashboardData.emailUnverified / dashboardData.totalUsers) * 100) : 0}
         />
 
         <StatCard
@@ -450,7 +450,7 @@ export default function AdminDashboard() {
           subtitle={`Pending vs users (${dashboardData.totalUsers > 0 ? ((dashboardData.kycPending / dashboardData.totalUsers) * 100).toFixed(1) : 0}%)`}
           icon={Shield}
           color="purple"
-          progress={dashboardData.totalUsers > 0 ? (dashboardData.kycPending / dashboardData.totalUsers) * 100 : 0}
+          progress={dashboardData.totalUsers > 0 ? Math.round((dashboardData.kycPending / dashboardData.totalUsers) * 100) : 0}
         />
 
         <StatCard
@@ -459,7 +459,7 @@ export default function AdminDashboard() {
           subtitle={`Accounts per user: ${dashboardData.totalUsers > 0 ? (dashboardData.totalMT5Accounts / dashboardData.totalUsers).toFixed(2) : 0}`}
           icon={Database}
           color="blue"
-          progress={dashboardData.totalUsers > 0 ? (dashboardData.totalMT5Accounts / dashboardData.totalUsers) * 100 : 0}
+          progress={dashboardData.totalUsers > 0 ? Math.round((dashboardData.totalMT5Accounts / dashboardData.totalUsers) * 100) : 0}
         />
       </div>
 
