@@ -411,7 +411,7 @@ function Dashboard() {
 
   return (
     <div className="bg-gray-100 min-h-screen overflow-x-hidden">
-      <div className="px-4 sm:px-14 pb-4 sm:pb-6 space-y-4 sm:space-y-6 max-w-full">
+      <div className="px-4 sm:px-14 pb-4 mt-4 sm:pb-6 space-y-4 sm:space-y-6 max-w-full">
         {/* Page Header */}
         <PageHeader
           icon={LayoutDashboard}
