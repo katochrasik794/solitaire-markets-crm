@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Inbox } from "lucide-react";
+import { Inbox, Download, FileText, FileSpreadsheet } from "lucide-react";
 import Badge from "./Badge.jsx";
 
 /**
@@ -76,6 +76,75 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
 
   const baseIndex = (page - 1) * pageSize;
 
+  // Export to PDF
+  const exportToPDF = () => {
+    Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable')
+    ]).then(([{ jsPDF }, autoTable]) => {
+      const doc = new jsPDF();
+      const tableData = filtered.map((row, idx) => {
+        return columns.map(col => {
+          if (col.key === '__index') return idx + 1;
+          const content = col.render ? col.render(row[col.key], row, Badge, idx) : row[col.key];
+          // Extract text from React elements
+          if (typeof content === 'object' && content?.props?.children) {
+            return String(content.props.children).replace(/[^\w\s]/gi, '');
+          }
+          return String(content || '');
+        });
+      });
+
+      // Add headers
+      const headers = columns.map(col => col.label);
+      
+      // Use autoTable for better formatting
+      doc.autoTable({
+        head: [headers],
+        body: tableData,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0], fontStyle: 'bold' },
+        margin: { top: 20 },
+        startY: 20
+      });
+      
+      doc.save(`${title || 'table'}-${new Date().toISOString().split('T')[0]}.pdf`);
+    }).catch(err => {
+      console.error('Error exporting PDF:', err);
+      alert('PDF export failed. Please refresh the page and try again.');
+    });
+  };
+
+  // Export to Excel
+  const exportToExcel = () => {
+    import('xlsx').then((XLSX) => {
+      const worksheetData = [
+        // Headers
+        columns.map(col => col.label),
+        // Data rows
+        ...filtered.map((row, idx) => {
+          return columns.map(col => {
+            if (col.key === '__index') return idx + 1;
+            const content = col.render ? col.render(row[col.key], row, Badge, idx) : row[col.key];
+            // Extract text from React elements
+            if (typeof content === 'object' && content?.props?.children) {
+              return String(content.props.children).replace(/[^\w\s]/gi, '');
+            }
+            return String(content || '');
+          });
+        })
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+      XLSX.writeFile(wb, `${title || 'table'}-${new Date().toISOString().split('T')[0]}.xlsx`);
+    }).catch(err => {
+      console.error('Error exporting Excel:', err);
+      alert('Excel export failed. Please install xlsx: npm install xlsx');
+    });
+  };
+
   return (
     <div className="space-y-4">
       {title && (
@@ -90,56 +159,67 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
         </div>
       )}
 
-      {/* Filters */}
-      <div className="rounded-2xl bg-white p-4 md:p-6 shadow-sm border border-gray-200">
-        <div className="flex flex-col lg:flex-row gap-4 items-center">
-          {/* Search Input */}
-          <div className="flex-1 w-full lg:w-auto">
-            <input
-              value={q}
-              onChange={e => { setQ(e.target.value); setPage(1); }}
-              placeholder={searchPlaceholder}
-              className="w-full rounded-lg border-gray-300 bg-white px-4 py-3 h-[44px] outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            />
-          </div>
+      {/* Table with merged filters */}
+      <div className="rounded-2xl overflow-hidden bg-white shadow-sm border border-gray-200">
+        {/* Filters - merged with table */}
+        <div className="border-b border-gray-200 bg-gray-50 px-4 py-2">
+          <div className="flex flex-col lg:flex-row gap-2 items-center">
+            {/* Search Input */}
+            <div className="flex-1 w-full lg:w-auto">
+              <input
+                value={q}
+                onChange={e => { setQ(e.target.value); setPage(1); }}
+                placeholder={searchPlaceholder}
+                className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 h-[40px] outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              />
+            </div>
 
-          {/* Select Filters */}
-          <div className="flex flex-wrap gap-3">
-            {(filters?.selects || []).map((s, i) => (
-              <select key={i}
-                value={selects[s.key]}
-                onChange={e => { setSelects(v => ({ ...v, [s.key]: e.target.value })); setPage(1); }}
-                className="rounded-lg border-gray-300 bg-white px-4 py-3 h-[44px] min-w-[120px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-                <option value="">{s.label}</option>
-                {s.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-              </select>
-            ))}
+            {/* Select Filters */}
+            <div className="flex flex-wrap gap-2">
+              {(filters?.selects || []).map((s, i) => (
+                <select key={i}
+                  value={selects[s.key]}
+                  onChange={e => { setSelects(v => ({ ...v, [s.key]: e.target.value })); setPage(1); }}
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] min-w-[120px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                  <option value="">{s.label}</option>
+                  {s.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              ))}
 
-            {/* Date Inputs */}
+              {/* Date Inputs */}
+              <div className="flex gap-2">
+                <input type="date" value={from} onChange={e => { setFrom(e.target.value); setPage(1); }}
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                <input type="date" value={to} onChange={e => { setTo(e.target.value); setPage(1); }}
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
             <div className="flex gap-2">
-              <input type="date" value={from} onChange={e => { setFrom(e.target.value); setPage(1); }}
-                className="rounded-lg border-gray-300 bg-white px-4 py-3 h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
-              <input type="date" value={to} onChange={e => { setTo(e.target.value); setPage(1); }}
-                className="rounded-lg border-gray-300 bg-white px-4 py-3 h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+              <button onClick={clearDates}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 h-[40px] text-sm hover:bg-gray-50 transition-all font-medium whitespace-nowrap">
+                Clear Dates
+              </button>
+              <button onClick={resetAll}
+                className="rounded-lg bg-brand-500 hover:bg-brand-600 text-dark-base px-4 py-2 h-[40px] text-sm shadow-md hover:shadow-lg transition-all font-medium whitespace-nowrap">
+                Reset All
+              </button>
+              {/* Download Buttons */}
+              <button onClick={exportToPDF}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] text-sm hover:bg-gray-50 transition-all font-medium flex items-center gap-2 whitespace-nowrap">
+                <FileText size={16} />
+                PDF
+              </button>
+              <button onClick={exportToExcel}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] text-sm hover:bg-gray-50 transition-all font-medium flex items-center gap-2 whitespace-nowrap">
+                <FileSpreadsheet size={16} />
+                Excel
+              </button>
             </div>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button onClick={clearDates}
-              className="rounded-lg border border-gray-300 bg-white px-6 py-3 h-[44px] hover:bg-gray-50 transition-all font-medium">
-              Clear Dates
-            </button>
-            <button onClick={resetAll}
-              className="rounded-lg bg-brand-500 hover:bg-brand-600 text-dark-base px-6 py-3 h-[44px] shadow-md hover:shadow-lg transition-all font-medium">
-              Reset All
-            </button>
-          </div>
         </div>
-      </div>
 
-      {/* Table */}
-      <div className="rounded-2xl overflow-hidden bg-white shadow-sm border border-gray-200">
         <style>{`
           .protable-scroll-wrapper {
             width: 100%;
