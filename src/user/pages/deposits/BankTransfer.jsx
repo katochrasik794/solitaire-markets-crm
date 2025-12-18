@@ -85,13 +85,7 @@ function BankTransfer() {
         effectiveMax = Math.max(0, maxDepositLimit - currentBalance);
       }
       
-      console.log('BankTransfer - Selected account limits:', {
-        account_number: selectedAccount.account_number,
-        minimum_deposit: selectedAccount.minimum_deposit,
-        maximum_deposit: selectedAccount.maximum_deposit,
-        current_balance: currentBalance,
-        effective_max: effectiveMax
-      });
+      // Limits calculated successfully
       
       return {
         min: selectedAccount.minimum_deposit !== null && selectedAccount.minimum_deposit !== undefined 

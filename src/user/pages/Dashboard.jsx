@@ -64,21 +64,14 @@ function Dashboard() {
   const fetchAccountBalance = async (accountNumber) => {
     try {
       const token = authService.getToken();
-      if (!token) {
-        console.warn(`No token available for account ${accountNumber}`);
-        return null;
-      }
+      if (!token) return null;
 
       const response = await fetch(`${API_BASE_URL}/accounts/${accountNumber}/balance`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` },
+        cache: 'no-store'
       });
 
-      if (!response.ok) {
-        console.warn(`Balance API returned ${response.status} for account ${accountNumber}`);
-        return null;
-      }
+      if (!response.ok) return null;
 
       const data = await response.json();
       if (data.success && data.data) {
@@ -87,11 +80,9 @@ function Dashboard() {
           [accountNumber]: data.data
         }));
         return data.data;
-      } else {
-        console.warn(`Balance API response not successful for account ${accountNumber}:`, data);
       }
     } catch (error) {
-      console.error(`Error fetching balance for account ${accountNumber}:`, error);
+      // Silent fail, use fallback
     }
     return null;
   };
@@ -155,9 +146,7 @@ function Dashboard() {
           totalEquity += accEquity;
           
           // If account has balance data, use it even if balance API call failed
-          if (accBalance > 0 || accCredit > 0 || accEquity > 0) {
-            console.log(`Using account data for ${accountNumber}:`, { balance: accBalance, credit: accCredit, equity: accEquity });
-          }
+          // (Silent - no console log needed)
         }
       });
 
@@ -169,16 +158,10 @@ function Dashboard() {
         const [depositsRes, withdrawalsRes] = await Promise.all([
           fetch(`${API_BASE_URL}/deposits/my?status=approved&limit=1000`, {
             headers: { 'Authorization': `Bearer ${token}` }
-          }).catch((err) => {
-            console.error('Error fetching deposits:', err);
-            return { ok: false };
-          }),
+          }).catch(() => ({ ok: false })),
           fetch(`${API_BASE_URL}/withdrawals/my?status=approved&limit=1000`, {
             headers: { 'Authorization': `Bearer ${token}` }
-          }).catch((err) => {
-            console.error('Error fetching withdrawals:', err);
-            return { ok: false };
-          })
+          }).catch(() => ({ ok: false }))
         ]);
 
         if (depositsRes.ok) {
@@ -195,10 +178,8 @@ function Dashboard() {
               }, 0);
             }
           } catch (err) {
-            console.error('Error parsing deposits:', err);
+            // Silent fail
           }
-        } else {
-          console.warn('Deposits API returned non-OK status:', depositsRes.status);
         }
 
         if (withdrawalsRes.ok) {
@@ -220,13 +201,11 @@ function Dashboard() {
               }, 0);
             }
           } catch (err) {
-            console.error('Error parsing withdrawals:', err);
+            // Silent fail
           }
-        } else {
-          console.warn('Withdrawals API returned non-OK status:', withdrawalsRes.status);
         }
       } catch (error) {
-        console.error('Error fetching deposits/withdrawals:', error);
+        // Silent fail
       }
 
       // Stop loading immediately - we're using stored data so it's instant
@@ -242,7 +221,6 @@ function Dashboard() {
       
       hasCalculatedRef.current = true;
     } catch (error) {
-      console.error('Error calculating summary totals:', error);
       setSummaryTotals(prev => ({ ...prev, loading: false }));
     } finally {
       isCalculatingRef.current = false;
@@ -324,7 +302,6 @@ function Dashboard() {
           setSummaryTotals(prev => ({ ...prev, loading: false }));
         }
       } catch (error) {
-        console.error('Error fetching accounts:', error);
         setSummaryTotals(prev => ({ ...prev, loading: false }));
       } finally {
         setLoadingAccounts(false);
