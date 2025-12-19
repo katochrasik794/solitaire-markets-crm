@@ -15,6 +15,8 @@ const RECIPIENT_TYPES = [
   { value: 'kyc_verified', label: 'KYC Verified Users', icon: Mail, gradient: 'from-blue-500 to-cyan-500' },
   { value: 'kyc_unverified', label: 'KYC Unverified Users', icon: Mail, gradient: 'from-amber-500 to-yellow-500' },
   { value: 'specific', label: 'Select Specific Users', icon: Search, gradient: 'from-neutral-600 to-neutral-800' },
+  { value: 'zero_balance', label: 'User with 0 Balance', icon: Users, gradient: 'from-orange-500 to-red-500' },
+  { value: 'no_account', label: 'User with No Account', icon: Users, gradient: 'from-purple-500 to-pink-500' },
 ];
 
 export default function SendEmails() {

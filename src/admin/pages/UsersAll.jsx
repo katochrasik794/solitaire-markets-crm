@@ -21,6 +21,8 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
   const [editing, setEditing] = useState(null); // row
   const [confirmDel, setConfirmDel] = useState(null); // row
   const [deleting, setDeleting] = useState(false); // loading state for delete
+  const [userFunds, setUserFunds] = useState(null); // {walletBalance, mt5Accounts, totalFunds}
+  const [loadingFunds, setLoadingFunds] = useState(false);
   const [confirmVerify, setConfirmVerify] = useState(null); // {row,next}
   const [confirmBan, setConfirmBan] = useState(null); // {row,next}
   const [countryScope, setCountryScope] = useState("");
@@ -144,7 +146,10 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
         </div>
         <div className="flex flex-col items-center gap-1">
           <button
-            onClick={() => setConfirmDel(row)}
+            onClick={() => {
+              setConfirmDel(row);
+              fetchUserFunds(row.id);
+            }}
             className="h-8 w-8 grid place-items-center rounded-md border border-rose-200 text-rose-600 hover:bg-rose-50"
             title="Delete"
           >
@@ -188,6 +193,45 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
         title: 'Error!',
         text: e.message || String(e)
       });
+    }
+  }
+
+  async function fetchUserFunds(userId) {
+    setLoadingFunds(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const r = await fetch(`${BASE}/admin/users/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await r.json();
+      if (data?.ok && data?.user) {
+        const walletBalance = parseFloat(data.user.walletBalance || 0);
+        const mt5Accounts = (data.user.MT5Account || []).map(acc => ({
+          accountId: acc.accountId,
+          group: acc.group,
+          balance: parseFloat(acc.balance || 0),
+          equity: parseFloat(acc.equity || 0),
+          credit: parseFloat(acc.credit || 0),
+          total: parseFloat(acc.balance || 0) + parseFloat(acc.equity || 0) + parseFloat(acc.credit || 0)
+        }));
+        
+        const totalMt5Funds = mt5Accounts.reduce((sum, acc) => sum + acc.total, 0);
+        const totalFunds = walletBalance + totalMt5Funds;
+        
+        setUserFunds({
+          walletBalance,
+          mt5Accounts,
+          totalMt5Funds,
+          totalFunds
+        });
+      } else {
+        setUserFunds(null);
+      }
+    } catch (e) {
+      console.error('Failed to fetch user funds:', e);
+      setUserFunds(null);
+    } finally {
+      setLoadingFunds(false);
     }
   }
 
@@ -399,14 +443,113 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
       </Modal>
 
       {/* Delete Confirm */}
-      <Modal open={!!confirmDel} onClose={()=>!deleting && setConfirmDel(null)} title="Delete User">
+      <Modal open={!!confirmDel} onClose={()=>{
+        if (!deleting) {
+          setConfirmDel(null);
+          setUserFunds(null);
+        }
+      }} title="Delete User">
         {confirmDel && (
           <div className="space-y-4">
             <p>Are you sure you want to delete <b>{confirmDel.email}</b>?</p>
             <p className="text-sm text-gray-600">This will delete all related records including deposits, withdrawals, MT5 accounts, KYC, and other data.</p>
+            
+            {/* Funds Information */}
+            {loadingFunds ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                <svg className="animate-spin h-5 w-5 text-gray-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <p className="text-xs text-gray-500 mt-2">Loading funds information...</p>
+              </div>
+            ) : userFunds ? (
+              <div className="space-y-3">
+                {/* Wallet Balance */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-blue-800">Wallet Balance:</span>
+                    <span className="text-sm font-bold text-blue-900">${userFunds.walletBalance.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* MT5 Accounts */}
+                {userFunds.mt5Accounts.length > 0 ? (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <p className="text-sm font-semibold text-gray-800 mb-2">MT5 Trading Accounts:</p>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {userFunds.mt5Accounts.map((acc, idx) => (
+                        <div key={idx} className="bg-white rounded p-2 border border-gray-200">
+                          <div className="flex justify-between items-start mb-1">
+                            <span className="text-xs font-medium text-gray-700">Account: {acc.accountId || 'N/A'}</span>
+                            <span className="text-xs text-gray-500">{acc.group || 'N/A'}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            <div>
+                              <span className="text-gray-500">Balance:</span>
+                              <span className="ml-1 font-medium">${acc.balance.toFixed(2)}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Equity:</span>
+                              <span className="ml-1 font-medium">${acc.equity.toFixed(2)}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Credit:</span>
+                              <span className="ml-1 font-medium">${acc.credit.toFixed(2)}</span>
+                            </div>
+                          </div>
+                          <div className="mt-1 pt-1 border-t border-gray-200">
+                            <span className="text-xs text-gray-500">Total: </span>
+                            <span className="text-xs font-bold text-gray-900">${acc.total.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-gray-300">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-semibold text-gray-800">Total MT5 Funds:</span>
+                        <span className="text-sm font-bold text-gray-900">${userFunds.totalMt5Funds.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <p className="text-sm text-gray-600">No MT5 trading accounts</p>
+                  </div>
+                )}
+
+                {/* Total Funds */}
+                <div className={`border rounded-lg p-3 ${userFunds.totalFunds > 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                  <div className="flex justify-between items-center">
+                    <span className={`text-sm font-semibold ${userFunds.totalFunds > 0 ? 'text-red-800' : 'text-green-800'}`}>
+                      Total Funds:
+                    </span>
+                    <span className={`text-lg font-bold ${userFunds.totalFunds > 0 ? 'text-red-900' : 'text-green-900'}`}>
+                      ${userFunds.totalFunds.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Warning if funds exist */}
+                {userFunds.totalFunds > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <p className="text-sm font-semibold text-amber-800 mb-1">⚠️ Cannot Delete:</p>
+                    <p className="text-xs text-amber-700">This user has funds. Please ensure all funds are withdrawn before deleting.</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <p className="text-sm text-gray-600">Unable to load funds information</p>
+              </div>
+            )}
+
             <div className="flex justify-end gap-2">
               <button 
-                onClick={()=>setConfirmDel(null)} 
+                onClick={()=>{
+                  setConfirmDel(null);
+                  setUserFunds(null);
+                }} 
                 disabled={deleting}
                 className="px-4 h-10 rounded-md border disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -414,8 +557,12 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
               </button>
               <button 
                 onClick={()=>onDelete(confirmDel)} 
-                disabled={deleting}
-                className="px-4 h-10 rounded-md bg-rose-600 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                disabled={deleting || (userFunds && userFunds.totalFunds > 0)}
+                className={`px-4 h-10 rounded-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  (userFunds && userFunds.totalFunds > 0) 
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                    : 'bg-rose-600 text-white'
+                }`}
               >
                 {deleting ? (
                   <>
