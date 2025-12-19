@@ -131,7 +131,7 @@ export default function AssignRoles() {
     email: "",
     password: "",
     admin_role: "admin",
-    features: []
+    features: [] // Features will be saved directly to admin table
   });
 
   // Build a global feature lookup from dynamic features
@@ -149,12 +149,18 @@ export default function AssignRoles() {
   };
 
   const getFeaturesForAdminUser = (adminUser) => {
-    // If a matching custom role exists, use its permissions.features
+    // First check if admin has features stored directly in admin table
+    if (Array.isArray(adminUser?.features) && adminUser.features.length > 0) {
+      return adminUser.features.map(p => FEATURE_MAP[p] || { name: p, icon: Settings, path: p });
+    }
+    
+    // If no features in admin table, check if a matching custom role exists
     const custom = findCustomRole(adminUser?.admin_role);
     const customFeatures = custom?.permissions?.features;
     if (Array.isArray(customFeatures) && customFeatures.length) {
       return customFeatures.map(p => FEATURE_MAP[p] || { name: p, icon: Settings, path: p });
     }
+    
     // Fallback to built-in role mapping
     return getFeaturesForRole(adminUser?.admin_role);
   };
@@ -270,8 +276,9 @@ export default function AssignRoles() {
         body: JSON.stringify(newAdmin)
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+      
+      if (response.ok && data.ok && data.admin) {
         setAdmins([...admins, data.admin]);
         setShowCreateModal(false);
         setNewAdmin({
@@ -292,8 +299,7 @@ export default function AssignRoles() {
           showConfirmButton: false
         });
       } else {
-        const data = await response.json();
-        const errorMessage = data.error || 'Failed to create admin';
+        const errorMessage = data.error || data.message || 'Failed to create admin';
 
         // Check if it's an email already exists error
         if (errorMessage.toLowerCase().includes('email') && errorMessage.toLowerCase().includes('already')) {
@@ -388,9 +394,18 @@ export default function AssignRoles() {
       return;
     }
     setSelectedAdmin(adminUser);
-    // Get features from custom role if exists
-    const custom = findCustomRole(adminUser.admin_role);
-    setSelectedFeatures(custom?.permissions?.features || []);
+    
+    // Get features from admin table first, then fallback to role
+    let features = [];
+    if (Array.isArray(adminUser.features) && adminUser.features.length > 0) {
+      features = adminUser.features;
+    } else {
+      // Fallback to custom role features
+      const custom = findCustomRole(adminUser.admin_role);
+      features = custom?.permissions?.features || [];
+    }
+    
+    setSelectedFeatures(features);
     setShowFeatureModal(true);
   };
 
@@ -420,41 +435,29 @@ export default function AssignRoles() {
 
     try {
       const token = localStorage.getItem('adminToken');
-      // Check if role exists in DB, if not create it, if yes update it
-      const existingRole = findCustomRole(selectedAdmin.admin_role);
-
-      if (existingRole) {
-        // Update existing role
-        const res = await fetch(`${BASE}/admin/roles/${existingRole.id}`, {
-          method: 'PUT',
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: existingRole.name,
-            description: existingRole.description || '',
-            features: selectedFeatures
-          })
-        });
-        const data = await res.json();
-        if (!res.ok || !data?.ok) throw new Error(data?.error || 'Failed to update role');
-        await fetchRoles();
-        Swal.fire({ icon: 'success', title: 'Features updated', timer: 1500, showConfirmButton: false });
-      } else {
-        // Create new role
-        const res = await fetch(`${BASE}/admin/roles`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: selectedAdmin.admin_role,
-            description: '',
-            features: selectedFeatures
-          })
-        });
-        const data = await res.json();
-        if (!res.ok || !data?.ok) throw new Error(data?.error || 'Failed to create role');
-        await fetchRoles();
-        Swal.fire({ icon: 'success', title: 'Role created and features saved', timer: 1500, showConfirmButton: false });
+      
+      // Save features directly to admin table
+      const res = await fetch(`${BASE}/admin/admins/${selectedAdmin.id}/features`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          features: selectedFeatures
+        })
+      });
+      
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || 'Failed to save features');
       }
-
+      
+      // Update local state
+      setAdmins(admins.map(admin =>
+        admin.id === selectedAdmin.id 
+          ? { ...admin, features: selectedFeatures }
+          : admin
+      ));
+      
+      Swal.fire({ icon: 'success', title: 'Features updated', timer: 1500, showConfirmButton: false });
       setShowFeatureModal(false);
       setSelectedAdmin(null);
       setSelectedFeatures([]);

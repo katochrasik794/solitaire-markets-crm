@@ -63,6 +63,11 @@ const supportService = {
     updateStatus: async (id, status) => {
         const response = await axios.post(`${API_URL}/admin/${id}/status`, { status }, getAdminHeaders())
         return response.data
+    },
+
+    assignTicket: async (id, roleId) => {
+        const response = await axios.post(`${API_URL}/admin/${id}/assign`, { roleId }, getAdminHeaders())
+        return response.data
     }
 }
 

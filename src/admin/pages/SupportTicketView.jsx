@@ -1,23 +1,35 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { Headphones, Send, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { Headphones, Send, RotateCcw, CheckCircle2, UserPlus, ChevronDown, ArrowLeft } from 'lucide-react';
 import supportService from '../../services/support.service';
+import { useAuth } from '../contexts/AuthContext';
+import Modal from '../components/Modal.jsx';
 
 export default function SupportTicketView() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { admin } = useAuth();
   const [ticket, setTicket] = useState(null);
   const [replies, setReplies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [roles, setRoles] = useState([]);
+  const [selectedRoleId, setSelectedRoleId] = useState(null);
+  const [assigning, setAssigning] = useState(false);
+  const [sendingReply, setSendingReply] = useState(false);
+  
+  // Check if current admin is super admin
+  const isSuperAdmin = admin?.role === 'admin' || admin?.role === 'super_admin' || !admin?.role;
 
   const fetchData = async () => {
-    setLoading(true);
     try {
       const data = await supportService.getAdminTicket(id);
       if (data.success) {
         setTicket(data.data.ticket);
         setReplies(data.data.messages || []);
+        setSelectedRoleId(data.data.ticket.assigned_role_id || null);
       }
     } catch (error) {
       console.error(error);
@@ -27,7 +39,27 @@ export default function SupportTicketView() {
     }
   };
 
-  useEffect(() => { fetchData(); }, [id]);
+  const fetchRoles = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/roles`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.ok) {
+        setRoles(data.roles || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch roles:', error);
+    }
+  };
+
+  useEffect(() => { 
+    fetchData(); 
+    if (isSuperAdmin) {
+      fetchRoles();
+    }
+  }, [id, isSuperAdmin]);
 
   const updateStatus = async (status) => {
     try {
@@ -44,17 +76,56 @@ export default function SupportTicketView() {
   };
 
   const sendReply = async () => {
-    if (!message.trim()) return;
+    if (!message.trim() || sendingReply) return;
+    
+    setSendingReply(true);
+    const messageToSend = message.trim();
+    
     try {
-      const res = await supportService.adminReply(id, message, 'answered');
+      // Don't pass status - let backend keep it as 'open'
+      const res = await supportService.adminReply(id, messageToSend, null);
       if (res.success) {
+        // Add message to replies immediately (real-time update)
+        const newReply = {
+          id: Date.now(), // Temporary ID
+          ticket_id: parseInt(id),
+          sender_id: admin?.adminId,
+          sender_type: 'admin',
+          message: messageToSend,
+          sender_name: admin?.username || 'Support Agent',
+          created_at: new Date().toISOString()
+        };
+        setReplies([...replies, newReply]);
         setMessage('');
+        
+        // Refresh ticket data in background
         fetchData();
       } else {
         throw new Error(res.error);
       }
     } catch (error) {
-      Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not send reply' });
+      Swal.fire({ icon: 'error', title: 'Failed', text: error.message || 'Could not send reply' });
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  const handleAssign = async () => {
+    if (assigning) return;
+    setAssigning(true);
+    try {
+      const res = await supportService.assignTicket(id, selectedRoleId);
+      if (res.success) {
+        Swal.fire({ icon: 'success', title: 'Success', text: 'Ticket assigned successfully', timer: 1500, showConfirmButton: false });
+        setShowAssignModal(false);
+        fetchData();
+      } else {
+        throw new Error(res.error || 'Failed to assign ticket');
+      }
+    } catch (error) {
+      Swal.fire({ icon: 'error', title: 'Failed', text: error.message || 'Could not assign ticket' });
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -69,15 +140,35 @@ export default function SupportTicketView() {
   return (
     <div className="p-2 sm:p-4 space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Headphones className="h-6 w-6" /> {ticket.subject || '(No subject)'}
-          </h1>
-          <p className="text-gray-600 text-sm">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+              title="Go back"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-600" />
+            </button>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Headphones className="h-6 w-6 text-brand-600" /> {ticket.subject || '(No subject)'}
+            </h1>
+          </div>
+          <p className="text-gray-600 text-sm ml-[52px]">
             {ticket.user_name || ticket.user_email} • Created {new Date(ticket.created_at).toLocaleString()}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {isSuperAdmin && (
+            <div className="relative">
+              <button 
+                onClick={() => setShowAssignModal(true)}
+                className="px-3 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+              >
+                <UserPlus className="h-4 w-4" /> Assign to Role
+                <ChevronDown className="h-4 w-4" />
+              </button>
+            </div>
+          )}
           {String(ticket.status).toLowerCase() === 'closed' ? (
             <button onClick={() => updateStatus('open')} className="px-3 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2">
               <RotateCcw className="h-4 w-4" /> Reopen
@@ -110,12 +201,26 @@ export default function SupportTicketView() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              disabled={sendingReply}
+              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Write a reply..."
             />
             <div className="flex items-center justify-end mt-2">
-              <button onClick={sendReply} className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg flex items-center gap-2">
-                <Send className="h-4 w-4" /> Send Reply
+              <button 
+                onClick={sendReply} 
+                disabled={sendingReply || !message.trim()}
+                className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-600 transition-colors"
+              >
+                {sendingReply ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-base"></div>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" /> Send Reply
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -141,6 +246,29 @@ export default function SupportTicketView() {
               <span className="font-medium text-gray-900">{ticket.category}</span>
             </div>
             <div className="flex justify-between border-b pb-2">
+              <span className="text-gray-500">Assigned To</span>
+              <div className="text-right">
+                {ticket.assigned_to_username ? (
+                  <div>
+                    <span className="font-medium px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-800">
+                      {ticket.assigned_to_username}
+                    </span>
+                    {ticket.assigned_role_name && (
+                      <div className="text-xs text-gray-500 mt-1">Role: {ticket.assigned_role_name}</div>
+                    )}
+                  </div>
+                ) : ticket.assigned_role_name ? (
+                  <span className="font-medium px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
+                    {ticket.assigned_role_name}
+                  </span>
+                ) : (
+                  <span className="font-medium px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-500 italic">
+                    Unassigned
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-between border-b pb-2">
               <span className="text-gray-500">User</span>
               <div className="text-right">
                 <div className="font-medium">{ticket.user_name}</div>
@@ -154,6 +282,46 @@ export default function SupportTicketView() {
           </div>
         </div>
       </div>
+
+      {/* Assign to Role Modal */}
+      <Modal
+        open={showAssignModal}
+        onClose={() => setShowAssignModal(false)}
+        title="Assign Ticket to Role"
+      >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Role
+              </label>
+              <select
+                value={selectedRoleId || ''}
+                onChange={(e) => setSelectedRoleId(e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              >
+                <option value="">Unassigned (All admins can see)</option>
+                {roles.map(role => (
+                  <option key={role.id} value={role.id}>{role.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <button
+                onClick={() => setShowAssignModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAssign}
+                disabled={assigning}
+                className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 disabled:opacity-50"
+              >
+                {assigning ? 'Assigning...' : 'Assign'}
+              </button>
+            </div>
+          </div>
+        </Modal>
     </div>
   );
 }

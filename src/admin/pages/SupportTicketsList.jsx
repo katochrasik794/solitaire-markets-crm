@@ -1,135 +1,323 @@
-import { useEffect, useState } from 'react';
-import { Headphones, Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
+import { Headphones, Eye, RefreshCw, UserPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import supportService from '../../services/support.service';
+import ProTable from '../components/ProTable.jsx';
+import Badge from '../components/Badge.jsx';
+import Modal from '../components/Modal.jsx';
+import Swal from 'sweetalert2';
+import { useAuth } from '../contexts/AuthContext';
+
+function fmtDate(v) {
+  if (!v) return "-";
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleString();
+}
 
 export default function SupportTicketsList({ status }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState('');
+  const navigate = useNavigate();
+  const { admin } = useAuth();
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [selectedRoleId, setSelectedRoleId] = useState(null);
+  const [assigning, setAssigning] = useState(false);
+  
+  // Check if current admin is super admin
+  const isSuperAdmin = admin?.role === 'admin' || admin?.role === 'super_admin' || !admin?.role;
 
   const fetchData = async () => {
     setLoading(true);
     try {
       // Map 'opened' to 'open' for API
       const apiStatus = status === 'opened' ? 'open' : status === 'closed' ? 'closed' : '';
-      console.log('Fetching tickets with status:', apiStatus);
       const data = await supportService.getAllTickets(apiStatus);
-      console.log('Tickets response:', data);
       if (data.success) {
         setItems(data.data || []);
-        console.log('Set items count:', data.data?.length || 0);
       } else {
-        console.error('API returned error:', data.error || data.message);
         setItems([]);
       }
     } catch (error) {
       console.error('Error fetching tickets:', error);
-      if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
-      }
       setItems([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchData(); }, [status]);
+  useEffect(() => { 
+    fetchData(); 
+    if (isSuperAdmin) {
+      fetchRoles();
+    }
+  }, [status, isSuperAdmin]);
+
+  const fetchRoles = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/roles`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.ok) {
+        setRoles(data.roles || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch roles:', error);
+    }
+  };
+
+  const handleAssignClick = (ticket) => {
+    setSelectedTicket(ticket);
+    setSelectedRoleId(ticket.assigned_role_id || null);
+    setShowAssignModal(true);
+  };
+
+  const handleAssign = async () => {
+    if (assigning || !selectedTicket) return;
+    setAssigning(true);
+    try {
+      const res = await supportService.assignTicket(selectedTicket.id, selectedRoleId);
+      if (res.success) {
+        Swal.fire({ icon: 'success', title: 'Success', text: 'Ticket assigned successfully', timer: 1500, showConfirmButton: false });
+        setShowAssignModal(false);
+        setSelectedTicket(null);
+        fetchData();
+      } else {
+        throw new Error(res.error || 'Failed to assign ticket');
+      }
+    } catch (error) {
+      Swal.fire({ icon: 'error', title: 'Failed', text: error.message || 'Could not assign ticket' });
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   const titleMap = {
     opened: 'Open Tickets',
     closed: 'Closed Tickets',
   };
 
-  // Filter client-side for search 'q' since API doesn't support search yet
-  const filteredItems = items.filter(t =>
-    !q ||
-    t.subject?.toLowerCase().includes(q.toLowerCase()) ||
-    t.user_email?.toLowerCase().includes(q.toLowerCase()) ||
-    t.id.toString().includes(q)
-  );
+  // Transform items to ProTable format
+  const rows = useMemo(() => {
+    return items.map(t => ({
+      id: t.id,
+      ticketId: `#${t.id}`,
+      subject: t.subject,
+      category: t.category || '-',
+      userName: t.user_name || 'Unknown',
+      userEmail: t.user_email || '-',
+      priority: t.priority || 'medium',
+      status: t.status || 'open',
+      updatedAt: t.updated_at,
+      createdAt: t.created_at,
+      assignedRoleId: t.assigned_role_id || null,
+      assignedRoleName: t.assigned_role_name || null,
+      assignedTo: t.assigned_to || null,
+      assignedToUsername: t.assigned_to_username || null,
+      assignedToEmail: t.assigned_to_email || null,
+    }));
+  }, [items]);
+
+  const columns = useMemo(() => [
+    { key: "__index", label: "Sr No", sortable: false },
+    { key: "ticketId", label: "ID", sortable: true },
+    { 
+      key: "subject", 
+      label: "Subject",
+      render: (v, row) => (
+        <div>
+          <div className="text-sm font-medium text-gray-900">{v || '-'}</div>
+          {row.category && row.category !== '-' && (
+            <div className="text-xs text-gray-500">{row.category}</div>
+          )}
+        </div>
+      )
+    },
+    { 
+      key: "userName", 
+      label: "User",
+      render: (v, row) => (
+        <div>
+          <div className="text-sm font-medium text-gray-900">{v}</div>
+          <div className="text-xs text-gray-500">{row.userEmail}</div>
+        </div>
+      )
+    },
+    { 
+      key: "priority", 
+      label: "Priority",
+      render: (v) => {
+        const priority = (v || 'medium').toLowerCase();
+        const tone = priority === 'high' ? 'red' : priority === 'medium' ? 'amber' : 'blue';
+        return <Badge tone={tone}>{(v || 'medium').toUpperCase()}</Badge>;
+      }
+    },
+    { 
+      key: "status", 
+      label: "Status",
+      render: (v) => {
+        const status = (v || 'open').toLowerCase();
+        const tone = status === 'open' ? 'green' : status === 'closed' ? 'gray' : 'blue';
+        return <Badge tone={tone}>{(v || 'open').toUpperCase()}</Badge>;
+      }
+    },
+    { 
+      key: "assignedRoleName", 
+      label: "Assigned To",
+      render: (v, row) => {
+        // Show admin user if assigned, otherwise show role, otherwise unassigned
+        if (row.assignedToUsername) {
+          return (
+            <div>
+              <Badge tone="purple">{row.assignedToUsername}</Badge>
+              {row.assignedRoleName && (
+                <div className="text-xs text-gray-500 mt-1">Role: {row.assignedRoleName}</div>
+              )}
+            </div>
+          );
+        }
+        if (row.assignedRoleName) {
+          return <Badge tone="blue">{row.assignedRoleName}</Badge>;
+        }
+        return <span className="text-gray-400 italic">Unassigned</span>;
+      }
+    },
+    { key: "updatedAt", label: "Updated", render: (v) => fmtDate(v), sortable: true },
+    { 
+      key: "actions", 
+      label: "Actions", 
+      sortable: false,
+      render: (v, row) => (
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center gap-1">
+            <button
+              onClick={() => navigate(`/admin/support/tickets/${row.id}`)}
+              className="h-8 w-8 grid place-items-center rounded-md border border-violet-200 text-violet-700 hover:bg-violet-50"
+              title="View Ticket"
+            >
+              <Eye size={16} />
+            </button>
+            <span className="text-xs text-gray-500">View</span>
+          </div>
+          {isSuperAdmin && (
+            <div className="flex flex-col items-center gap-1">
+              <button
+                onClick={() => handleAssignClick({ id: row.id, assigned_role_id: row.assignedRoleId })}
+                className="h-8 w-8 grid place-items-center rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50"
+                title="Assign to Role"
+              >
+                <UserPlus size={16} />
+              </button>
+              <span className="text-xs text-gray-500">Assign</span>
+            </div>
+          )}
+        </div>
+      )
+    },
+  ], [navigate, isSuperAdmin]);
+
+  const filters = useMemo(() => ({
+    searchKeys: ['subject', 'userEmail', 'userName', 'ticketId', 'category'],
+    selects: [
+      {
+        key: 'priority',
+        label: 'All Priorities',
+        options: ['high', 'medium', 'low']
+      },
+      {
+        key: 'status',
+        label: 'All Statuses',
+        options: ['open', 'closed', 'pending']
+      }
+    ],
+    dateKey: 'updatedAt'
+  }), []);
 
   return (
     <div className="p-2 sm:p-4">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Headphones className="h-6 w-6" /> {titleMap[status] || 'Tickets'}
-        </h1>
-        <p className="text-gray-600">Manage and respond to customer support tickets</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Headphones className="h-6 w-6" /> {titleMap[status] || 'Tickets'}
+          </h1>
+          <p className="text-gray-600">Manage and respond to customer support tickets</p>
+        </div>
+        <button
+          onClick={fetchData}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-4 sm:px-6 py-3 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search subject, email, or ID"
-            className="w-full sm:w-80 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
-          />
-          <button onClick={fetchData} className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600">Refresh</button>
+      {loading && rows.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+          <div className="text-gray-500">Loading tickets...</div>
         </div>
+      ) : (
+        <ProTable
+          title={titleMap[status] || 'Tickets'}
+          rows={rows}
+          columns={columns}
+          filters={filters}
+          pageSize={10}
+          searchPlaceholder="Search subject, email, or ID"
+        />
+      )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
-                <tr><td className="px-6 py-6 text-center text-gray-500" colSpan={7}>Loading...</td></tr>
-              ) : filteredItems.length === 0 ? (
-                <tr><td className="px-6 py-6 text-center text-gray-500" colSpan={7}>No tickets found</td></tr>
-              ) : (
-                filteredItems.map(t => (
-                  <tr key={t.id} className="hover:bg-gray-50">
-                    <td className="px-3 sm:px-6 py-3 text-sm text-gray-500">#{t.id}</td>
-                    <td className="px-3 sm:px-6 py-3">
-                      <div className="text-sm font-medium text-gray-900">{t.subject}</div>
-                      <div className="text-xs text-gray-500">{t.category}</div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3">
-                      <div className="text-sm font-medium text-gray-900">{t.user_name || 'Unknown'}</div>
-                      <div className="text-xs text-gray-500">{t.user_email}</div>
-                    </td>
-                    <td className="hidden md:table-cell px-3 sm:px-6 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${(t.priority || '').toLowerCase() === 'high' ? 'bg-red-100 text-red-800' :
-                        (t.priority || '').toLowerCase() === 'medium' ? 'bg-amber-100 text-amber-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
-                        {(t.priority || 'medium').toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${t.status === 'open' ? 'bg-green-100 text-green-800' :
-                        t.status === 'closed' ? 'bg-gray-100 text-gray-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
-                        {t.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 text-sm text-gray-800">{new Date(t.updated_at).toLocaleString()}</td>
-                    <td className="px-3 sm:px-6 py-3 text-sm">
-                      <Link to={`/admin/support/tickets/${t.id}`} className="flex flex-col items-center text-blue-600 hover:text-blue-800">
-                        <Eye className="h-4 w-4" />
-                        <small className="text-[10px] leading-3 mt-1">View</small>
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Assign to Role Modal */}
+      {showAssignModal && selectedTicket && (
+        <Modal
+          isOpen={showAssignModal}
+          onClose={() => {
+            setShowAssignModal(false);
+            setSelectedTicket(null);
+          }}
+          title="Assign Ticket to Role"
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Role
+              </label>
+              <select
+                value={selectedRoleId || ''}
+                onChange={(e) => setSelectedRoleId(e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              >
+                <option value="">Unassigned (All admins can see)</option>
+                {roles.map(role => (
+                  <option key={role.id} value={role.id}>{role.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <button
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSelectedTicket(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAssign}
+                disabled={assigning}
+                className="px-4 py-2 bg-brand-500 text-dark-base rounded-lg hover:bg-brand-600 disabled:opacity-50"
+              >
+                {assigning ? 'Assigning...' : 'Assign'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
