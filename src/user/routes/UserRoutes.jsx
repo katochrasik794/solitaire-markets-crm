@@ -36,6 +36,7 @@ import AssetsOverview from '../pages/analysis/AssetsOverview'
 import MarketNews from '../pages/analysis/MarketNews'
 import MarketCalendar from '../pages/analysis/MarketCalendar'
 import ResearchTerminal from '../pages/analysis/ResearchTerminal'
+import TradePerformance from '../pages/TradePerformance'
 
 // Export array of route configurations
 const userRoutes = [
@@ -64,6 +65,7 @@ const userRoutes = [
   { path: 'analysis/market-news', element: <MarketNews /> },
   { path: 'analysis/market-calendar', element: <MarketCalendar /> },
   { path: 'analysis/research-terminal', element: <ResearchTerminal /> },
+  { path: 'trade-performance', element: <TradePerformance /> },
   { path: 'platforms', element: <Platforms /> },
   { path: 'refer-a-friend', element: <ReferAFriend /> },
   { path: 'legal', element: <Legal /> },

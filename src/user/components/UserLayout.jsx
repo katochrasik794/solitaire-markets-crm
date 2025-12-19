@@ -29,6 +29,7 @@ const routeTitles = {
   '/user/withdrawals/crypto': 'Crypto Withdrawal',
   '/user/transfers': 'Transfers',
   '/user/reports': 'Reports',
+  '/user/trade-performance': 'Trade Performance',
   '/user/analysis/signal-centre': 'Signal Centre',
   '/user/analysis/assets-overview': 'Assets Overview',
   '/user/analysis/market-news': 'Market News',

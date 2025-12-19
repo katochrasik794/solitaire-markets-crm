@@ -6,13 +6,17 @@ function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
   const navigate = useNavigate()
   const [openSubmenus, setOpenSubmenus] = useState({
-    analysis: false
+    analysis: false,
+    tradePerformance: false
   })
 
   // Auto-open submenus when on a submenu page
   useEffect(() => {
     if (location.pathname.startsWith('/user/analysis/')) {
       setOpenSubmenus(prev => ({ ...prev, analysis: true }))
+    }
+    if (location.pathname.startsWith('/user/trade-performance')) {
+      setOpenSubmenus(prev => ({ ...prev, tradePerformance: true }))
     }
   }, [location.pathname])
 
@@ -157,6 +161,82 @@ function Sidebar({ isOpen, onClose }) {
               </svg>
             <span className="text-sm font-normal">Reports</span>
           </Link>
+
+          {/* Trade Performance */}
+          <div>
+            <button
+              onClick={() => toggleSubmenu('tradePerformance')}
+              className={`w-full flex items-center justify-between px-4 py-3 transition-colors relative rounded-lg ${isActive('/trade-performance')
+                ? 'bg-brand-500 text-dark-base'
+                : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
+                }`}
+              style={{}}
+            >
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span className="text-sm font-normal">Trade Performance</span>
+              </div>
+              <svg
+                className={`w-4 h-4 flex-shrink-0 transition-transform ${openSubmenus.tradePerformance ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {openSubmenus.tradePerformance && (
+              <div className="ml-8 mt-1 space-y-1">
+                <Link
+                  to="/user/trade-performance"
+                  className={`block px-4 py-2 rounded-lg transition-colors ${isActive('/trade-performance') && !location.search
+                    ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
+                    : 'text-gray-600 hover:bg-brand-50 hover:text-brand-900'
+                    }`}
+                >
+                  <span className="text-sm font-normal">Summary</span>
+                </Link>
+                <Link
+                  to="/user/trade-performance?chart=net-profit"
+                  className={`block px-4 py-2 rounded-lg transition-colors ${location.search.includes('chart=net-profit')
+                    ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
+                    : 'text-gray-600 hover:bg-brand-50 hover:text-brand-900'
+                    }`}
+                >
+                  <span className="text-sm font-normal">Net Profit</span>
+                </Link>
+                <Link
+                  to="/user/trade-performance?chart=closed-orders"
+                  className={`block px-4 py-2 rounded-lg transition-colors ${location.search.includes('chart=closed-orders')
+                    ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
+                    : 'text-gray-600 hover:bg-brand-50 hover:text-brand-900'
+                    }`}
+                >
+                  <span className="text-sm font-normal">Closed Orders</span>
+                </Link>
+                <Link
+                  to="/user/trade-performance?chart=trading-volume"
+                  className={`block px-4 py-2 rounded-lg transition-colors ${location.search.includes('chart=trading-volume')
+                    ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
+                    : 'text-gray-600 hover:bg-brand-50 hover:text-brand-900'
+                    }`}
+                >
+                  <span className="text-sm font-normal">Trading Volume</span>
+                </Link>
+                <Link
+                  to="/user/trade-performance?chart=equity"
+                  className={`block px-4 py-2 rounded-lg transition-colors ${location.search.includes('chart=equity')
+                    ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
+                    : 'text-gray-600 hover:bg-brand-50 hover:text-brand-900'
+                    }`}
+                >
+                  <span className="text-sm font-normal">Equity</span>
+                </Link>
+              </div>
+            )}
+          </div>
 
           {/* Analysis */}
           <div>
