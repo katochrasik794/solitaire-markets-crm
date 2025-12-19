@@ -13,7 +13,20 @@ import {
   Legend,
   Title
 } from "chart.js";
-import { TrendingUp, TrendingDown, DollarSign, Activity, BarChart3, Info } from "lucide-react";
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  DollarSign, 
+  Activity, 
+  BarChart3, 
+  Info,
+  Wallet,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  Coins,
+  LineChart,
+  Target
+} from "lucide-react";
 
 ChartJS.register(
   CategoryScale,
@@ -309,88 +322,126 @@ function TradePerformance() {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Net Profit */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-md p-6 border border-blue-100 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-blue-600" />
-                <h3 className="text-sm font-medium text-gray-700">Net profit</h3>
-                <Info className="w-4 h-4 text-gray-400 cursor-help" />
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${summary.netProfit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                  {summary.netProfit >= 0 ? (
+                    <TrendingUp className={`w-6 h-6 ${summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+                  ) : (
+                    <TrendingDown className="w-6 h-6 text-red-600" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Net profit</h3>
+                </div>
+                <Info className="w-4 h-4 text-gray-400 cursor-help hover:text-gray-600 transition-colors" />
               </div>
             </div>
-            <p className={`text-2xl font-bold ${summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-3xl font-bold mb-4 ${summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {formatCurrency(summary.netProfit)}
             </p>
-            <div className="mt-4 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Profit</span>
-                <span className="text-green-600 font-semibold">+{formatCurrency(summary.profit)}</span>
+            <div className="mt-4 space-y-2 text-sm bg-white/60 rounded-lg p-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 flex items-center gap-1">
+                  <ArrowUpCircle className="w-4 h-4 text-green-500" />
+                  Profit
+                </span>
+                <span className="text-green-600 font-bold">+{formatCurrency(summary.profit)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Loss</span>
-                <span className="text-red-600 font-semibold">{formatCurrency(summary.loss)}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 flex items-center gap-1">
+                  <ArrowDownCircle className="w-4 h-4 text-red-500" />
+                  Loss
+                </span>
+                <span className="text-red-600 font-bold">{formatCurrency(summary.loss)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-gray-600">Unrealised P/L</span>
-                <span className="text-gray-700">{formatCurrency(summary.unrealisedPL)}</span>
+                <span className="text-gray-700 font-semibold">{formatCurrency(summary.unrealisedPL)}</span>
               </div>
             </div>
           </div>
 
           {/* Closed Orders */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-md p-6 border border-green-100 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-green-600" />
-                <h3 className="text-sm font-medium text-gray-700">Closed orders</h3>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-100">
+                  <Target className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Closed orders</h3>
+                </div>
               </div>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{formatNumber(summary.closedOrders)}</p>
-            <div className="mt-4 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Profitable</span>
-                <span className="text-green-600 font-semibold">{formatNumber(summary.profitable)}</span>
+            <p className="text-3xl font-bold text-gray-900 mb-4">{formatNumber(summary.closedOrders)}</p>
+            <div className="mt-4 space-y-2 text-sm bg-white/60 rounded-lg p-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  Profitable
+                </span>
+                <span className="text-green-600 font-bold">{formatNumber(summary.profitable)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Unprofitable</span>
-                <span className="text-red-600 font-semibold">{formatNumber(summary.unprofitable)}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  Unprofitable
+                </span>
+                <span className="text-red-600 font-bold">{formatNumber(summary.unprofitable)}</span>
               </div>
             </div>
             {summary.closedOrders === 0 && (
-              <p className="mt-2 text-xs text-gray-500 italic">Trade history data not available</p>
+              <p className="mt-2 text-xs text-gray-500 italic text-center">Trade history data not available</p>
             )}
           </div>
 
           {/* Trading Volume */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-md p-6 border border-purple-100 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-purple-600" />
-                <h3 className="text-sm font-medium text-gray-700">Trading volume</h3>
-                <Info className="w-4 h-4 text-gray-400 cursor-help" />
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-purple-100">
+                  <Coins className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Trading volume</h3>
+                </div>
+                <Info className="w-4 h-4 text-gray-400 cursor-help hover:text-gray-600 transition-colors" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{formatCurrency(summary.tradingVolume)}</p>
-            <div className="mt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Lifetime</span>
-                <span className="text-gray-700 font-semibold">{formatCurrency(summary.lifetimeVolume)}</span>
+            <p className="text-3xl font-bold text-gray-900 mb-4">{formatCurrency(summary.tradingVolume)}</p>
+            <div className="mt-4 bg-white/60 rounded-lg p-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600 flex items-center gap-1">
+                  <BarChart3 className="w-4 h-4 text-purple-500" />
+                  Lifetime
+                </span>
+                <span className="text-purple-700 font-bold">{formatCurrency(summary.lifetimeVolume)}</span>
               </div>
             </div>
           </div>
 
           {/* Equity */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gradient-to-br from-indigo-50 to-cyan-50 rounded-lg shadow-md p-6 border border-indigo-100 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-indigo-600" />
-                <h3 className="text-sm font-medium text-gray-700">Equity</h3>
-                <Info className="w-4 h-4 text-gray-400 cursor-help" />
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-indigo-100">
+                  <Wallet className="w-6 h-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Equity</h3>
+                </div>
+                <Info className="w-4 h-4 text-gray-400 cursor-help hover:text-gray-600 transition-colors" />
               </div>
             </div>
-            <div className="mt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Current</span>
-                <span className="text-2xl font-bold text-gray-900">{formatCurrency(summary.equity)}</span>
+            <div className="mt-4 bg-white/60 rounded-lg p-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 text-sm flex items-center gap-1">
+                  <LineChart className="w-4 h-4 text-indigo-500" />
+                  Current
+                </span>
+                <span className="text-3xl font-bold text-indigo-700">{formatCurrency(summary.equity)}</span>
               </div>
             </div>
           </div>
