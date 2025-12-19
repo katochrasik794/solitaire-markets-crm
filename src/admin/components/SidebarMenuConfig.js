@@ -259,6 +259,13 @@ export const ADMIN_MENU = [
     ],
   },
   {
+    label: "LOGS",
+    items: [
+      { icon: FileText, label: "Admin Logs", to: "logs/admin" },
+      { icon: FileText, label: "User Logs", to: "logs/user" },
+    ],
+  },
+  {
     label: "BOOK MANAGEMENT",
     items: [
       {

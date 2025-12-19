@@ -48,6 +48,10 @@ import SupportTicketView from "../pages/SupportTicketView.jsx";
 import AssignCountryPartner from "../pages/AssignCountryPartner.jsx";
 import AssignedCountryAdmins from "../pages/AssignedCountryAdmins.jsx";
 import GroupManagement from "../pages/GroupManagement.jsx";
+import AdminLogs from "../pages/AdminLogs.jsx";
+import UserLogs from "../pages/UserLogs.jsx";
+import LogDetail from "../pages/LogDetail.jsx";
+import AdminLogsByAdmin from "../pages/AdminLogsByAdmin.jsx";
 import GroupReport from "../pages/GroupReport.jsx";
 import SendEmails from "../pages/SendEmails.jsx";
 import EmailTemplates from "../pages/EmailTemplates.jsx";
@@ -151,6 +155,13 @@ export default [
 
   /* ------------------------ CONTENT MANAGEMENT ------------------------ */
   { path: "content-management/tickers", element: <Tickers /> },
+
+  /* ------------------------------ LOGS -------------------------------- */
+  { path: "logs/admin", element: <AdminLogs /> },
+  { path: "logs/user", element: <UserLogs /> },
+  { path: "logs/admin/detail/:logId", element: <LogDetail /> },
+  { path: "logs/user/detail/:logId", element: <LogDetail /> },
+  { path: "logs/admin/by-admin", element: <AdminLogsByAdmin /> },
 
   /* ------------------------------ AUTH -------------------------------- */
   { path: "logout", element: <Logout /> },
