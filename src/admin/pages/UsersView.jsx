@@ -65,7 +65,6 @@ export default function UsersView() {
   const [disablingAccount, setDisablingAccount] = useState(null); // Track which account is being disabled
   // Backend base URL (Express server runs on 5000 with /api prefix)
   const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
-  const MT5_API_BASE = "http://13.43.216.232:5003/api";
 
 
 
@@ -88,18 +87,22 @@ export default function UsersView() {
       setDisablingAccount(accountId);
       const token = localStorage.getItem('adminToken');
       
-      // Call MT5 API to disable account
-      const response = await fetch(`${MT5_API_BASE}/users/${accountId}/disable`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      // Call backend proxy to disable account (handles MT5 API call)
+      try {
+        const response = await fetch(`${BASE}/admin/mt5/account/${accountId}/disable`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Failed to disable account');
         }
-      });
 
-      const data = await response.json();
-
-      if (response.ok && data.success !== false) {
         // Update database account_status to 'inactive'
         try {
           const updateResponse = await fetch(`${BASE}/admin/mt5/account/${accountId}/status`, {
@@ -116,11 +119,32 @@ export default function UsersView() {
             console.log(`✅ Database status updated to 'inactive' for account ${accountId}`);
           } else {
             console.warn('⚠️ Failed to update database status:', updateData);
-            // The account is disabled in MT5, but DB update failed - user will see it in archive after refresh
+            // Account is disabled in MT5, but DB update failed - show warning
+            await Swal.fire({
+              icon: 'warning',
+              title: 'Account Disabled',
+              text: `MT5 account ${accountId} has been disabled, but database update failed. Please refresh.`,
+              timer: 2000,
+              showConfirmButton: false
+            });
+            setTimeout(() => {
+              fetchUser();
+            }, 500);
+            return;
           }
         } catch (dbError) {
-          console.error('Error updating database status:', dbError);
-          // Continue anyway - MT5 account is disabled
+          console.error('❌ Error updating database status:', dbError);
+          await Swal.fire({
+            icon: 'warning',
+            title: 'Account Disabled',
+            text: `MT5 account ${accountId} has been disabled, but database update failed. Please refresh.`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+          setTimeout(() => {
+            fetchUser();
+          }, 500);
+          return;
         }
 
         setDisabledAccounts(prev => new Set([...prev, accountId]));
@@ -132,9 +156,18 @@ export default function UsersView() {
           showConfirmButton: false
         });
         // Refresh MT5 data
-        fetchUser();
-      } else {
-        throw new Error(data.message || 'Failed to disable account');
+        setTimeout(() => {
+          fetchUser();
+        }, 500);
+      } catch (error) {
+        console.error('Error disabling account:', error);
+        await Swal.fire({
+          icon: 'error',
+          title: 'Failed to Disable Account',
+          text: error.message || 'Failed to disable account. Please try again.',
+        });
+      } finally {
+        setDisablingAccount(null);
       }
     } catch (error) {
       console.error('Error disabling account:', error);
@@ -166,18 +199,22 @@ export default function UsersView() {
       setEnablingAccount(accountId);
       const token = localStorage.getItem('adminToken');
       
-      // Call MT5 API to enable account
-      const response = await fetch(`${MT5_API_BASE}/users/${accountId}/enable`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      // Call backend proxy to enable account (handles MT5 API call)
+      try {
+        const response = await fetch(`${BASE}/admin/mt5/account/${accountId}/enable`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Failed to enable account');
         }
-      });
 
-      const data = await response.json();
-
-      if (response.ok && data.success !== false) {
         // Update database account_status to 'active'
         try {
           const updateResponse = await fetch(`${BASE}/admin/mt5/account/${accountId}/status`, {
@@ -194,10 +231,32 @@ export default function UsersView() {
             console.log(`✅ Database status updated to 'active' for account ${accountId}`);
           } else {
             console.warn('⚠️ Failed to update database status:', updateData);
+            // Account is enabled in MT5, but DB update failed - show warning
+            await Swal.fire({
+              icon: 'warning',
+              title: 'Account Enabled',
+              text: `MT5 account ${accountId} has been enabled, but database update failed. Please refresh.`,
+              timer: 2000,
+              showConfirmButton: false
+            });
+            setTimeout(() => {
+              fetchUser();
+            }, 500);
+            return;
           }
         } catch (dbError) {
           console.error('❌ Error updating database status:', dbError);
-          // Continue anyway - MT5 account is enabled
+          await Swal.fire({
+            icon: 'warning',
+            title: 'Account Enabled',
+            text: `MT5 account ${accountId} has been enabled, but database update failed. Please refresh.`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+          setTimeout(() => {
+            fetchUser();
+          }, 500);
+          return;
         }
 
         setDisabledAccounts(prev => {
@@ -216,8 +275,15 @@ export default function UsersView() {
         setTimeout(() => {
           fetchUser();
         }, 500);
-      } else {
-        throw new Error(data.message || 'Failed to enable account');
+      } catch (error) {
+        console.error('Error enabling account:', error);
+        await Swal.fire({
+          icon: 'error',
+          title: 'Failed to Enable Account',
+          text: error.message || 'Failed to enable account. Please try again.',
+        });
+      } finally {
+        setEnablingAccount(null);
       }
     } catch (error) {
       console.error('Error enabling account:', error);
