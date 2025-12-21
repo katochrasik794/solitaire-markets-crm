@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import ProTable from "../components/ProTable.jsx";
 import Modal from "../components/Modal.jsx";
-import { Pencil, Trash2, MailCheck, MailX, Eye, Lock, Unlock } from "lucide-react";
+import { Pencil, Trash2, MailCheck, MailX, Eye, Lock, Unlock, CheckCircle, XCircle } from "lucide-react";
 import Swal from "sweetalert2";
 
 function fmtDate(v) {
@@ -91,9 +91,23 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
     { key: "email", label: "Email" },
     { key: "phone", label: "Phone" },
     { key: "country", label: "Country" },
-    { key: "status", label: "Status", render: (v, row, Badge) => (
-      <Badge tone={v === 'active' ? 'green' : 'red'}>{v}</Badge>
-    ) },
+    { key: "status", label: "Status", render: (v, row, Badge) => {
+      const isActive = v === 'active';
+      const isInactive = v === 'inactive';
+      const isBanned = v === 'banned';
+      return (
+        <div className="flex items-center gap-2">
+          {isActive ? (
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          ) : isInactive ? (
+            <XCircle className="h-4 w-4 text-gray-500" />
+          ) : (
+            <XCircle className="h-4 w-4 text-red-600" />
+          )}
+          <Badge tone={isActive ? 'green' : isBanned ? 'red' : 'gray'}>{v}</Badge>
+        </div>
+      );
+    } },
     { key: "emailVerified", label: "Email Verified", render: (v, row, Badge) => (
       <Badge tone={v === 'Yes' ? 'green' : 'amber'}>{v}</Badge>
     ) },
@@ -133,6 +147,19 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
             {row.status === 'banned' ? <Unlock size={16} /> : <Lock size={16} />}
           </button>
           <span className="text-xs text-gray-500">{row.status === 'banned' ? 'Unlock' : 'Lock'}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <button
+            onClick={() => {
+              const nextStatus = row.status === 'inactive' ? 'active' : 'inactive';
+              setConfirmBan({ row, next: nextStatus });
+            }}
+            className="h-8 w-8 grid place-items-center rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50"
+            title={row.status === 'inactive' ? 'Activate User' : 'Deactivate User'}
+          >
+            {row.status === 'inactive' ? <CheckCircle size={16} /> : <XCircle size={16} />}
+          </button>
+          <span className="text-xs text-gray-500">{row.status === 'inactive' ? 'Activate' : 'Deactivate'}</span>
         </div>
         <div className="flex flex-col items-center gap-1">
           <button
@@ -426,16 +453,33 @@ export default function UsersAll({ initialTitle = 'All Users', queryParams = {} 
       </Modal>
 
       {/* Lock/Unlock Confirm */}
-      <Modal open={!!confirmBan} onClose={()=>setConfirmBan(null)} title={confirmBan?.next==='banned'? 'Lock User' : 'Unlock User'}>
+      <Modal open={!!confirmBan} onClose={()=>setConfirmBan(null)} title={
+        confirmBan?.next==='banned' ? 'Lock User' : 
+        confirmBan?.next==='inactive' ? 'Deactivate User' :
+        confirmBan?.next==='active' ? (confirmBan?.row?.status === 'inactive' ? 'Activate User' : 'Unlock User') :
+        'Update User Status'
+      }>
         {confirmBan && (
           <div className="space-y-4">
             <p>
-              Do you want to {confirmBan.next === 'banned' ? 'lock' : 'unlock'} user <b>{confirmBan.row.email}</b>?
+              Do you want to {
+                confirmBan.next === 'banned' ? 'lock' : 
+                confirmBan.next === 'inactive' ? 'deactivate' :
+                confirmBan.next === 'active' ? (confirmBan.row.status === 'inactive' ? 'activate' : 'unlock') :
+                'update status for'
+              } user <b>{confirmBan.row.email}</b>?
             </p>
             <div className="flex justify-end gap-2">
               <button onClick={()=>setConfirmBan(null)} className="px-4 h-10 rounded-md border">Cancel</button>
-              <button onClick={()=>onToggleBan(confirmBan.row, confirmBan.next)} className={`px-4 h-10 rounded-md ${confirmBan.next==='banned' ? 'bg-rose-600' : 'bg-emerald-600'} text-white`}>
-                {confirmBan.next === 'banned' ? 'Lock' : 'Unlock'}
+              <button onClick={()=>onToggleBan(confirmBan.row, confirmBan.next)} className={`px-4 h-10 rounded-md ${
+                confirmBan.next==='banned' ? 'bg-rose-600' : 
+                confirmBan.next==='inactive' ? 'bg-gray-600' :
+                'bg-emerald-600'
+              } text-white`}>
+                {confirmBan.next === 'banned' ? 'Lock' : 
+                 confirmBan.next === 'inactive' ? 'Deactivate' :
+                 confirmBan.next === 'active' ? (confirmBan.row.status === 'inactive' ? 'Activate' : 'Unlock') :
+                 'Update'}
               </button>
             </div>
           </div>

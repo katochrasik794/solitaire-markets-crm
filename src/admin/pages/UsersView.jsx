@@ -1,7 +1,7 @@
 // src/pages/admin/UsersView.jsx
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Users, Wallet, Download, Upload, ShieldCheck, CreditCard, LogIn, Key } from "lucide-react";
+import { Users, Wallet, Download, Upload, ShieldCheck, CreditCard, LogIn, Key, CheckCircle, XCircle } from "lucide-react";
 import ProTable from "../components/ProTable.jsx";
 import Modal from "../components/Modal.jsx";
 import Badge from "../components/Badge.jsx";
@@ -522,7 +522,19 @@ export default function UsersView() {
       <div className="rounded-2xl bg-white border border-gray-200 p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <div className="text-xl font-bold">{u.name || u.email}</div>
+            <div className="flex items-center gap-2">
+              <div className="text-xl font-bold">{u.name || u.email}</div>
+              {(() => {
+                const status = (u.status && u.status.toLowerCase()) || 'active';
+                if (status === 'active') {
+                  return <CheckCircle className="h-5 w-5 text-green-600" />;
+                } else if (status === 'inactive') {
+                  return <XCircle className="h-5 w-5 text-gray-500" />;
+                } else {
+                  return <XCircle className="h-5 w-5 text-red-600" />;
+                }
+              })()}
+            </div>
             <div className="text-sm text-gray-600">{u.email}</div>
             <div className="text-xs text-gray-500 mt-1">
               Created {fmt(u.createdAt)} • Last login {fmt(u.lastLoginAt)}

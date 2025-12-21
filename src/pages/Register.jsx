@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import authService from '../services/auth.js'
 import AuthLoader from '../components/AuthLoader.jsx'
@@ -6,7 +6,7 @@ import AuthLoader from '../components/AuthLoader.jsx'
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 function Register() {
-  const [currentPage, setCurrentPage] = useState(1) // 1 = country selection, 2 = registration form
+  const [currentPage, setCurrentPage] = useState(1) // 1 = country selection, 2 = registration form, 3 = OTP verification
   const [country, setCountry] = useState('')
   const [countries, setCountries] = useState([])
   const [countriesLoading, setCountriesLoading] = useState(true)
@@ -25,6 +25,9 @@ function Register() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
+  const [otp, setOtp] = useState(['', '', '', '', '', ''])
+  const otpInputRefs = useRef([])
+  const [verifying, setVerifying] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const isRegisterPage = location.pathname === '/register' || location.pathname.startsWith('/register')
@@ -382,26 +385,128 @@ function Register() {
         country: country
       }
 
-      // Minimum 3 seconds loading time for beautiful animation
-      const [result] = await Promise.all([
-        authService.register(registrationData),
-        new Promise(resolve => setTimeout(resolve, 3000))
-      ])
+      // Send OTP instead of directly registering
+      const response = await fetch(`${API_BASE_URL}/auth/send-registration-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(registrationData)
+      })
+
+      const result = await response.json()
 
       if (result.success) {
-        // Auto-login after successful registration
-        navigate('/user/dashboard')
+        // Move to OTP verification page
+        setCurrentPage(3)
+        // Initialize OTP input refs
+        otpInputRefs.current = Array(6).fill(null).map(() => null)
+        // Focus first input after a short delay
+        setTimeout(() => {
+          if (otpInputRefs.current[0]) {
+            otpInputRefs.current[0].focus()
+          }
+        }, 100)
+      } else {
+        setError(result.message || 'Failed to send OTP. Please try again.')
       }
     } catch (err) {
-      // Handle validation errors from backend
-      if (err.message && err.message.includes('Validation failed')) {
-        setError(err.message)
-      } else if (err.message && err.message.includes('already exists')) {
-        setError('An account with this email already exists')
-      } else {
-        setError(err.message || 'Registration failed. Please try again.')
-      }
+      setError(err.message || 'Failed to send OTP. Please try again.')
+    } finally {
       setLoading(false)
+    }
+  }
+
+  // Handle OTP input change
+  const handleOtpChange = (index, value) => {
+    // Only allow digits
+    if (value && !/^\d$/.test(value)) {
+      return
+    }
+
+    const newOtp = [...otp]
+    newOtp[index] = value
+    setOtp(newOtp)
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      if (otpInputRefs.current[index + 1]) {
+        otpInputRefs.current[index + 1].focus()
+      }
+    }
+  }
+
+  // Handle OTP backspace
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      if (otpInputRefs.current[index - 1]) {
+        otpInputRefs.current[index - 1].focus()
+      }
+    }
+  }
+
+  // Handle OTP paste
+  const handleOtpPaste = (e) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData('text').trim()
+    if (/^\d{6}$/.test(pastedData)) {
+      const newOtp = pastedData.split('')
+      setOtp(newOtp)
+      if (otpInputRefs.current[5]) {
+        otpInputRefs.current[5].focus()
+      }
+    }
+  }
+
+  // Verify OTP and complete registration
+  const handleVerifyOtp = async () => {
+    const otpString = otp.join('')
+    
+    if (otpString.length !== 6) {
+      setError('Please enter the complete 6-digit OTP')
+      return
+    }
+
+    setVerifying(true)
+    setError('')
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-registration-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: formData.email.trim().toLowerCase(),
+          otp: otpString
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Store token and user data
+        if (result.data.token) {
+          localStorage.setItem('token', result.data.token)
+        }
+        // Auto-login after successful registration
+        navigate('/user/dashboard')
+      } else {
+        setError(result.message || 'Invalid OTP. Please try again.')
+        // Clear OTP on error
+        setOtp(['', '', '', '', '', ''])
+        if (otpInputRefs.current[0]) {
+          otpInputRefs.current[0].focus()
+        }
+      }
+    } catch (err) {
+      setError(err.message || 'Verification failed. Please try again.')
+      setOtp(['', '', '', '', '', ''])
+      if (otpInputRefs.current[0]) {
+        otpInputRefs.current[0].focus()
+      }
+    } finally {
+      setVerifying(false)
     }
   }
 
@@ -907,10 +1012,118 @@ function Register() {
                   disabled={loading || !allPasswordRequirementsMet || !usTaxChecked}
                   className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base border border-brand-500 py-3 rounded-lg transition-colors font-semibold uppercase disabled:opacity-50 disabled:cursor-not-allowed font-sans text-sm"
                 >
-                  {loading ? 'Registering...' : 'CONTINUE'}
+                  {loading ? 'Sending OTP...' : 'CONTINUE'}
                 </button>
 
               </form>
+            </div>
+          )}
+
+          {/* Page 3: OTP Verification */}
+          {currentPage === 3 && (
+            <div className="p-6 w-full">
+              {/* Error Message */}
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-800" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    {error}
+                  </p>
+                </div>
+              )}
+
+              <div className="text-center mb-6">
+                <div className="mb-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-100 rounded-full mb-4">
+                    <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+                <h2 className="text-2xl font-bold text-dark-base mb-3 font-sans">Verify Your Email</h2>
+                <p className="text-dark-base/70 text-sm mb-2 font-sans">
+                  OTP has been sent on your <strong className="font-bold text-dark-base">{formData.email}</strong>
+                </p>
+                <p className="text-dark-base/60 text-xs font-sans">
+                  Please verify to activate your account
+                </p>
+              </div>
+
+              {/* OTP Input Boxes */}
+              <div className="flex justify-center gap-3 mb-6">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (otpInputRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    onPaste={index === 0 ? handleOtpPaste : undefined}
+                    className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all font-sans"
+                    style={{
+                      fontFamily: 'Courier New, monospace',
+                      fontSize: '24px',
+                      letterSpacing: '0',
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Verify Button */}
+              <button
+                onClick={handleVerifyOtp}
+                disabled={verifying || otp.join('').length !== 6}
+                className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base border border-brand-500 py-3 rounded-lg transition-colors font-semibold uppercase disabled:opacity-50 disabled:cursor-not-allowed font-sans text-sm"
+              >
+                {verifying ? 'Verifying...' : 'VERIFY & CONTINUE'}
+              </button>
+
+              {/* Resend OTP */}
+              <div className="text-center mt-4">
+                <button
+                  onClick={async () => {
+                    setError('')
+                    setOtp(['', '', '', '', '', ''])
+                    setLoading(true)
+                    try {
+                      const registrationData = {
+                        email: formData.email.trim().toLowerCase(),
+                        password: formData.password,
+                        firstName: formData.firstName.trim(),
+                        lastName: formData.lastName.trim(),
+                        phoneCode: formData.phoneCode,
+                        phoneNumber: formData.phoneNumber.trim(),
+                        country: country
+                      }
+                      const response = await fetch(`${API_BASE_URL}/auth/send-registration-otp`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(registrationData)
+                      })
+                      const result = await response.json()
+                      if (result.success) {
+                        if (otpInputRefs.current[0]) {
+                          otpInputRefs.current[0].focus()
+                        }
+                      } else {
+                        setError(result.message || 'Failed to resend OTP')
+                      }
+                    } catch (err) {
+                      setError('Failed to resend OTP. Please try again.')
+                    } finally {
+                      setLoading(false)
+                    }
+                  }}
+                  disabled={loading}
+                  className="text-sm text-brand-600 hover:text-brand-700 font-medium font-sans disabled:opacity-50"
+                >
+                  Resend OTP
+                </button>
+              </div>
             </div>
           )}
 

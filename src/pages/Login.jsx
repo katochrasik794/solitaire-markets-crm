@@ -3,6 +3,8 @@ import { useNavigate, Link, useLocation } from 'react-router-dom'
 import authService from '../services/auth.js'
 import AuthLoader from '../components/AuthLoader.jsx'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -10,6 +12,8 @@ function Login() {
   const [rememberMe, setRememberMe] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+  const [activationLink, setActivationLink] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const isRegisterPage = location.pathname === '/register' || location.pathname.startsWith('/register')
@@ -31,20 +35,26 @@ function Login() {
     setLoading(true)
 
     try {
-      // Minimum 3 seconds loading time for beautiful animation
-      const [result] = await Promise.all([
-        authService.login(email, password),
-        new Promise(resolve => setTimeout(resolve, 3000))
-      ])
+      const result = await authService.login(email, password)
 
-      if (result.success) {
+      // Check if account requires activation
+      if (result && result.requiresActivation) {
+        setError('') // Clear any previous errors
+        // Show message with activation link
+        setMessage(result.message)
+        setActivationLink(result.activationLink)
+      } else if (result && result.success) {
         navigate('/user/dashboard')
+      } else {
+        setError(result?.message || 'Login failed. Please check your credentials.')
       }
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.')
+    } finally {
       setLoading(false)
     }
   }
+
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col font-sans">
@@ -91,6 +101,21 @@ function Login() {
         </div>
         {/* Form Container */}
         <div className="w-full max-w-lg">
+          {/* Activation Message with Link */}
+          {message && activationLink && (
+            <div className="mb-4 p-4 bg-amber-50 border border-amber-300 rounded-lg">
+              <p className="text-sm text-amber-800 mb-3 font-sans">
+                {message}
+              </p>
+              <a
+                href={activationLink}
+                className="inline-block px-4 py-2 bg-brand-500 hover:bg-brand-600 text-dark-base rounded-lg text-sm font-semibold transition-colors font-sans"
+              >
+                Click Here to Activate
+              </a>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-lg">

@@ -72,13 +72,31 @@ class AuthService {
         body: JSON.stringify({ email, password }),
       });
 
-      // Check if response is ok before parsing JSON
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Network error' }));
-        throw new Error(errorData.message || `Server error: ${response.status}`);
+      const data = await response.json();
+
+      // Handle inactive account requiring activation
+      if (data.requiresActivation) {
+        return {
+          requiresActivation: true,
+          message: data.message,
+          activationLink: data.activationLink,
+          email: data.email
+        };
       }
 
-      const data = await response.json();
+      // Check if response is ok before parsing JSON
+      if (!response.ok) {
+        // Check if it's an inactive account error
+        if (response.status === 403 && data.requiresActivation) {
+          return {
+            requiresActivation: true,
+            message: data.message,
+            activationLink: data.activationLink,
+            email: data.email
+          };
+        }
+        throw new Error(data.message || `Server error: ${response.status}`);
+      }
 
       if (data.success && data.data.token) {
         this.setToken(data.data.token);
