@@ -21,6 +21,7 @@ function Dashboard() {
   const [showCopyTradingBanner, setShowCopyTradingBanner] = useState(true);
   const [showKycBanner, setShowKycBanner] = useState(true);
   const [accounts, setAccounts] = useState([]);
+  const [archivedAccounts, setArchivedAccounts] = useState([]); // Disabled/inactive accounts
   const [loadingAccounts, setLoadingAccounts] = useState(true);
   const [accountBalances, setAccountBalances] = useState({}); // { accountNumber: { leverage, equity, balance, margin, credit } }
   const [syncingAccount, setSyncingAccount] = useState(null); // accountNumber being synced
@@ -250,13 +251,30 @@ function Dashboard() {
         const data = await response.json();
         if (data.success) {
           const all = Array.isArray(data.data) ? data.data : [];
-          // Store all active MT5 accounts
+          console.log('All accounts fetched:', all.length, all.map(a => ({ id: a.account_number, status: a.account_status })));
+          
+          // Store all active MT5 accounts (status is empty, 'active', or null)
           const activeAccounts = all.filter((acc) => {
             const platform = (acc.platform || '').toUpperCase();
             const status = (acc.account_status || '').toLowerCase();
-            return platform === 'MT5' && (status === '' || status === 'active');
+            const isActive = platform === 'MT5' && (status === '' || status === 'active' || !status);
+            return isActive;
           });
           setAccounts(activeAccounts);
+          console.log('Active accounts:', activeAccounts.length);
+          
+          // Store archived (disabled/inactive) MT5 accounts - check for ANY non-active status
+          const archived = all.filter((acc) => {
+            const platform = String(acc.platform || '').toUpperCase();
+            const status = String(acc.account_status || '').toLowerCase().trim();
+            const isArchived = platform === 'MT5' && status && status !== '' && status !== 'active' && status !== 'null';
+            if (isArchived) {
+              console.log('📦 Found archived account:', acc.account_number, 'status:', status, 'platform:', platform);
+            }
+            return isArchived;
+          });
+          setArchivedAccounts(archived);
+          console.log('📦 Total archived accounts:', archived.length, archived.map(a => ({ id: a.account_number, status: a.account_status, platform: a.platform })));
 
           // Use stored balance data IMMEDIATELY - no waiting for API calls
           const realAccounts = activeAccounts.filter(acc => !acc.is_demo);
@@ -806,6 +824,12 @@ function Dashboard() {
                     return platform === 'MT5' && (status === '' || status === 'active');
                   });
                   setAccounts(live);
+                  const archived = all.filter((acc) => {
+                    const platform = (acc.platform || '').toUpperCase();
+                    const status = (acc.account_status || '').toLowerCase();
+                    return platform === 'MT5' && (status === 'inactive' || status === 'suspended' || status === 'disabled');
+                  });
+                  setArchivedAccounts(archived);
                 }
               } catch (error) {
                 console.error('Error syncing account:', error);
@@ -853,6 +877,12 @@ function Dashboard() {
                     return platform === 'MT5' && (status === '' || status === 'active');
                   });
                   setAccounts(live);
+                  const archived = all.filter((acc) => {
+                    const platform = (acc.platform || '').toUpperCase();
+                    const status = (acc.account_status || '').toLowerCase();
+                    return platform === 'MT5' && (status === 'inactive' || status === 'suspended' || status === 'disabled');
+                  });
+                  setArchivedAccounts(archived);
                 }
               } catch (error) {
                 console.error('Error syncing account:', error);
@@ -863,6 +893,62 @@ function Dashboard() {
             syncingAccount={syncingAccount}
             title="Demo"
           />
+        </div>
+
+        {/* Archive Accounts Section */}
+        <div className="w-full mt-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+            <h2 className="text-gray-700 text-sm md:text-md font-medium">
+              Archive Accounts (Disabled)
+            </h2>
+          </div>
+          
+          {archivedAccounts.length === 0 ? (
+            <div className="bg-white rounded-lg shadow p-8 text-center">
+              <p className="text-gray-600" style={{ fontFamily: "Roboto, sans-serif", fontSize: "14px" }}>
+                No archived accounts found
+              </p>
+            </div>
+          ) : (
+
+            <AccountsTable
+              accounts={archivedAccounts}
+              loading={loadingAccounts}
+              accountBalances={accountBalances}
+              onSync={async (accountNumber) => {
+                setSyncingAccount(accountNumber);
+                try {
+                  await fetchAccountBalance(accountNumber);
+                  const token = authService.getToken();
+                  const response = await fetch(`${API_BASE_URL}/accounts`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  const data = await response.json();
+                  if (data.success) {
+                    const all = Array.isArray(data.data) ? data.data : [];
+                    const active = all.filter((acc) => {
+                      const platform = (acc.platform || '').toUpperCase();
+                      const status = (acc.account_status || '').toLowerCase();
+                      return platform === 'MT5' && (status === '' || status === 'active');
+                    });
+                    setAccounts(active);
+                    const archived = all.filter((acc) => {
+                      const platform = (acc.platform || '').toUpperCase();
+                      const status = (acc.account_status || '').toLowerCase();
+                      return platform === 'MT5' && (status === 'inactive' || status === 'suspended' || status === 'disabled');
+                    });
+                    setArchivedAccounts(archived);
+                  }
+                } catch (error) {
+                  console.error('Error syncing account:', error);
+                } finally {
+                  setSyncingAccount(null);
+                }
+              }}
+              syncingAccount={syncingAccount}
+              title="Archive"
+            />
+          )}
         </div>
 
         {/* Activity Modal */}

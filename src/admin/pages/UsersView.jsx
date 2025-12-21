@@ -1,7 +1,7 @@
 // src/pages/admin/UsersView.jsx
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Users, Wallet, Download, Upload, ShieldCheck, CreditCard, LogIn, Key, CheckCircle, XCircle } from "lucide-react";
+import { Users, Wallet, Download, Upload, ShieldCheck, CreditCard, LogIn, Key, CheckCircle, XCircle, Power, PowerOff, Archive, Info } from "lucide-react";
 import ProTable from "../components/ProTable.jsx";
 import Modal from "../components/Modal.jsx";
 import Badge from "../components/Badge.jsx";
@@ -60,10 +60,176 @@ export default function UsersView() {
   const [newUserPassword, setNewUserPassword] = useState('');
   const [showNewUserPassword, setShowNewUserPassword] = useState(false);
   const [changingUserPassword, setChangingUserPassword] = useState(false);
+  const [disabledAccounts, setDisabledAccounts] = useState(new Set()); // Track disabled account IDs
+  const [enablingAccount, setEnablingAccount] = useState(null); // Track which account is being enabled
+  const [disablingAccount, setDisablingAccount] = useState(null); // Track which account is being disabled
   // Backend base URL (Express server runs on 5000 with /api prefix)
   const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
+  const MT5_API_BASE = "http://13.43.216.232:5003/api";
 
 
+
+  // Enable/Disable MT5 Account
+  async function handleDisableAccount(accountId) {
+    try {
+      const result = await Swal.fire({
+        title: 'Disable MT5 Account?',
+        text: `Are you sure you want to disable account ${accountId}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, disable it',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (!result.isConfirmed) return;
+
+      setDisablingAccount(accountId);
+      const token = localStorage.getItem('adminToken');
+      
+      // Call MT5 API to disable account
+      const response = await fetch(`${MT5_API_BASE}/users/${accountId}/disable`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success !== false) {
+        // Update database account_status to 'inactive'
+        try {
+          const updateResponse = await fetch(`${BASE}/admin/mt5/account/${accountId}/status`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ account_status: 'inactive' })
+          });
+          
+          const updateData = await updateResponse.json();
+          if (updateResponse.ok && updateData.success) {
+            console.log(`✅ Database status updated to 'inactive' for account ${accountId}`);
+          } else {
+            console.warn('⚠️ Failed to update database status:', updateData);
+            // The account is disabled in MT5, but DB update failed - user will see it in archive after refresh
+          }
+        } catch (dbError) {
+          console.error('Error updating database status:', dbError);
+          // Continue anyway - MT5 account is disabled
+        }
+
+        setDisabledAccounts(prev => new Set([...prev, accountId]));
+        await Swal.fire({
+          icon: 'success',
+          title: 'Account Disabled',
+          text: `MT5 account ${accountId} has been disabled successfully.`,
+          timer: 2000,
+          showConfirmButton: false
+        });
+        // Refresh MT5 data
+        fetchUser();
+      } else {
+        throw new Error(data.message || 'Failed to disable account');
+      }
+    } catch (error) {
+      console.error('Error disabling account:', error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to disable MT5 account'
+      });
+    } finally {
+      setDisablingAccount(null);
+    }
+  }
+
+  async function handleEnableAccount(accountId) {
+    try {
+      const result = await Swal.fire({
+        title: 'Enable MT5 Account?',
+        text: `Are you sure you want to enable account ${accountId}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, enable it',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (!result.isConfirmed) return;
+
+      setEnablingAccount(accountId);
+      const token = localStorage.getItem('adminToken');
+      
+      // Call MT5 API to enable account
+      const response = await fetch(`${MT5_API_BASE}/users/${accountId}/enable`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success !== false) {
+        // Update database account_status to 'active'
+        try {
+          const updateResponse = await fetch(`${BASE}/admin/mt5/account/${accountId}/status`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ account_status: 'active' })
+          });
+          
+          const updateData = await updateResponse.json();
+          if (updateResponse.ok && updateData.success) {
+            console.log(`✅ Database status updated to 'active' for account ${accountId}`);
+          } else {
+            console.warn('⚠️ Failed to update database status:', updateData);
+          }
+        } catch (dbError) {
+          console.error('❌ Error updating database status:', dbError);
+          // Continue anyway - MT5 account is enabled
+        }
+
+        setDisabledAccounts(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(accountId);
+          return newSet;
+        });
+        await Swal.fire({
+          icon: 'success',
+          title: 'Account Enabled',
+          text: `MT5 account ${accountId} has been enabled successfully.`,
+          timer: 2000,
+          showConfirmButton: false
+        });
+        // Refresh MT5 data and wait a bit for DB to update
+        setTimeout(() => {
+          fetchUser();
+        }, 500);
+      } else {
+        throw new Error(data.message || 'Failed to enable account');
+      }
+    } catch (error) {
+      console.error('Error enabling account:', error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to enable MT5 account'
+      });
+    } finally {
+      setEnablingAccount(null);
+    }
+  }
 
   // Bonus actions
   async function handleAddBonus(accountId) {
@@ -703,7 +869,9 @@ export default function UsersView() {
             rows={((mt5Tab === "real"
               ? splitMt5Accounts.real
               : splitMt5Accounts.demo) || []
-            ).map((a, idx) => ({
+            )
+              .filter(a => !disabledAccounts.has(a.accountId))
+              .map((a, idx) => ({
               __index: idx + 1,
               accountId: a.accountId,
               // Prefer live group from MT5 API; fall back to DB only if API missing
@@ -740,37 +908,59 @@ export default function UsersView() {
                 key: "actions",
                 label: "Actions",
                 sortable: false,
-                render: (v, row) => (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() =>
-                        setActionModal({
-                          type: "deposit",
-                          accountId: row.accountId,
-                          amount: "",
-                          comment: "Admin deposit",
-                        })
-                      }
-                      className="px-2 py-1 rounded-full bg-emerald-600 text-white text-xs hover:bg-emerald-700 shadow-sm"
-                    >
-                      Deposit
-                    </button>
-                    <button
-                      onClick={() =>
-                        setActionModal({
-                          type: "withdraw",
-                          accountId: row.accountId,
-                          amount: "",
-                          comment: "Admin withdrawal",
-                          txId: "",
-                        })
-                      }
-                      className="px-2 py-1 rounded-full bg-rose-600 text-white text-xs hover:bg-rose-700 shadow-sm"
-                    >
-                      Withdraw
-                    </button>
-                  </div>
-                ),
+                render: (v, row) => {
+                  const isDisabled = disabledAccounts.has(row.accountId);
+                  return (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() =>
+                          setActionModal({
+                            type: "deposit",
+                            accountId: row.accountId,
+                            amount: "",
+                            comment: "Admin deposit",
+                          })
+                        }
+                        className="px-2 py-1 rounded-full bg-emerald-600 text-white text-xs hover:bg-emerald-700 shadow-sm"
+                      >
+                        Deposit
+                      </button>
+                      <button
+                        onClick={() =>
+                          setActionModal({
+                            type: "withdraw",
+                            accountId: row.accountId,
+                            amount: "",
+                            comment: "Admin withdrawal",
+                            txId: "",
+                          })
+                        }
+                        className="px-2 py-1 rounded-full bg-rose-600 text-white text-xs hover:bg-rose-700 shadow-sm"
+                      >
+                        Withdraw
+                      </button>
+                      {!isDisabled ? (
+                        <button
+                          onClick={() => handleDisableAccount(row.accountId)}
+                          disabled={disablingAccount === row.accountId}
+                          className="p-1.5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Disable Account"
+                        >
+                          <PowerOff className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleEnableAccount(row.accountId)}
+                          disabled={enablingAccount === row.accountId}
+                          className="p-1.5 rounded-full bg-green-100 text-green-600 hover:bg-green-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Enable Account"
+                        >
+                          <Power className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                },
               },
               {
                 key: "bonus",
@@ -815,6 +1005,92 @@ export default function UsersView() {
           />
         </div>
       </div>
+
+      {/* Archive Accounts (Disabled MT5 Accounts) */}
+      {((mt5Tab === "real" ? splitMt5Accounts.real : splitMt5Accounts.demo) || [])
+        .filter(a => disabledAccounts.has(a.accountId)).length > 0 && (
+        <div className="rounded-2xl bg-white border border-gray-200 shadow-sm mt-6">
+          <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Archive className="h-4 w-4 text-gray-600" />
+              <div className="text-sm font-semibold">Archive Accounts (Disabled)</div>
+            </div>
+          </div>
+          <div className="p-4">
+            <ProTable
+              rows={((mt5Tab === "real"
+                ? splitMt5Accounts.real
+                : splitMt5Accounts.demo) || []
+              )
+                .filter(a => disabledAccounts.has(a.accountId))
+                .map((a, idx) => ({
+                  __index: idx + 1,
+                  accountId: a.accountId,
+                  group: mt5Map[a.accountId]?.group || a.group || "-",
+                  leverage: mt5Map[a.accountId]?.leverage
+                    ? `1:${Number(mt5Map[a.accountId]?.leverage).toFixed(0)}`
+                    : "-",
+                  balance: `$${(mt5Map[a.accountId]?.balance || 0).toFixed(2)}`,
+                  equity: `$${(mt5Map[a.accountId]?.equity || 0).toFixed(2)}`,
+                  createdAt: fmt(a.createdAt),
+                  _raw: a,
+                }))}
+              columns={[
+                { key: "__index", label: "Sr No", sortable: false },
+                { key: "accountId", label: "Account ID" },
+                {
+                  key: "group",
+                  label: "Group",
+                  render: (v) => {
+                    const groupName = v || "-";
+                    const isDemo = String(groupName)
+                      .toLowerCase()
+                      .includes("demo");
+                    return (
+                      <Badge tone={isDemo ? "green" : "blue"}>{groupName}</Badge>
+                    );
+                  },
+                },
+                { key: "leverage", label: "Leverage" },
+                { key: "balance", label: "Balance" },
+                { key: "equity", label: "Equity" },
+                { key: "createdAt", label: "Created" },
+                {
+                  key: "status",
+                  label: "Status",
+                  sortable: false,
+                  render: (v, row) => (
+                    <Badge tone="red">Disabled</Badge>
+                  ),
+                },
+                {
+                  key: "actions",
+                  label: "Actions",
+                  sortable: false,
+                  render: (v, row) => (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEnableAccount(row.accountId)}
+                        disabled={enablingAccount === row.accountId}
+                        className="px-3 py-1.5 rounded-full bg-green-600 text-white text-xs hover:bg-green-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Enable and restore this account"
+                      >
+                        <div className="flex items-center gap-1">
+                          <Power className="w-3 h-3" />
+                          {enablingAccount === row.accountId ? 'Enabling...' : 'Active Account'}
+                        </div>
+                      </button>
+                    </div>
+                  ),
+                },
+              ]}
+              pageSize={5}
+              searchPlaceholder="Search archived accounts…"
+              filters={{ searchKeys: ["accountId", "group"] }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Approved Payment Methods */}
       <div className="rounded-2xl bg-white border border-gray-200 shadow-sm">
