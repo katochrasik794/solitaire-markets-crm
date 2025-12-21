@@ -899,7 +899,7 @@ function Dashboard() {
         <div className="w-full mt-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
             <h2 className="text-gray-700 text-sm md:text-md font-medium">
-              Archive Accounts (Disabled)
+              Archive Accounts
             </h2>
           </div>
           

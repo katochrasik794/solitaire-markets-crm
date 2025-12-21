@@ -1091,7 +1091,7 @@ export default function UsersView() {
         </div>
       </div>
 
-      {/* Archive Accounts (Disabled MT5 Accounts) */}
+      {/* Archive Accounts */}
       {((mt5Tab === "real" ? splitMt5Accounts.real : splitMt5Accounts.demo) || [])
         .filter(a => {
           const isDisabled = disabledAccounts.has(a.accountId) || 
@@ -1102,7 +1102,7 @@ export default function UsersView() {
           <div className="px-5 pt-4 pb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Archive className="h-4 w-4 text-gray-600" />
-              <div className="text-sm font-semibold">Archive Accounts (Disabled)</div>
+              <div className="text-sm font-semibold">Archive Accounts</div>
             </div>
           </div>
           <div className="p-4">
