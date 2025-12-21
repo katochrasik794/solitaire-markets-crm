@@ -27,14 +27,14 @@ function Support() {
 
     useEffect(() => {
         fetchTickets()
-        // Poll for updates every 30 seconds if active ticket is open or just generally
+        // Poll for updates every 3 seconds for real-time experience
         const interval = setInterval(() => {
             if (activeTicket) {
                 refreshActiveTicket()
             } else {
                 fetchTickets(false) // silent update
             }
-        }, 30000)
+        }, 3000) // Poll every 3 seconds
         return () => clearInterval(interval)
     }, [activeTicket])
 

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Headphones, Eye, RefreshCw, UserPlus } from 'lucide-react';
+import { Headphones, Eye, RefreshCw, UserPlus, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import supportService from '../../services/support.service';
 import ProTable from '../components/ProTable.jsx';
@@ -27,7 +27,18 @@ export default function SupportTicketsList({ status }) {
   const [assigning, setAssigning] = useState(false);
   
   // Check if current admin is super admin
-  const isSuperAdmin = admin?.role === 'admin' || admin?.role === 'super_admin' || !admin?.role;
+  // Check both 'role' and 'admin_role' for compatibility
+  const adminRole = admin?.role || admin?.admin_role;
+  // Super admin if: no role (null/undefined/empty string), or role is 'admin', 'superadmin', or 'super_admin'
+  const isSuperAdmin = 
+    !adminRole || 
+    adminRole === '' || 
+    adminRole === null || 
+    adminRole === undefined ||
+    adminRole === 'admin' || 
+    adminRole === 'superadmin' ||
+    adminRole === 'super_admin' ||
+    admin?.isSuperAdmin === true;
 
   const fetchData = async () => {
     setLoading(true);
@@ -50,23 +61,26 @@ export default function SupportTicketsList({ status }) {
 
   useEffect(() => { 
     fetchData(); 
-    if (isSuperAdmin) {
-      fetchRoles();
-    }
-  }, [status, isSuperAdmin]);
+    fetchRoles(); // Always fetch roles for assignment
+  }, [status]);
 
   const fetchRoles = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/roles`, {
+      const BASE = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${BASE}/admin/roles`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      if (data.ok) {
+      if (data?.ok && data.roles) {
         setRoles(data.roles || []);
+      } else {
+        console.error('Failed to fetch roles:', data?.error || 'Unknown error');
+        setRoles([]);
       }
     } catch (error) {
       console.error('Failed to fetch roles:', error);
+      setRoles([]);
     }
   };
 
@@ -101,6 +115,23 @@ export default function SupportTicketsList({ status }) {
     closed: 'Closed Tickets',
   };
 
+  // Format time taken (seconds to hours, minutes, seconds)
+  const formatTimeTaken = (seconds) => {
+    if (!seconds || seconds === null || seconds === undefined) return '-';
+    const totalSeconds = Math.floor(seconds);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${secs}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    } else {
+      return `${secs}s`;
+    }
+  };
+
   // Transform items to ProTable format
   const rows = useMemo(() => {
     return items.map(t => ({
@@ -114,6 +145,7 @@ export default function SupportTicketsList({ status }) {
       status: t.status || 'open',
       updatedAt: t.updated_at,
       createdAt: t.created_at,
+      timeTakenSeconds: t.time_taken_seconds || null,
       assignedRoleId: t.assigned_role_id || null,
       assignedRoleName: t.assigned_role_name || null,
       assignedTo: t.assigned_to || null,
@@ -186,6 +218,22 @@ export default function SupportTicketsList({ status }) {
         return <span className="text-gray-400 italic">Unassigned</span>;
       }
     },
+    ...(status === 'closed' ? [{
+      key: "timeTakenSeconds",
+      label: "Time Taken",
+      render: (v, row) => {
+        const timeStr = formatTimeTaken(v);
+        return (
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-700" title="Time taken to resolve the ticket">
+              {timeStr}
+            </span>
+          </div>
+        );
+      },
+      sortable: true
+    }] : []),
     { key: "updatedAt", label: "Updated", render: (v) => fmtDate(v), sortable: true },
     { 
       key: "actions", 
@@ -272,15 +320,14 @@ export default function SupportTicketsList({ status }) {
       )}
 
       {/* Assign to Role Modal */}
-      {showAssignModal && selectedTicket && (
-        <Modal
-          isOpen={showAssignModal}
-          onClose={() => {
-            setShowAssignModal(false);
-            setSelectedTicket(null);
-          }}
-          title="Assign Ticket to Role"
-        >
+      <Modal
+        open={showAssignModal && !!selectedTicket}
+        onClose={() => {
+          setShowAssignModal(false);
+          setSelectedTicket(null);
+        }}
+        title="Assign Ticket to Role"
+      >
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -292,9 +339,13 @@ export default function SupportTicketsList({ status }) {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
               >
                 <option value="">Unassigned (All admins can see)</option>
-                {roles.map(role => (
-                  <option key={role.id} value={role.id}>{role.name}</option>
-                ))}
+                {roles.length > 0 ? (
+                  roles.map(role => (
+                    <option key={role.id} value={role.id}>{role.name}</option>
+                  ))
+                ) : (
+                  <option value="" disabled>No roles available. Please create roles first.</option>
+                )}
               </select>
             </div>
             <div className="flex justify-end gap-2 pt-4">
@@ -317,7 +368,6 @@ export default function SupportTicketsList({ status }) {
             </div>
           </div>
         </Modal>
-      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { Headphones, Send, RotateCcw, CheckCircle2, UserPlus, ChevronDown, ArrowLeft } from 'lucide-react';
+import { Headphones, Send, RotateCcw, CheckCircle2, UserPlus, ChevronDown, ArrowLeft, Clock } from 'lucide-react';
 import supportService from '../../services/support.service';
 import { useAuth } from '../contexts/AuthContext';
 import Modal from '../components/Modal.jsx';
@@ -21,45 +21,101 @@ export default function SupportTicketView() {
   const [sendingReply, setSendingReply] = useState(false);
   
   // Check if current admin is super admin
-  const isSuperAdmin = admin?.role === 'admin' || admin?.role === 'super_admin' || !admin?.role;
+  // Check both 'role' and 'admin_role' for compatibility
+  const adminRole = admin?.role || admin?.admin_role;
+  // Super admin if: no role (null/undefined/empty string), or role is 'admin', 'superadmin', or 'super_admin'
+  const isSuperAdmin = 
+    !adminRole || 
+    adminRole === '' || 
+    adminRole === null || 
+    adminRole === undefined ||
+    adminRole === 'admin' || 
+    adminRole === 'superadmin' ||
+    adminRole === 'super_admin' ||
+    admin?.isSuperAdmin === true;
 
-  const fetchData = async () => {
+  // Format time taken (seconds to hours, minutes, seconds)
+  const formatTimeTaken = (seconds) => {
+    if (!seconds || seconds === null || seconds === undefined) return '-';
+    const totalSeconds = Math.floor(seconds);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${secs}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    } else {
+      return `${secs}s`;
+    }
+  };
+
+  const fetchData = async (silent = false) => {
     try {
+      if (!silent) {
+        setLoading(true);
+      }
       const data = await supportService.getAdminTicket(id);
       if (data.success) {
         setTicket(data.data.ticket);
-        setReplies(data.data.messages || []);
+        // Only update replies if we got new data (avoid unnecessary re-renders)
+        const newMessages = data.data.messages || [];
+        setReplies(prevReplies => {
+          // Check if we have new messages by comparing IDs
+          const existingIds = new Set(prevReplies.map(r => r.id));
+          const hasNewMessages = newMessages.some(m => !existingIds.has(m.id));
+          
+          if (hasNewMessages || prevReplies.length !== newMessages.length) {
+            return newMessages;
+          }
+          return prevReplies; // No changes, keep existing
+        });
         setSelectedRoleId(data.data.ticket.assigned_role_id || null);
       }
     } catch (error) {
-      console.error(error);
-      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load ticket' });
+      if (!silent) {
+        console.error(error);
+        Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load ticket' });
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
   const fetchRoles = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/roles`, {
+      const BASE = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${BASE}/admin/roles`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      if (data.ok) {
+      if (data?.ok && data.roles) {
         setRoles(data.roles || []);
+      } else {
+        console.error('Failed to fetch roles:', data?.error || 'Unknown error');
+        setRoles([]);
       }
     } catch (error) {
       console.error('Failed to fetch roles:', error);
+      setRoles([]);
     }
   };
 
   useEffect(() => { 
     fetchData(); 
-    if (isSuperAdmin) {
-      fetchRoles();
-    }
-  }, [id, isSuperAdmin]);
+    fetchRoles(); // Always fetch roles for assignment
+    
+    // Auto-refresh messages every 3 seconds to get new replies from users
+    const interval = setInterval(() => {
+      fetchData(true); // Silent update - don't show loading spinner
+    }, 3000); // Poll every 3 seconds
+    
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [id]);
 
   const updateStatus = async (status) => {
     try {
@@ -98,8 +154,8 @@ export default function SupportTicketView() {
         setReplies([...replies, newReply]);
         setMessage('');
         
-        // Refresh ticket data in background
-        fetchData();
+        // Refresh ticket data in background (silently)
+        fetchData(true);
       } else {
         throw new Error(res.error);
       }
@@ -275,10 +331,21 @@ export default function SupportTicketView() {
                 <div className="text-xs text-gray-500">{ticket.user_email}</div>
               </div>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between border-b pb-2">
               <span className="text-gray-500">Ticket ID</span>
               <span className="font-medium">#{ticket.id}</span>
             </div>
+            {ticket.status === 'closed' && (
+              <div className="flex justify-between">
+                <span className="text-gray-500 flex items-center gap-1.5">
+                  <Clock className="h-4 w-4" />
+                  Time Taken
+                </span>
+                <span className="font-medium text-gray-900" title="Time taken to resolve the ticket">
+                  {formatTimeTaken(ticket.time_taken_seconds)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -300,9 +367,13 @@ export default function SupportTicketView() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
               >
                 <option value="">Unassigned (All admins can see)</option>
-                {roles.map(role => (
-                  <option key={role.id} value={role.id}>{role.name}</option>
-                ))}
+                {roles.length > 0 ? (
+                  roles.map(role => (
+                    <option key={role.id} value={role.id}>{role.name}</option>
+                  ))
+                ) : (
+                  <option value="" disabled>No roles available. Please create roles first.</option>
+                )}
               </select>
             </div>
             <div className="flex justify-end gap-2 pt-4">
