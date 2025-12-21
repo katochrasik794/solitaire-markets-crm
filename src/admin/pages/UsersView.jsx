@@ -537,6 +537,19 @@ export default function UsersView() {
     return cancel;
   }, [fetchUser]);
 
+  // Initialize disabledAccounts from database account_status on data load
+  useEffect(() => {
+    if (data?.user?.MT5Account) {
+      const disabled = new Set();
+      data.user.MT5Account.forEach(account => {
+        if (account.accountStatus && account.accountStatus !== 'active' && account.accountStatus !== '') {
+          disabled.add(account.accountId);
+        }
+      });
+      setDisabledAccounts(disabled);
+    }
+  }, [data?.user?.MT5Account]);
+
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     let cancel = false;
@@ -936,7 +949,12 @@ export default function UsersView() {
               ? splitMt5Accounts.real
               : splitMt5Accounts.demo) || []
             )
-              .filter(a => !disabledAccounts.has(a.accountId))
+              .filter(a => {
+                // Filter out disabled accounts - check both state and database status
+                const isDisabled = disabledAccounts.has(a.accountId) || 
+                  (a.accountStatus && a.accountStatus !== 'active' && a.accountStatus !== '');
+                return !isDisabled;
+              })
               .map((a, idx) => ({
               __index: idx + 1,
               accountId: a.accountId,
@@ -975,7 +993,8 @@ export default function UsersView() {
                 label: "Actions",
                 sortable: false,
                 render: (v, row) => {
-                  const isDisabled = disabledAccounts.has(row.accountId);
+                  const isDisabled = disabledAccounts.has(row.accountId) || 
+                    (row._raw?.accountStatus && row._raw.accountStatus !== 'active' && row._raw.accountStatus !== '');
                   return (
                     <div className="flex items-center gap-2">
                       <button
@@ -1074,7 +1093,11 @@ export default function UsersView() {
 
       {/* Archive Accounts (Disabled MT5 Accounts) */}
       {((mt5Tab === "real" ? splitMt5Accounts.real : splitMt5Accounts.demo) || [])
-        .filter(a => disabledAccounts.has(a.accountId)).length > 0 && (
+        .filter(a => {
+          const isDisabled = disabledAccounts.has(a.accountId) || 
+            (a.accountStatus && a.accountStatus !== 'active' && a.accountStatus !== '');
+          return isDisabled;
+        }).length > 0 && (
         <div className="rounded-2xl bg-white border border-gray-200 shadow-sm mt-6">
           <div className="px-5 pt-4 pb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -1088,7 +1111,11 @@ export default function UsersView() {
                 ? splitMt5Accounts.real
                 : splitMt5Accounts.demo) || []
               )
-                .filter(a => disabledAccounts.has(a.accountId))
+                .filter(a => {
+                  const isDisabled = disabledAccounts.has(a.accountId) || 
+                    (a.accountStatus && a.accountStatus !== 'active' && a.accountStatus !== '');
+                  return isDisabled;
+                })
                 .map((a, idx) => ({
                   __index: idx + 1,
                   accountId: a.accountId,
