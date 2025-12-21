@@ -543,163 +543,115 @@ function Dashboard() {
         )}
 
         {/* Account Summary */}
-        <h2 className="text-sm md:text-md font-medium text-gray-800 mb-3">
+        <h2 className="text-sm md:text-md font-medium text-gray-800 mb-4">
           Account Summary
         </h2>
 
-        {/* Card */}
-        <div
-          className="
-    bg-white border border-gray-200 rounded-lg w-full 
-    p-4 md:p-8 
-    flex flex-col md:flex-row 
-    items-stretch md:items-center 
-    justify-between 
-    gap-6 
-    space-y-6 md:space-y-0
-"
-        >
-          {/* ITEM WRAPPER (mobile layout fix) */}
-          <div className="w-full flex justify-between md:block">
-            <div className="flex flex-col items-start">
-              <div className="text-gray-700 font-medium text-xs mb-2">
-                Total Balance
-              </div>
-              <div className="text-gray-900 font-bold text-xs">
-                {summaryTotals.loading ? (
-                  <span className="inline-flex items-center">
-                    <span className="animate-pulse">●</span>
-                    <span className="animate-pulse delay-75">●</span>
-                    <span className="animate-pulse delay-150">●</span>
-                  </span>
-                ) : (
-                  `${summaryTotals.totalBalance.toFixed(2)} USD`
-                )}
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Total Balance Card */}
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 group-hover:bg-white/30 transition-all duration-300">
+                <MdOutlineAccountBalanceWallet className="text-white text-2xl" />
               </div>
             </div>
-
-            {/* Icon (mobile on right, desktop stays same) */}
-            <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-              <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
+            <div className="text-white/80 text-xs font-medium mb-1">Total Balance</div>
+            <div className="text-white font-bold text-lg">
+              {summaryTotals.loading ? (
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                </span>
+              ) : (
+                `${summaryTotals.totalBalance.toFixed(2)} USD`
+              )}
             </div>
           </div>
 
-          {/* Desktop icon */}
-          <div className="hidden md:flex items-center justify-center bg-gray-100" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-            <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl" />
-          </div>
-
-          {/* Divider */}
-          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
-
-          {/* ITEM 2 */}
-          <div className="w-full flex justify-between md:block">
-            <div className="flex flex-col items-start">
-              <div className="text-gray-700 font-medium text-xs mb-2">
-                Total Credit
-              </div>
-              <div className="text-gray-900 font-bold text-xs min-h-[16px]">
-                {summaryTotals.loading ? (
-                  <span className="inline-flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></span>
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
-                  </span>
-                ) : (
-                  `${summaryTotals.totalCredit.toFixed(2)} USD`
-                )}
+          {/* Total Credit Card */}
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 group-hover:bg-white/30 transition-all duration-300">
+                <LuWallet className="text-white text-2xl" />
               </div>
             </div>
-            <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-              <LuWallet className="text-gray-600 text-xl" />
+            <div className="text-white/80 text-xs font-medium mb-1">Total Credit</div>
+            <div className="text-white font-bold text-lg">
+              {summaryTotals.loading ? (
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                </span>
+              ) : (
+                `${summaryTotals.totalCredit.toFixed(2)} USD`
+              )}
             </div>
-          </div>
-          <div className="hidden md:flex items-center justify-center bg-gray-100" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-            <LuWallet className="text-gray-600 text-xl md:text-2xl" />
           </div>
 
-          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
-
-          {/* ITEM 3 */}
-          <div className="w-full flex justify-between md:block">
-            <div className="flex flex-col items-start">
-              <div className="text-gray-700 font-medium text-xs mb-2">
-                Total Equity
-              </div>
-              <div className="text-gray-900 font-bold text-xs min-h-[16px]">
-                {summaryTotals.loading ? (
-                  <span className="inline-flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></span>
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
-                  </span>
-                ) : (
-                  `${summaryTotals.totalEquity.toFixed(2)} USD`
-                )}
+          {/* Total Equity Card */}
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 group-hover:bg-white/30 transition-all duration-300">
+                <MdOutlineAccountBalanceWallet className="text-white text-2xl" />
               </div>
             </div>
-            <div className="flex items-center justify-center bg-gray-100 md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-              <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl md:text-2xl" />
+            <div className="text-white/80 text-xs font-medium mb-1">Total Equity</div>
+            <div className="text-white font-bold text-lg">
+              {summaryTotals.loading ? (
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                </span>
+              ) : (
+                `${summaryTotals.totalEquity.toFixed(2)} USD`
+              )}
             </div>
           </div>
-          <div className="hidden md:flex items-center justify-center bg-gray-100" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-            <MdOutlineAccountBalanceWallet className="text-gray-600 text-xl md:text-2xl" />
-          </div>
 
-          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
-
-          {/* ITEM 4 */}
-          <div className="w-full flex justify-between md:block">
-            <div className="flex flex-col items-start">
-              <div className="text-gray-700 font-medium text-xs mb-2">
-                Total Deposits
-              </div>
-              <div className="text-gray-900 font-bold text-xs min-h-[16px]">
-                {summaryTotals.loading ? (
-                  <span className="inline-flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></span>
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
-                  </span>
-                ) : (
-                  `${summaryTotals.totalDeposits.toFixed(2)} USD`
-                )}
+          {/* Total Deposits Card */}
+          <div className="bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 group-hover:bg-white/30 transition-all duration-300">
+                <RiArrowUpCircleLine className="text-white text-2xl" />
               </div>
             </div>
-            <div className="flex items-center justify-center bg-[#dff8f4] md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-              <RiArrowUpCircleLine className="text-teal-600 text-xl" />
+            <div className="text-white/80 text-xs font-medium mb-1">Total Deposits</div>
+            <div className="text-white font-bold text-lg">
+              {summaryTotals.loading ? (
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                </span>
+              ) : (
+                `${summaryTotals.totalDeposits.toFixed(2)} USD`
+              )}
             </div>
-          </div>
-          <div className="hidden md:flex items-center justify-center bg-[#dff8f4]" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-            <RiArrowUpCircleLine className="text-teal-600 text-xl md:text-2xl" />
           </div>
 
-          <div className="hidden md:block w-px h-14 bg-gray-200"></div>
-
-          {/* ITEM 5 */}
-          <div className="w-full flex justify-between md:block">
-            <div className="flex flex-col items-start">
-              <div className="text-gray-700 font-medium text-xs mb-2">
-                Total Withdrawals
-              </div>
-              <div className="text-gray-900 font-bold text-xs min-h-[16px]">
-                {summaryTotals.loading ? (
-                  <span className="inline-flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></span>
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
-                  </span>
-                ) : (
-                  `${summaryTotals.totalWithdrawals.toFixed(2)} USD`
-                )}
+          {/* Total Withdrawals Card */}
+          <div className="bg-gradient-to-br from-rose-500 to-pink-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 group-hover:bg-white/30 transition-all duration-300">
+                <RiArrowDownCircleLine className="text-white text-2xl" />
               </div>
             </div>
-            <div className="flex items-center justify-center bg-[#ffecec] md:hidden" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-              <RiArrowDownCircleLine className="text-red-500 text-xl" />
+            <div className="text-white/80 text-xs font-medium mb-1">Total Withdrawals</div>
+            <div className="text-white font-bold text-lg">
+              {summaryTotals.loading ? (
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                  <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                </span>
+              ) : (
+                `${summaryTotals.totalWithdrawals.toFixed(2)} USD`
+              )}
             </div>
-          </div>
-          <div className="hidden md:flex items-center justify-center bg-[#ffecec]" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', overflow: 'hidden' }}>
-            <RiArrowDownCircleLine className="text-red-500 text-xl md:text-2xl" />
           </div>
         </div>
 
