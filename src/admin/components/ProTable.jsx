@@ -40,7 +40,17 @@ const loadPDFLibs = async () => {
  *  dateKey: "executedAt" (Date ISO)
  * }
  */
-export default function ProTable({ title, kpis = [], rows = [], columns = [], filters, pageSize = 10, searchPlaceholder = "Search..." }) {
+export default function ProTable({
+  title,
+  kpis = [],
+  rows = [],
+  columns = [],
+  filters,
+  pageSize = 10,
+  searchPlaceholder = "Search...",
+  onResetAll,
+  onClearDates,
+}) {
   const [q, setQ] = useState("");
   const [selects, setSelects] = useState(
     Object.fromEntries((filters?.selects || []).map(s => [s.key, ""]))
@@ -51,10 +61,27 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
   const [page, setPage] = useState(1);
 
   function resetAll() {
-    setQ(""); setSelects(Object.fromEntries((filters?.selects || []).map(s => [s.key, ""])));
-    setFrom(""); setTo(""); setSortBy(null); setPage(1);
+    setQ("");
+    setSelects(Object.fromEntries((filters?.selects || []).map(s => [s.key, ""])));
+    setFrom("");
+    setTo("");
+    setSortBy(null);
+    setPage(1);
+    // Allow parent pages (like Admin Logs) to reset their own filters too
+    if (typeof onResetAll === "function") {
+      onResetAll();
+    }
   }
-  function clearDates() { setFrom(""); setTo(""); setPage(1); }
+
+  function clearDates() {
+    setFrom("");
+    setTo("");
+    setPage(1);
+    // Allow parent pages to clear external date filters
+    if (typeof onClearDates === "function") {
+      onClearDates();
+    }
+  }
 
   const filtered = useMemo(() => {
     let out = [...rows];
@@ -264,31 +291,46 @@ export default function ProTable({ title, kpis = [], rows = [], columns = [], fi
               />
             </div>
 
-            {/* Select Filters */}
+            {/* Select Filters + (optional) Date Filters */}
             <div className="flex flex-wrap gap-2">
               {(filters?.selects || []).map((s, i) => (
-                <select key={i}
+                <select
+                  key={i}
                   value={selects[s.key]}
                   onChange={e => { setSelects(v => ({ ...v, [s.key]: e.target.value })); setPage(1); }}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] min-w-[120px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] min-w-[120px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                >
                   <option value="">{s.label}</option>
                   {s.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
               ))}
 
-              {/* Date Inputs */}
-              <div className="flex gap-2">
-                <input type="date" value={from} onChange={e => { setFrom(e.target.value); setPage(1); }}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
-                <input type="date" value={to} onChange={e => { setTo(e.target.value); setPage(1); }}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
-              </div>
+              {/* Date Inputs – only when a dateKey is configured for this table */}
+              {filters?.dateKey && (
+                <div className="flex gap-2">
+                  <input
+                    type="date"
+                    value={from}
+                    onChange={e => { setFrom(e.target.value); setPage(1); }}
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  />
+                  <input
+                    type="date"
+                    value={to}
+                    onChange={e => { setTo(e.target.value); setPage(1); }}
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 h-[40px] text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
             <div className="flex gap-2">
-              <button onClick={clearDates}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 h-[40px] text-sm hover:bg-gray-50 transition-all font-medium whitespace-nowrap">
+              {/* Clear date range filters (always visible, safely no-op if dateKey not used) */}
+              <button
+                onClick={clearDates}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 h-[40px] text-sm hover:bg-gray-50 transition-all font-medium whitespace-nowrap"
+              >
                 Clear Dates
               </button>
               <button onClick={resetAll}

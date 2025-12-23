@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import Swal from "sweetalert2";
-import { CreditCard, CheckCircle2, XCircle } from "lucide-react";
+import { CreditCard, CheckCircle2, XCircle, ShieldX } from "lucide-react";
 import ProTable from "../components/ProTable.jsx";
 
 const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
@@ -77,8 +77,15 @@ export default function PaymentDetails() {
       });
       const data = await res.json();
       if (res.ok && data?.ok) {
+        // Update local state immediately for better UX
+        setAllPaymentDetails(prev => prev.map(item => 
+          item.id === id 
+            ? { ...item, status: 'approved', rejectionReason: null, reviewedAt: new Date().toISOString() }
+            : item
+        ));
         Swal.fire({ icon: 'success', title: 'Approved', timer: 1200, showConfirmButton: false });
-        fetchData();
+        // Force refresh the data to get the latest from server (including reviewedBy)
+        await fetchData();
       } else {
         Swal.fire({ icon: 'error', title: 'Failed', text: data?.error || 'Unable to approve' });
       }
@@ -112,15 +119,66 @@ export default function PaymentDetails() {
         body: JSON.stringify({ reason: result.value || '' })
       });
       const data = await res.json();
+      
       if (res.ok && data?.ok) {
+        // Update local state immediately for better UX
+        setAllPaymentDetails(prev => prev.map(item => 
+          item.id === id 
+            ? { ...item, status: 'rejected', rejectionReason: result.value || null, reviewedAt: new Date().toISOString() }
+            : item
+        ));
         Swal.fire({ icon: 'success', title: 'Rejected', timer: 1200, showConfirmButton: false });
-        fetchData();
+        // Force refresh the data to get the latest from server (including reviewedBy)
+        await fetchData();
       } else {
+        console.error('Reject failed:', { status: res.status, data });
         Swal.fire({ icon: 'error', title: 'Failed', text: data?.error || 'Unable to reject' });
       }
     } catch (error) {
       console.error('Reject error:', error);
       Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to reject payment details' });
+    }
+  };
+
+  const unapprove = async (id) => {
+    const confirm = await Swal.fire({
+      icon: 'question',
+      title: 'Unapprove Payment Details?',
+      text: 'This payment method will be set back to pending status.',
+      showCancelButton: true,
+      confirmButtonText: 'Unapprove',
+      confirmButtonColor: '#f59e0b'
+    });
+    if (!confirm.isConfirmed) return;
+    
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${BASE}/admin/payment-details/${id}/unapprove`, {
+        method: 'PATCH',
+        headers: { 
+          'Authorization': `Bearer ${token}`, 
+          'Content-Type': 'application/json' 
+        }
+      });
+      const data = await res.json();
+      
+      if (res.ok && data?.ok) {
+        // Update local state immediately for better UX
+        setAllPaymentDetails(prev => prev.map(item => 
+          item.id === id 
+            ? { ...item, status: 'pending', reviewedAt: null, reviewedBy: null, rejectionReason: null }
+            : item
+        ));
+        Swal.fire({ icon: 'success', title: 'Unapproved', timer: 1200, showConfirmButton: false });
+        // Force refresh the data to get the latest from server
+        await fetchData();
+      } else {
+        console.error('Unapprove failed:', { status: res.status, data });
+        Swal.fire({ icon: 'error', title: 'Failed', text: data?.error || 'Unable to unapprove' });
+      }
+    } catch (error) {
+      console.error('Unapprove error:', error);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to unapprove payment details' });
     }
   };
 
@@ -228,40 +286,60 @@ export default function PaymentDetails() {
       label: "Actions",
       sortable: false,
       render: (v, row) => {
-        if (row.status === 'approved') {
-          return <span className="text-xs text-gray-500">Approved</span>;
-        } else if (row.status === 'rejected') {
-          return (
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => approve(row.id)} 
-                className="flex items-center gap-1 text-green-600 hover:text-green-700 text-xs"
-              >
-                <CheckCircle2 className="h-4 w-4" /> Approve
-              </button>
-            </div>
-          );
-        } else {
-          return (
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => approve(row.id)} 
-                className="flex items-center gap-1 text-green-600 hover:text-green-700 text-xs"
-              >
-                <CheckCircle2 className="h-4 w-4" /> Approve
-              </button>
-              <button 
-                onClick={() => reject(row.id)} 
-                className="flex items-center gap-1 text-red-600 hover:text-red-700 text-xs"
-              >
-                <XCircle className="h-4 w-4" /> Reject
-              </button>
-            </div>
-          );
-        }
+        // Check lowercase for database consistency
+        const status = String(row.status || '').toLowerCase();
+        const isApproved = status === 'approved';
+        const isRejected = status === 'rejected';
+        
+        return (
+          <div className="flex items-center gap-3">
+            {isApproved ? (
+              <div className="flex flex-col items-center gap-1">
+                <button 
+                  onClick={() => unapprove(row.id)}
+                  className="h-8 px-3 rounded-md border border-amber-200 text-amber-700 hover:bg-amber-50 inline-flex items-center gap-1"
+                >
+                  <ShieldX size={16} /> Unapprove
+                </button>
+                <span className="text-xs text-gray-500">Unapprove</span>
+              </div>
+            ) : isRejected ? (
+              <div className="flex flex-col items-center gap-1">
+                <button 
+                  onClick={() => approve(row.id)}
+                  className="h-8 px-3 rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 inline-flex items-center gap-1"
+                >
+                  <CheckCircle2 size={16} /> Approve
+                </button>
+                <span className="text-xs text-gray-500">Approve</span>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col items-center gap-1">
+                  <button 
+                    onClick={() => approve(row.id)}
+                    className="h-8 px-3 rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 inline-flex items-center gap-1"
+                  >
+                    <CheckCircle2 size={16} /> Approve
+                  </button>
+                  <span className="text-xs text-gray-500">Approve</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <button 
+                    onClick={() => reject(row.id)}
+                    className="h-8 px-3 rounded-md border border-red-200 text-red-700 hover:bg-red-50 inline-flex items-center gap-1"
+                  >
+                    <XCircle size={16} /> Reject
+                  </button>
+                  <span className="text-xs text-gray-500">Reject</span>
+                </div>
+              </>
+            )}
+          </div>
+        );
       }
     }
-  ], [admins]);
+  ], [admins, approve, reject, unapprove]);
 
   if (loading) {
     return (

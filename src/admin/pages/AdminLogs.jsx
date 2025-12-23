@@ -202,13 +202,22 @@ export default function AdminLogs() {
       <ProTable
         columns={columns}
         rows={rows}
-        loading={loading}
-        pagination={{
-          limit: pagination.limit,
-          offset: pagination.offset,
-          total: pagination.total,
-          onLimitChange: (limit) => setPagination(prev => ({ ...prev, limit, offset: 0 })),
-          onOffsetChange: (offset) => setPagination(prev => ({ ...prev, offset }))
+        // keep client-side helpers but also reset outer filters when toolbar buttons are used
+        onResetAll={() => {
+          setFilters({
+            adminEmail: "",
+            actionType: "",
+            actionCategory: "",
+            targetType: "",
+            startDate: "",
+            endDate: "",
+            search: ""
+          });
+          setPagination(prev => ({ ...prev, offset: 0 }));
+        }}
+        onClearDates={() => {
+          setFilters(prev => ({ ...prev, startDate: "", endDate: "" }));
+          setPagination(prev => ({ ...prev, offset: 0 }));
         }}
       />
     </div>
