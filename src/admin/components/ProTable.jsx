@@ -9,12 +9,19 @@ let autoTableLoaded = false;
 // Load libraries on first use
 const loadPDFLibs = async () => {
   if (!jsPDFLib) {
-    const jsPDFModule = await import('jspdf');
-    jsPDFLib = jsPDFModule.default || jsPDFModule.jsPDF || jsPDFModule;
-    
-    if (!autoTableLoaded) {
-      await import('jspdf-autotable');
-      autoTableLoaded = true;
+    try {
+      const jsPDFModule = await import('jspdf');
+      // jspdf v3 exports as default
+      jsPDFLib = jsPDFModule.default || jsPDFModule.jsPDF || jsPDFModule;
+      
+      if (!autoTableLoaded) {
+        // jspdf-autotable automatically extends jsPDF when imported
+        await import('jspdf-autotable');
+        autoTableLoaded = true;
+      }
+    } catch (error) {
+      console.error('Failed to load PDF libraries:', error);
+      throw error;
     }
   }
   return jsPDFLib;

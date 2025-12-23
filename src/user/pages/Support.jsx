@@ -223,7 +223,10 @@ function Support() {
                                     <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">{ticket.subject}</h3>
                                     <div className="flex justify-between items-center text-xs text-gray-500">
                                         <span>{ticket.category}</span>
-                                        <span>#{ticket.id}</span>
+                                        <span>Ticket No: #{ticket.id}</span>
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        Date: {new Date(ticket.created_at).toLocaleDateString()}
                                     </div>
                                 </div>
                             ))
