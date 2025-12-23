@@ -1,7 +1,15 @@
 import axios from 'axios'
 import authService from './auth'
 
-const API_URL = import.meta.env.VITE_API_URL + '/support'
+// Ensure API_URL includes /api if not already present
+const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_URL = baseUrl.endsWith('/api') ? `${baseUrl}/support` : `${baseUrl}/api/support`
+
+// Debug: Log API URL in development
+if (import.meta.env.DEV) {
+    console.log('📧 Support Service API URL:', API_URL)
+    console.log('📧 VITE_API_URL:', import.meta.env.VITE_API_URL)
+}
 
 const getHeaders = () => {
     const token = authService.getToken()
@@ -34,8 +42,19 @@ const supportService = {
     },
 
     createTicket: async (ticketData) => {
-        const response = await axios.post(API_URL, ticketData, getHeaders())
-        return response.data
+        try {
+            const response = await axios.post(API_URL, ticketData, getHeaders())
+            return response.data
+        } catch (error) {
+            console.error('Create ticket error:', error)
+            console.error('API URL:', API_URL)
+            console.error('Request data:', ticketData)
+            if (error.response) {
+                console.error('Response status:', error.response.status)
+                console.error('Response data:', error.response.data)
+            }
+            throw error
+        }
     },
 
     replyToTicket: async (id, message) => {

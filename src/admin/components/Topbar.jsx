@@ -1,5 +1,5 @@
 // src/components/Topbar.jsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Menu, Shield, Bell, Search, ChevronDown, User, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
@@ -25,8 +25,12 @@ export default function Topbar({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [customFeatures, setCustomFeatures] = useState(null);
+  const [openTicketsCount, setOpenTicketsCount] = useState(0);
+  const [latestTickets, setLatestTickets] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const menuRef = useRef(null);
   const searchRef = useRef(null);
+  const notificationsRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { admin, logout } = useAuth();
@@ -83,6 +87,70 @@ export default function Topbar({
       }).catch(()=>{});
     return () => abort.abort();
   }, [admin?.admin_role, BASE]);
+
+  // Fetch open tickets count for notifications
+  const fetchOpenTickets = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) return;
+      
+      const response = await fetch(`${BASE}/admin/support/summary`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      const data = await response.json();
+      if (data?.ok) {
+        const newCount = data.openTickets || 0;
+        const newTickets = data.latestTickets || [];
+        
+        setOpenTicketsCount(newCount);
+        setLatestTickets(newTickets);
+        
+        console.log('📧 Open tickets updated:', newCount, 'tickets');
+      } else {
+        console.error('Failed to fetch support summary:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching open tickets:', error);
+    }
+  }, [BASE]);
+
+  // Fetch tickets on mount and set up polling
+  useEffect(() => {
+    // Fetch immediately on mount
+    fetchOpenTickets();
+    
+    // Poll every 10 seconds for new tickets (more responsive)
+    const interval = setInterval(() => {
+      fetchOpenTickets();
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [fetchOpenTickets]);
+
+  // Close notifications dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    if (notificationsOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [notificationsOpen]);
+
+  // Refresh notifications when navigating to support pages
+  useEffect(() => {
+    if (location.pathname.includes('/support')) {
+      fetchOpenTickets();
+    }
+  }, [location.pathname, fetchOpenTickets]);
 
   const filterMenuByFeatures = (features) => {
     if (!Array.isArray(features) || features.length === 0) return [];
@@ -386,12 +454,103 @@ export default function Topbar({
             })()}
 
             {/* Notifications */}
-            <button
-              aria-label="Notifications"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
-            >
-              <Bell className="h-5 w-5" />
-            </button>
+            <div className="relative" ref={notificationsRef}>
+              <button
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                aria-label="Notifications"
+                className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+              >
+                <Bell className="h-5 w-5" />
+                {openTicketsCount > 0 && (
+                  <span className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                    {openTicketsCount > 99 ? '99+' : openTicketsCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notifications Dropdown */}
+              {notificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl z-50">
+                  <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-gray-900">Support Tickets</h3>
+                      <div className="flex items-center gap-2">
+                        {openTicketsCount > 0 && (
+                          <span className="text-xs font-medium text-red-600">
+                            {openTicketsCount} {openTicketsCount === 1 ? 'ticket' : 'tickets'} open
+                          </span>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            fetchOpenTickets();
+                          }}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                          title="Refresh"
+                        >
+                          ↻
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="max-h-96 overflow-y-auto">
+                    {latestTickets.length > 0 ? (
+                      <div className="divide-y divide-gray-100">
+                        {latestTickets.map((ticket) => (
+                          <button
+                            key={ticket.id}
+                            onClick={() => {
+                              navigate(`/admin/support/tickets/${ticket.id}`);
+                              setNotificationsOpen(false);
+                            }}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  #{ticket.id}: {ticket.subject}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {ticket.user_name || ticket.user_email || 'Unknown User'}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {new Date(ticket.created_at).toLocaleString()}
+                                </p>
+                              </div>
+                              <span className="ml-2 flex-shrink-0">
+                                <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+                                  {ticket.priority || 'medium'}
+                                </span>
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="px-4 py-8 text-center">
+                        <Bell className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">No open tickets</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {openTicketsCount > 0 && (
+                    <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+                      <button
+                        onClick={() => {
+                          navigate('/admin/support/open');
+                          setNotificationsOpen(false);
+                        }}
+                        className="w-full text-sm font-medium text-blue-600 hover:text-blue-700 text-center"
+                      >
+                        View All Open Tickets →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* User menu */}
             <div className="relative" ref={menuRef}>

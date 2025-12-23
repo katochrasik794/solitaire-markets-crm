@@ -1,10 +1,11 @@
 // src/pages/admin/AdminDashboard.jsx
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
   Users, Download, Upload, Shield, Database, TrendingUp, TrendingDown,
   DollarSign, Clock, AlertCircle, CheckCircle, XCircle, Mail, UserX,
-  BarChart3, Activity, Eye, RefreshCw, ArrowUp, ArrowDown
+  BarChart3, Activity, Eye, RefreshCw, ArrowUp, ArrowDown, MessageCircle
 } from "lucide-react";
 import ProTable from "../components/ProTable.jsx";
 import Badge from "../components/Badge.jsx";
@@ -41,7 +42,8 @@ const initialDashboardData = {
   mtdWithdrawals: 0,
   todayWithdrawals: 0,
   avg7DayWithdrawals: 0,
-  topDepositor: "N/A"
+  topDepositor: "N/A",
+  openSupportTickets: 0
 };
 
 // Stat Card Component
@@ -164,6 +166,7 @@ export default function AdminDashboard() {
 
   const BASE = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
   const { admin } = useAuth();
+  const navigate = useNavigate();
   const [countryScope, setCountryScope] = useState("");
   const [scopeResolved, setScopeResolved] = useState(false);
 
@@ -198,7 +201,7 @@ export default function AdminDashboard() {
 
       // Fetch all data in parallel using correct API endpoints
       const scope = countryScope ? `&country=${encodeURIComponent(countryScope)}` : '';
-      const [usersRes, depositsRes, withdrawalsRes, kycRes, mt5Res] = await Promise.all([
+      const [usersRes, depositsRes, withdrawalsRes, kycRes, mt5Res, supportRes] = await Promise.all([
         fetch(`${BASE}/admin/users/all?limit=1000${scope}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }).then(r => r.json()).catch(() => ({ ok: false, items: [] })),
@@ -217,7 +220,12 @@ export default function AdminDashboard() {
 
         fetch(`${BASE}/admin/mt5/users?limit=1000${scope}`, {
           headers: { 'Authorization': `Bearer ${token}` }
-        }).then(r => r.json()).catch(() => ({ ok: false, items: [] }))
+        }).then(r => r.json()).catch(() => ({ ok: false, items: [] })),
+
+        // Support tickets summary (open tickets count)
+        fetch(`${BASE}/admin/support/summary`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).then(r => r.json()).catch(() => ({ ok: false, openTickets: 0 }))
       ]);
 
       // Process users data
@@ -247,6 +255,9 @@ export default function AdminDashboard() {
       // Process MT5 data
       const mt5Accounts = mt5Res.items || [];
       const totalMT5Accounts = mt5Res.total || 0;
+
+      // Support tickets summary
+      const openSupportTickets = supportRes.openTickets || 0;
 
       // Calculate MTD and today values
       const now = new Date();
@@ -315,7 +326,8 @@ export default function AdminDashboard() {
         mtdWithdrawals,
         todayWithdrawals,
         avg7DayWithdrawals,
-        topDepositor
+        topDepositor,
+        openSupportTickets
       });
 
     } catch (err) {
@@ -425,7 +437,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Top Row - Main Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <StatCard
           title="Total Users"
           value={dashboardData.totalUsers}
@@ -460,6 +472,18 @@ export default function AdminDashboard() {
           icon={Database}
           color="blue"
           progress={dashboardData.totalUsers > 0 ? Math.round((dashboardData.totalMT5Accounts / dashboardData.totalUsers) * 100) : 0}
+        />
+
+        <StatCard
+          title="Open Support Tickets"
+          value={dashboardData.openSupportTickets}
+          subtitle="Tickets waiting for response"
+          icon={MessageCircle}
+          color="yellow"
+          progress={dashboardData.openSupportTickets > 0 && dashboardData.totalUsers > 0
+            ? Math.min(100, Math.round((dashboardData.openSupportTickets / dashboardData.totalUsers) * 100))
+            : 0}
+          onClick={() => navigate('/admin/support/open')}
         />
       </div>
 

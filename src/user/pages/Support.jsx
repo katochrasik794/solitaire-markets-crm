@@ -90,13 +90,33 @@ function Support() {
                 setShowCreateModal(false)
                 setFormData({ subject: '', category: 'General', priority: 'medium', message: '' })
                 fetchTickets()
+            } else {
+                throw new Error(result.error || 'Failed to create ticket')
             }
         } catch (error) {
+            console.error('Create ticket error:', error)
+            console.error('Error response:', error.response)
+            console.error('Error request URL:', error.config?.url)
+            console.error('Error request method:', error.config?.method)
+            
+            let errorMessage = 'Failed to create ticket. Please try again.'
+            if (error.response) {
+                // Server responded with error
+                errorMessage = error.response.data?.error || error.response.data?.message || `Server error: ${error.response.status}`
+            } else if (error.request) {
+                // Request was made but no response received
+                errorMessage = 'No response from server. Please check your connection.'
+            } else {
+                // Error in request setup
+                errorMessage = error.message || 'Failed to create ticket. Please try again.'
+            }
+            
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to create ticket. Please try again.',
-                confirmButtonColor: '#d4b000'
+                text: errorMessage,
+                confirmButtonColor: '#d4b000',
+                footer: error.config?.url ? `URL: ${error.config.url}` : ''
             })
         } finally {
             setLoading(false)
