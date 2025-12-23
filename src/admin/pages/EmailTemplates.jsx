@@ -66,18 +66,59 @@ export default function EmailTemplates() {
   const loadTemplates = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('adminToken');
+      
+      if (!token) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Authentication Required',
+          text: 'Please log in again to access email templates.',
+          confirmButtonText: 'Go to Login',
+        }).then(() => {
+          window.location.href = '/admin/login';
+        });
+        return;
+      }
+      
       const response = await axios.get(`${BASE}/admin/email-templates`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
+      
       if (response.data.ok) {
         setTemplates(response.data.templates || []);
+      } else {
+        throw new Error(response.data.error || response.data.message || 'Failed to load templates');
       }
     } catch (error) {
       console.error('Failed to load templates:', error);
+      
+      // Handle 401 specifically - token expired or invalid
+      if (error.response?.status === 401) {
+        const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Authentication failed';
+        Swal.fire({
+          icon: 'warning',
+          title: 'Session Expired',
+          text: errorMsg === 'Token has expired' || errorMsg.includes('expired') 
+            ? 'Your session has expired. Please log in again.'
+            : errorMsg,
+          confirmButtonText: 'Log In Again',
+        }).then(() => {
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('adminInfo');
+          window.location.href = '/admin/login';
+        });
+        return;
+      }
+      
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to load templates';
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: error.response?.data?.error || 'Failed to load templates',
+        title: 'Error Loading Templates',
+        html: `
+          <p>${errorMessage}</p>
+          ${error.response?.data?.details ? `<pre style="text-align: left; font-size: 11px; max-height: 200px; overflow: auto; background: #f5f5f5; padding: 10px; border-radius: 4px; margin-top: 10px;">${error.response.data.details}</pre>` : ''}
+        `,
+        width: '600px'
       });
     } finally {
       setLoading(false);

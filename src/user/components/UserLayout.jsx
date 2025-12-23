@@ -50,6 +50,19 @@ function UserLayout() {
     }
     return false
   })
+  
+  // Collapsed state for desktop sidebar (persisted in localStorage)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('userSidebarCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+  
+  const toggleSidebarCollapse = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem('userSidebarCollapsed', JSON.stringify(newState));
+  };
+  
   const [kycStatus, setKycStatus] = useState(null)
   const [topTickers, setTopTickers] = useState([])
   const [middleTickers, setMiddleTickers] = useState([])
@@ -152,10 +165,14 @@ function UserLayout() {
         />
       )}
 
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+      />
 
       <div
-        className="flex-1 overflow-x-hidden w-full lg:ml-[324px] relative z-10 transition-all duration-300 flex flex-col min-h-screen"
+        className={`flex-1 overflow-x-hidden w-full relative z-10 transition-all duration-300 flex flex-col min-h-screen ${sidebarCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[240px]'}`}
         onClick={() => {
           // Close sidebar when clicking on main content area on mobile
           if (typeof window !== 'undefined' && window.innerWidth < 1024 && sidebarOpen) {
@@ -163,7 +180,11 @@ function UserLayout() {
           }
         }}
       >
-        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <Header 
+          onMenuClick={() => setSidebarOpen(true)}
+          onSidebarToggle={toggleSidebarCollapse}
+          sidebarCollapsed={sidebarCollapsed}
+        />
         
         {/* Tickers - Display directly below navbar */}
         <div className="mt-[64px] md:mt-[77px]">

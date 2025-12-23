@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import authService from '../../services/auth.js'
 
-function Header({ onMenuClick }) {
+function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
   const [languageOpen, setLanguageOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [userName, setUserName] = useState('User')
@@ -91,15 +91,33 @@ function Header({ onMenuClick }) {
       {/* Header Bar - Fixed */}
       <div className="bg-white fixed top-0 left-0 right-0 z-50">
         <div className="flex justify-between items-center px-6 py-4 md:py-7 relative">
-          {/* Left side - Hamburger menu (Mobile only) */}
-          <div className="flex items-center gap-4 lg:hidden">
+          {/* Left side - Hamburger menu (Mobile only) and Desktop toggle */}
+          <div className="flex items-center gap-4">
+            {/* Mobile hamburger */}
             <button
               onClick={onMenuClick}
-              className="text-gray-700 hover:text-gray-900"
+              className="lg:hidden text-gray-700 hover:text-gray-900"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
+            </button>
+            
+            {/* Desktop sidebar toggle */}
+            <button
+              onClick={onSidebarToggle}
+              className="hidden lg:flex items-center justify-center w-10 h-10 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {sidebarCollapsed ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              )}
             </button>
           </div>
           

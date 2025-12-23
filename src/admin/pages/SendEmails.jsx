@@ -60,14 +60,44 @@ export default function SendEmails() {
     try {
       setLoadingTemplates(true);
       const token = localStorage.getItem('adminToken');
+      
+      if (!token) {
+        console.warn('No admin token found');
+        return;
+      }
+      
       const response = await axios.get(`${BASE}/admin/email-templates`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
       if (response.data.ok) {
         setTemplates(response.data.templates || []);
+      } else {
+        throw new Error(response.data.error || response.data.message || 'Failed to load templates');
       }
     } catch (error) {
       console.error('Failed to load templates:', error);
+      
+      // Handle 401 specifically - token expired or invalid
+      if (error.response?.status === 401) {
+        const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Authentication failed';
+        if (errorMsg.includes('expired') || errorMsg.includes('Token')) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Session Expired',
+            text: 'Your session has expired. Please refresh the page and log in again.',
+            confirmButtonText: 'OK'
+          });
+        }
+        return;
+      }
+      
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to load templates';
+      Swal.fire({
+        icon: 'error',
+        title: 'Error Loading Templates',
+        text: errorMessage
+      });
     } finally {
       setLoadingTemplates(false);
     }

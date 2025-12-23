@@ -15,9 +15,21 @@ export default function Shell() {
   console.log('Shell - admin:', admin, 'role:', role);
   const { pathname } = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  
+  // Collapsed state for desktop sidebar (persisted in localStorage)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('adminSidebarCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const toggleSidebar = () => setMobileOpen(v => !v);
   const closeSidebar  = () => setMobileOpen(false);
+  
+  const toggleSidebarCollapse = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem('adminSidebarCollapsed', JSON.stringify(newState));
+  };
 
   const menu = useMemo(() => (
     role === 'superadmin' ? SUPERADMIN_MENU : role === 'admin' ? ADMIN_MENU : USER_MENU
@@ -96,11 +108,18 @@ export default function Shell() {
         pathname={pathname}
         open={mobileOpen}
         onClose={closeSidebar}
+        collapsed={sidebarCollapsed}
       />
 
       {/* Main content area – reserve sidebar width on lg+ */}
-      <main className="min-h-screen lg:pl-[320px]">
-        <Topbar role={role} onMenuToggle={toggleSidebar} breadcrumbs={breadcrumbs} />
+      <main className={`min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-[80px]' : 'lg:pl-[240px]'}`}>
+        <Topbar 
+          role={role} 
+          onMenuToggle={toggleSidebar} 
+          breadcrumbs={breadcrumbs}
+          onSidebarToggle={toggleSidebarCollapse}
+          sidebarCollapsed={sidebarCollapsed}
+        />
 
         {/* Page canvas */}
         <div className="min-h-[calc(100vh-72px)]">

@@ -1,7 +1,7 @@
 // src/components/Topbar.jsx
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Menu, Shield, Bell, Search, ChevronDown, User, LogOut } from "lucide-react";
+import { Menu, Shield, Bell, Search, ChevronDown, User, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { SUPERADMIN_MENU, ADMIN_MENU, USER_MENU, getSuperAdminFeatures } from "./SidebarMenuConfig.js";
 
@@ -17,6 +17,8 @@ export default function Topbar({
   role = "superadmin",
   title = "Dashboard",
   breadcrumbs = [],
+  onSidebarToggle = () => {},
+  sidebarCollapsed = false,
 }) {
   const [open, setOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -210,7 +212,7 @@ export default function Topbar({
   return (
     <>
       {/* Fixed bar aligned to content width with full responsiveness */}
-        <header className="pointer-events-none fixed z-40 top-2 left-0 right-0 lg:left-[320px]">
+        <header className={`pointer-events-none fixed z-40 top-2 left-0 right-0 transition-all duration-300 ${sidebarCollapsed ? 'lg:left-[80px]' : 'lg:left-[240px]'}`}>
         <div
           style={{ marginInline: 'var(--app-x)' }}
           className="pointer-events-auto w-[calc(100%-var(--app-x)*2)] rounded-2xl bg-white border border-gray-200 text-gray-800 shadow-md">
@@ -222,6 +224,19 @@ export default function Topbar({
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
+            </button>
+            
+            {/* Desktop sidebar toggle */}
+            <button
+              onClick={onSidebarToggle}
+              className="hidden lg:inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {sidebarCollapsed ? (
+                <ChevronRight className="h-5 w-5" />
+              ) : (
+                <ChevronLeft className="h-5 w-5" />
+              )}
             </button>
 
             {/* Title / Breadcrumbs */}

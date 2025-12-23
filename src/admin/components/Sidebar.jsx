@@ -6,15 +6,17 @@ import { useAuth } from "../contexts/AuthContext";
 import { ChevronDown } from "lucide-react";
 
 /* ---------- Section ---------- */
-function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark }) {
+function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark, collapsed = false }) {
   return (
     <div className="mt-6">
-      <div className={`px-4 text-xs font-semibold tracking-wider ${isDark ? 'text-slate-300/70' : 'text-gray-500'
-        }`}>
-        {title}
-      </div>
+      {!collapsed && (
+        <div className={`px-4 text-xs font-semibold tracking-wider ${isDark ? 'text-slate-300/70' : 'text-gray-500'
+          }`}>
+          {title}
+        </div>
+      )}
 
-      <div className="mt-2 space-y-1 px-2">
+      <div className={`mt-2 space-y-1 ${collapsed ? 'px-2' : 'px-2'}`}>
         {items.map((it) => {
           const hasChildren = Array.isArray(it.children) && it.children.length > 0;
           const active =
@@ -34,52 +36,57 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
                 <button
                   type="button"
                   onClick={() => onToggle(it.to || it.label)}
-                  className={`w-full flex items-center justify-between rounded-xl px-3 py-2 transition-all duration-200 relative group ${isOpen || active ? parentActive : parentBase
+                  className={`w-full flex items-center ${collapsed ? 'justify-center' : 'justify-between'} rounded-xl ${collapsed ? 'px-2' : 'px-3'} py-2 transition-all duration-200 relative group ${isOpen || active ? parentActive : parentBase
                     }`}
+                  title={collapsed ? it.label : undefined}
                 >
                   <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-brand-500 transition-all duration-200 ${isOpen || active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                     }`} />
                   <span className="flex items-center gap-2 min-w-0">
                     {it.icon ? <it.icon size={16} className="shrink-0" /> : <span className={`h-2 w-2 rounded-full ${dotCls} shrink-0`} />}
-                    <span className="font-medium truncate text-sm">{it.label}</span>
+                    {!collapsed && <span className="font-medium truncate text-sm">{it.label}</span>}
                   </span>
-                  <ChevronDown
-                    size={14}
-                    className={`ml-1 shrink-0 opacity-75 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                  />
+                  {!collapsed && (
+                    <ChevronDown
+                      size={14}
+                      className={`ml-1 shrink-0 opacity-75 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                    />
+                  )}
                 </button>
 
-                <div
-                  className={`pl-6 pr-1 transition-all duration-600 grid ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                    }`}
-                >
-                  <div className="overflow-hidden my-1 space-y-1">
-                    {it.children.map((child) => (
-                      <NavLink
-                        key={child.to}
-                        to={child.to}
-                        onClick={onNavigate}
-                        className={({ isActive }) =>
-                          `flex items-center gap-2 rounded-lg px-2 py-1 text-xs transition-all duration-200 relative group ${isActive ? childActive : childBase
-                          }`
-                        }
-                      >
-                        {({ isActive }) => (
-                          <>
-                            <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-brand-500 transition-all duration-200 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                              }`} />
-                            {child.icon ? (
-                              <child.icon size={14} className="shrink-0 opacity-80" />
-                            ) : (
-                              <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${dotCls}`} />
-                            )}
-                            <span className="truncate">{child.label}</span>
-                          </>
-                        )}
-                      </NavLink>
-                    ))}
+                {!collapsed && (
+                  <div
+                    className={`pl-6 pr-1 transition-all duration-600 grid ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                      }`}
+                  >
+                    <div className="overflow-hidden my-1 space-y-1">
+                      {it.children.map((child) => (
+                        <NavLink
+                          key={child.to}
+                          to={child.to}
+                          onClick={onNavigate}
+                          className={({ isActive }) =>
+                            `flex items-center gap-2 rounded-lg px-2 py-1 text-xs transition-all duration-200 relative group ${isActive ? childActive : childBase
+                            }`
+                          }
+                        >
+                          {({ isActive }) => (
+                            <>
+                              <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-brand-500 transition-all duration-200 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                                }`} />
+                              {child.icon ? (
+                                <child.icon size={14} className="shrink-0 opacity-80" />
+                              ) : (
+                                <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${dotCls}`} />
+                              )}
+                              <span className="truncate">{child.label}</span>
+                            </>
+                          )}
+                        </NavLink>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             );
           }
@@ -90,16 +97,17 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
               to={it.to}
               onClick={onNavigate}
               className={({ isActive }) =>
-                `w-full flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 relative group ${active || isActive ? parentActive : parentBase
+                `w-full flex items-center ${collapsed ? 'justify-center' : 'gap-2'} rounded-xl ${collapsed ? 'px-2' : 'px-3'} py-2 transition-all duration-200 relative group ${active || isActive ? parentActive : parentBase
                 }`
               }
+              title={collapsed ? it.label : undefined}
             >
               {({ isActive }) => (
                 <>
                   <span className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-brand-500 transition-all duration-200 ${active || isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                     }`} />
                   {it.icon ? <it.icon size={16} className="shrink-0" /> : <span className={`h-2 w-2 rounded-full ${dotCls} shrink-0`} />}
-                  <span className="font-medium truncate text-sm">{it.label}</span>
+                  {!collapsed && <span className="font-medium truncate text-sm">{it.label}</span>}
                 </>
               )}
             </NavLink>
@@ -111,11 +119,15 @@ function Section({ title, items, pathname, openMap, onToggle, onNavigate, isDark
 }
 
 /* ---------- Header ---------- */
-function Header({ role }) {
+function Header({ role, collapsed = false }) {
   return (
     <div className="p-4">
       <div className="flex items-center justify-center">
-        <img src="/logo.svg" alt="Equiti Admin" className="h-12 w-auto" />
+        {collapsed ? (
+          <img src="/logo.svg" alt="Equiti Admin" className="h-8 w-8 object-contain" />
+        ) : (
+          <img src="/logo.svg" alt="Equiti Admin" className="h-12 w-auto" />
+        )}
       </div>
     </div>
   );
@@ -129,6 +141,7 @@ export default function Sidebar({
   open = false,
   onClose = () => { },
   className = "",
+  collapsed = false,
 }) {
   const { admin } = useAuth();
 
@@ -387,12 +400,12 @@ export default function Sidebar({
       {/* DESKTOP (fixed so no bottom gap) */}
       <aside
         style={{ ...backgroundStyle }}
-        className={`hidden lg:block fixed left-0 top-0 bottom-0 w-[320px] shrink-0 overflow-y-auto overflow-x-hidden
+        className={`hidden lg:block fixed left-0 top-0 bottom-0 shrink-0 overflow-y-auto overflow-x-hidden transition-all duration-300
                     sidebar ${textTheme} shadow-xl ${className} border-r border-gray-200
                     scrollbar-thin scrollbar-thumb-brand-500/50 scrollbar-track-neutral-900/10
-                    hover:scrollbar-thumb-brand-500/70`}
+                    hover:scrollbar-thumb-brand-500/70 ${collapsed ? 'w-[80px]' : 'w-[240px]'}`}
       >
-        <Header role={role} />
+        <Header role={role} collapsed={collapsed} />
         <nav className="pb-8">
           {MENU.map((section) => (
             <Section
@@ -404,6 +417,7 @@ export default function Sidebar({
               onToggle={toggle}
               onNavigate={() => { }}
               isDark={isDark}
+              collapsed={collapsed}
             />
           ))}
         </nav>
