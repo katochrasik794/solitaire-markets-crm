@@ -22,7 +22,6 @@ function CreateAccount() {
     platform: 'MT5',
     mt5GroupId: '',
     leverage: 2000,
-    isSwapFree: false,
     isCopyAccount: false,
     reasonForAccount: 'Different trading strategy',
     masterPassword: '',
@@ -120,22 +119,6 @@ function CreateAccount() {
       newFormData.mt5GroupId = value
     }
 
-    // If swap free is checked, limit leverage to 500
-    if (name === 'isSwapFree' && checked) {
-      const currentLeverage = parseInt(newFormData.leverage)
-      if (currentLeverage > 500) {
-        newFormData.leverage = 500
-      }
-    }
-
-    // If leverage is changed and swap free is enabled, limit to 500
-    if (name === 'leverage' && newFormData.isSwapFree) {
-      const leverageValue = parseInt(value)
-      if (leverageValue > 500) {
-        newFormData.leverage = 500
-      }
-    }
-
     setFormData(newFormData)
   }
 
@@ -162,7 +145,6 @@ function CreateAccount() {
             platform: formData.platform,
             mt5GroupId: parseInt(formData.mt5GroupId),
             leverage: parseInt(formData.leverage),
-            isSwapFree: formData.isSwapFree,
             isCopyAccount: formData.isCopyAccount,
             reasonForAccount: formData.reasonForAccount,
             masterPassword: formData.masterPassword,
@@ -212,7 +194,7 @@ function CreateAccount() {
         />
       )}
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <PageHeader
           icon={PlusCircle}
           title="Create Trading Account"
@@ -265,45 +247,14 @@ function CreateAccount() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Platform Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  Platform
-                </label>
-                <div className="flex gap-4">
-                  <label className="flex-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="platform"
-                      value="MT5"
-                      checked={formData.platform === 'MT5'}
-                      onChange={handleChange}
-                      className="sr-only"
-                    />
-                    <div className={`border-2 rounded-lg p-1 transition-all ${formData.platform === 'MT5'
-                      ? 'border-brand-500 bg-brand-500 bg-opacity-5'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}>
-                      <div className="flex items-center gap-4">
-                        <img
-                          src="/mt_5.png"
-                          alt="MetaTrader 5"
-                          className="w-40 h-40 object-contain flex-shrink-0"
-                        />
-                        <span className="text-sm font-medium text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                          MetaTrader 5
-                        </span>
-                      </div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
               {/* Trading Group Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  Trading Group
+                  Choose Your Trading Group
                 </label>
+                <p className="text-xs text-gray-600 mb-4" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  Select the trading group that best suits your trading style. Each group offers different spreads, commissions, and trading conditions.
+                </p>
                 {loadingGroups ? (
                   <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-center">
                     <svg className="animate-spin h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24">
@@ -333,21 +284,27 @@ function CreateAccount() {
                           ? 'border-brand-500 bg-brand-500 bg-opacity-5'
                           : 'border-gray-200 hover:border-gray-300'
                           }`}>
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className={`w-4 h-4 rounded-full ${formData.mt5GroupId === group.id.toString() ? 'bg-brand-500' : 'bg-gray-300'
-                              }`}></div>
-                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
+                          <div className="flex items-center gap-4">
+                            {/* MT5 Image on left side */}
+                            <img
+                              src="/mt_5.png"
+                              alt="MetaTrader 5"
+                              className="w-28 h-20 object-contain flex-shrink-0"
+                            />
+                            {/* Group name and details */}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className={`w-4 h-4 rounded-full ${formData.mt5GroupId === group.id.toString() ? 'bg-brand-500' : 'bg-gray-300'
+                                  }`}></div>
+                                <span className="font-semibold text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                                  {group.dedicated_name || 'Unnamed Group'}
+                                </span>
+                              </div>
+                              <ul className="space-y-1 text-sm text-gray-600 ml-7" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                                <li>• Currency: {group.currency}</li>
+                              </ul>
                             </div>
-                            <span className="font-semibold text-gray-900" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                              {group.dedicated_name || 'Unnamed Group'}
-                            </span>
                           </div>
-                          <ul className="space-y-1 text-sm text-gray-600 ml-11" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                            <li>• Currency: {group.currency}</li>
-                          </ul>
                         </div>
                       </label>
                     ))}
@@ -358,8 +315,11 @@ function CreateAccount() {
               {/* Leverage Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  Leverage
+                  Select Your Leverage
                 </label>
+                <p className="text-xs text-gray-600 mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  Leverage allows you to trade with more capital than you have in your account. Higher leverage increases both potential profits and risks.
+                </p>
                 <select
                   name="leverage"
                   value={formData.leverage}
@@ -378,36 +338,17 @@ function CreateAccount() {
                 </select>
               </div>
 
-              {/* Swap Free Account */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    Swap Free Account
-                  </label>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="isSwapFree"
-                      checked={formData.isSwapFree}
-                      onChange={handleChange}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-500 peer-focus:ring-opacity-20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
-                  </label>
-                </div>
-                <p className="text-xs text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  By selecting Swap Free Account you agree to the{' '}
-                  <a href="#" className="text-brand-600 hover:underline">Terms and Conditions for Swap Free accounts</a>.
-                  Swap Free Accounts are subject to a maximum leverage of 1:500.
-                </p>
-              </div>
-
               {/* Solitaire Markets Copy Account */}
               <div>
-                <div className="flex items-center justify-between">
-                  <label className="block text-sm font-medium text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    Solitaire Markets Copy Account
-                  </label>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      Solitaire Markets Copy Account
+                    </label>
+                    <p className="text-xs text-gray-600 mt-1" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      Enable copy trading to automatically replicate trades from successful traders.
+                    </p>
+                  </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -424,8 +365,11 @@ function CreateAccount() {
               {/* Reason for opening */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  Reason for opening an additional account:
+                  Reason for Opening an Additional Account
                 </label>
+                <p className="text-xs text-gray-600 mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  Help us understand your trading needs by selecting the primary reason for opening this account.
+                </p>
                 <select
                   name="reasonForAccount"
                   value={formData.reasonForAccount}
