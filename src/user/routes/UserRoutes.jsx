@@ -13,6 +13,7 @@ import ReferAFriend from '../pages/ReferAFriend'
 import Legal from '../pages/Legal'
 import Support from '../pages/Support'
 import PaymentDetails from '../pages/PaymentDetails'
+import Settings from '../pages/Settings'
 
 // Withdrawal Pages
 import Crypto from '../pages/withdrawals/Crypto'
@@ -70,7 +71,8 @@ const userRoutes = [
   { path: 'refer-a-friend', element: <ReferAFriend /> },
   { path: 'legal', element: <Legal /> },
   { path: 'support', element: <Support /> },
-  { path: 'payment-details', element: <PaymentDetails /> }
+  { path: 'payment-details', element: <PaymentDetails /> },
+  { path: 'settings', element: <Settings /> }
 ]
 
 // Function to render routes
