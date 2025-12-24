@@ -2,19 +2,22 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import authService from '../../services/auth.js'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:5000/api';
+
 function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
   const [languageOpen, setLanguageOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [notificationCount] = useState(0) // TODO: Implement actual notification count
   const [userName, setUserName] = useState('User')
+  const [kycStatus, setKycStatus] = useState(null)
+  const [kycLoading, setKycLoading] = useState(true)
+  const [showKycTooltip, setShowKycTooltip] = useState(false)
   const languageRef = useRef(null)
   const profileRef = useRef(null)
-  const notificationsRef = useRef(null)
+  const kycTooltipRef = useRef(null)
   const navigate = useNavigate()
 
-  // Fetch user data on component mount
+  // Fetch user data and KYC status on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -42,7 +45,44 @@ function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
       }
     }
 
+    const fetchKYCStatus = async () => {
+      try {
+        const token = authService.getToken()
+        if (!token) {
+          setKycLoading(false)
+          return
+        }
+
+        const response = await fetch(`${API_BASE_URL}/kyc/status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data) {
+            setKycStatus(data.data.status?.toLowerCase() || 'unverified')
+          } else {
+            setKycStatus('unverified')
+          }
+        } else {
+          setKycStatus('unverified')
+        }
+      } catch (error) {
+        console.error('Error fetching KYC status:', error)
+        setKycStatus('unverified')
+      } finally {
+        setKycLoading(false)
+      }
+    }
+
     fetchUserData()
+    fetchKYCStatus()
+    
+    // Refresh KYC status every 30 seconds
+    const kycInterval = setInterval(fetchKYCStatus, 30000)
+    return () => clearInterval(kycInterval)
   }, [])
 
   const handleLogout = () => {
@@ -65,9 +105,9 @@ function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false)
       }
-      // Check if click is outside notifications dropdown
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-        setNotificationsOpen(false)
+      // Check if click is outside KYC tooltip
+      if (kycTooltipRef.current && !kycTooltipRef.current.contains(event.target)) {
+        setShowKycTooltip(false)
       }
     }
 
@@ -186,33 +226,39 @@ function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
                   )}
                 </div>
 
-                {/* Notifications Bell */}
-                <div className="relative" ref={notificationsRef}>
-                  <button
-                    onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="relative flex items-center justify-center w-8 h-8 lg:w-9 lg:h-9 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    {notificationCount > 0 && (
-                      <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
-                        {notificationCount > 9 ? '9+' : notificationCount}
-                      </span>
-                    )}
-                  </button>
-                  
-                  {notificationsOpen && (
-                    <div 
-                      className="absolute right-0 top-full mt-2 w-72 md:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      <div className="p-4">
-                        <p className="text-sm text-gray-500 text-center">No new notifications</p>
+                {/* KYC Verification Badge */}
+                {!kycLoading && (
+                  <div className="relative" ref={kycTooltipRef}>
+                    {kycStatus === 'approved' ? (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-lg">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-xs font-medium whitespace-nowrap">KYC Verified</span>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    ) : (
+                      <Link
+                        to="/user/verification"
+                        className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition-colors relative"
+                        onMouseEnter={() => setShowKycTooltip(true)}
+                        onMouseLeave={() => setShowKycTooltip(false)}
+                      >
+                        <span className="text-xs font-medium whitespace-nowrap">KYC Unverified</span>
+                        <div className="relative">
+                          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {showKycTooltip && (
+                            <div className="absolute right-0 top-full mt-1 w-40 bg-gray-900 text-white text-xs rounded px-2 py-1.5 whitespace-nowrap z-50">
+                              Click here to verify
+                              <div className="absolute -top-1 right-2 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    )}
+                  </div>
+                )}
 
                 {/* User Profile */}
                 <div className="relative" ref={profileRef}>
