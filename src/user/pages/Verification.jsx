@@ -162,6 +162,12 @@ function Verification() {
         .withConf({
           //language of WebSDK texts and comments (ISO 639-1 format)
           lang: 'en',
+          // Configure logo URL
+          theme: 'light',
+          // Add logo configuration if supported
+          uiConf: {
+            logoUrl: 'https://portal.solitairemarkets.com/logo.png'
+          }
         })
         .on('onError', (error) => {
           console.log('onError', error)
@@ -672,10 +678,14 @@ function Verification() {
             {/* Logo at the top */}
             <div className="flex justify-center mb-6">
               <img 
-                src="/logo.svg" 
+                src="https://portal.solitairemarkets.com/logo.png?v=2" 
                 alt="Solitaire Markets" 
                 className="h-16 w-auto" 
                 style={{ background: 'transparent' }} 
+                onError={(e) => {
+                  // Fallback to local logo if external fails
+                  e.target.src = '/logo.svg';
+                }}
               />
             </div>
             

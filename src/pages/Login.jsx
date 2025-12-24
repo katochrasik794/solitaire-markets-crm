@@ -17,6 +17,10 @@ function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const isRegisterPage = location.pathname === '/register' || location.pathname.startsWith('/register')
+  
+  // Get redirect parameter from URL
+  const searchParams = new URLSearchParams(location.search)
+  const redirectTo = searchParams.get('redirect') || '/user/dashboard'
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -44,7 +48,8 @@ function Login() {
         setMessage(result.message)
         setActivationLink(result.activationLink)
       } else if (result && result.success) {
-        navigate('/user/dashboard')
+        // Navigate to redirect URL or default to dashboard
+        navigate(redirectTo || '/user/dashboard')
       } else {
         setError(result?.message || 'Login failed. Please check your credentials.')
       }
