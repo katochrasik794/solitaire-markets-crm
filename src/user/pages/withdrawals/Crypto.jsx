@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import withdrawalService from '../../../services/withdrawal.service'
 import authService from '../../../services/auth.js'
 import Swal from 'sweetalert2'
@@ -17,6 +17,8 @@ function Crypto() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [cryptoAddress, setCryptoAddress] = useState('')
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
+  const [paymentMethods, setPaymentMethods] = useState([])
   const [selectedNetwork, setSelectedNetwork] = useState('TRC20')
   const [kycStatus, setKycStatus] = useState(null)
   const [kycLoading, setKycLoading] = useState(true)
@@ -32,8 +34,90 @@ function Crypto() {
     if (status === 'approved') {
       fetchAccounts()
       fetchWallet()
+      fetchPaymentMethods()
     }
   }, [kycStatus])
+
+  // Fetch approved payment methods
+  const fetchPaymentMethods = async () => {
+    try {
+      const token = authService.getToken()
+      if (!token) return
+
+      const response = await fetch(`${API_BASE_URL}/payment-details`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && Array.isArray(data.data)) {
+          // Filter only approved payment methods
+          const approved = data.data.filter(pm => 
+            pm.status?.toLowerCase() === 'approved' && 
+            (pm.payment_method === 'usdt_trc20' || pm.payment_method === 'usdt_erc20' || pm.payment_method === 'usdt_bep20')
+          )
+          setPaymentMethods(approved)
+          
+          // Auto-select first payment method if available
+          if (approved.length > 0 && !selectedPaymentMethod) {
+            const matchingNetwork = approved.find(pm => {
+              const method = pm.payment_method?.toLowerCase() || ''
+              if (selectedNetwork === 'TRC20' && method === 'usdt_trc20') return true
+              if (selectedNetwork === 'ERC20' && method === 'usdt_erc20') return true
+              if (selectedNetwork === 'BEP20' && method === 'usdt_bep20') return true
+              return false
+            })
+            if (matchingNetwork) {
+              setSelectedPaymentMethod(matchingNetwork)
+              const details = typeof matchingNetwork.payment_details === 'string' 
+                ? JSON.parse(matchingNetwork.payment_details) 
+                : matchingNetwork.payment_details
+              setCryptoAddress(details.walletAddress || details.wallet_address || '')
+            } else if (approved[0]) {
+              setSelectedPaymentMethod(approved[0])
+              const details = typeof approved[0].payment_details === 'string' 
+                ? JSON.parse(approved[0].payment_details) 
+                : approved[0].payment_details
+              setCryptoAddress(details.walletAddress || details.wallet_address || '')
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch payment methods:', error)
+    }
+  }
+
+  // Update selected payment method when network changes (optional - try to match, but don't require it)
+  useEffect(() => {
+    if (paymentMethods.length > 0 && !selectedPaymentMethod) {
+      // Try to find matching network first
+      const matchingMethod = paymentMethods.find(pm => {
+        const method = pm.payment_method?.toLowerCase() || ''
+        if (selectedNetwork === 'TRC20' && method === 'usdt_trc20') return true
+        if (selectedNetwork === 'ERC20' && method === 'usdt_erc20') return true
+        if (selectedNetwork === 'BEP20' && method === 'usdt_bep20') return true
+        return false
+      })
+      
+      if (matchingMethod) {
+        setSelectedPaymentMethod(matchingMethod)
+        const details = typeof matchingMethod.payment_details === 'string' 
+          ? JSON.parse(matchingMethod.payment_details) 
+          : matchingMethod.payment_details
+        setCryptoAddress(details.walletAddress || details.wallet_address || '')
+      } else if (paymentMethods[0]) {
+        // If no matching network, select first available
+        setSelectedPaymentMethod(paymentMethods[0])
+        const details = typeof paymentMethods[0].payment_details === 'string' 
+          ? JSON.parse(paymentMethods[0].payment_details) 
+          : paymentMethods[0].payment_details
+        setCryptoAddress(details.walletAddress || details.wallet_address || '')
+      }
+    }
+  }, [selectedNetwork, paymentMethods])
 
   const checkKYCStatus = async () => {
     try {
@@ -141,8 +225,19 @@ function Crypto() {
       return
     }
 
-    if (!cryptoAddress) {
-      Swal.fire('Error', 'Please enter your crypto wallet address', 'error')
+    if (!selectedPaymentMethod) {
+      Swal.fire('Error', 'Please select a payment method', 'error')
+      return
+    }
+
+    // Get wallet address from selected payment method
+    const paymentDetails = typeof selectedPaymentMethod.payment_details === 'string' 
+      ? JSON.parse(selectedPaymentMethod.payment_details) 
+      : selectedPaymentMethod.payment_details
+    const walletAddress = paymentDetails.walletAddress || paymentDetails.wallet_address || ''
+    
+    if (!walletAddress) {
+      Swal.fire('Error', 'Selected payment method has no wallet address', 'error')
       return
     }
 
@@ -156,7 +251,8 @@ function Crypto() {
         currency: selectedAccount.currency || 'USD',
         method: 'crypto',
         paymentMethod: `USDT-${selectedNetwork}`,
-        cryptoAddress: cryptoAddress,
+        cryptoAddress: walletAddress,
+        paymentDetailId: selectedPaymentMethod.id, // Include payment detail ID
         pmCurrency: 'USDT',
         pmNetwork: selectedNetwork,
         password: password
@@ -172,10 +268,10 @@ function Crypto() {
         })
         setAmount('')
         setPassword('')
-        setCryptoAddress('')
         // Refresh accounts and wallet to show updated balance
         fetchAccounts()
         fetchWallet()
+        fetchPaymentMethods()
       } else {
         throw new Error(response.message || 'Unknown error')
       }
@@ -296,7 +392,7 @@ function Crypto() {
         <h1 className="text-left p-4 md:p-6 pb-0 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '20px', color: '#000000', fontWeight: '400' }}>
           Withdraw through Crypto
         </h1>
-        <div className="w-full max-w-2xl mx-auto px-4 md:px-6 pb-4 md:pb-6">
+        <div className="w-full max-w-4xl mx-auto px-4 md:px-6 pb-4 md:pb-6">
 
           {/* Main Form Container */}
           <div className="bg-white rounded-lg p-4 border border-gray-200">
@@ -393,17 +489,66 @@ function Crypto() {
                   >
                     <option value="TRC20">USDT (TRC20)</option>
                     <option value="ERC20">USDT (ERC20)</option>
+                    <option value="BEP20">USDT (BEP20)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-600">Wallet Address</label>
-                  <input
-                    type="text"
-                    value={cryptoAddress}
-                    onChange={(e) => setCryptoAddress(e.target.value)}
-                    placeholder="Enter wallet address"
-                    className="w-full mt-1 p-2 border rounded-lg outline-none focus:border-[#009688]"
-                  />
+                  <label className="text-sm text-gray-600">Payment Method</label>
+                  {paymentMethods.length === 0 ? (
+                    <div className="mt-1 p-2 border border-amber-300 rounded-lg bg-amber-50">
+                      <p className="text-xs text-amber-700">
+                        No approved payment methods found. Please{' '}
+                        <Link to="/user/payment-details" className="underline font-semibold">
+                          add a payment method
+                        </Link>{' '}
+                        first.
+                      </p>
+                    </div>
+                  ) : (
+                    <select
+                      value={selectedPaymentMethod?.id || ''}
+                      onChange={(e) => {
+                        const method = paymentMethods.find(pm => pm.id === parseInt(e.target.value))
+                        if (method) {
+                          setSelectedPaymentMethod(method)
+                          const details = typeof method.payment_details === 'string' 
+                            ? JSON.parse(method.payment_details) 
+                            : method.payment_details
+                          setCryptoAddress(details.walletAddress || details.wallet_address || '')
+                          // Update network to match selected payment method
+                          const methodType = method.payment_method?.toLowerCase() || ''
+                          if (methodType === 'usdt_trc20') setSelectedNetwork('TRC20')
+                          else if (methodType === 'usdt_erc20') setSelectedNetwork('ERC20')
+                          else if (methodType === 'usdt_bep20') setSelectedNetwork('BEP20')
+                        }
+                      }}
+                      className="w-full mt-1 p-2 border rounded-lg outline-none focus:border-[#009688]"
+                    >
+                      <option value="">Select payment method</option>
+                      {paymentMethods.map(pm => {
+                        const details = typeof pm.payment_details === 'string' 
+                          ? JSON.parse(pm.payment_details) 
+                          : pm.payment_details
+                        const address = details.walletAddress || details.wallet_address || ''
+                        const displayAddress = address.length > 20 
+                          ? `${address.substring(0, 10)}...${address.substring(address.length - 10)}` 
+                          : address
+                        const methodType = pm.payment_method?.toUpperCase().replace('_', ' ') || 'UNKNOWN'
+                        return (
+                          <option key={pm.id} value={pm.id}>
+                            {methodType} - {displayAddress}
+                          </option>
+                        )
+                      })}
+                    </select>
+                  )}
+                  {selectedPaymentMethod && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Selected: {cryptoAddress.length > 30 
+                        ? `${cryptoAddress.substring(0, 15)}...${cryptoAddress.substring(cryptoAddress.length - 15)}` 
+                        : cryptoAddress}
+                    </p>
+                  )}
                 </div>
               </div>
 

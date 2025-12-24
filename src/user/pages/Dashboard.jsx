@@ -11,14 +11,13 @@ import { RiArrowDownCircleLine, RiArrowUpCircleLine } from "react-icons/ri";
 import { LayoutDashboard } from "lucide-react";
 import authService from "../../services/auth.js";
 import PageHeader from "../components/PageHeader.jsx";
+import PromotionsSlider from "../components/PromotionsSlider.jsx";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 import AccountsTable from '../components/AccountsTable.jsx';
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [showReferBanner, setShowReferBanner] = useState(true);
-  const [showCopyTradingBanner, setShowCopyTradingBanner] = useState(true);
   const [showKycBanner, setShowKycBanner] = useState(true);
   const [accounts, setAccounts] = useState([]);
   const [archivedAccounts, setArchivedAccounts] = useState([]); // Disabled/inactive accounts
@@ -449,110 +448,8 @@ function Dashboard() {
           subtitle="Overview of your trading accounts, wallet balance, and recent activities."
         />
         
-        {/* Promotional Banners */}
-        {showReferBanner && (
-          <div className="mt-8 sm:mt-10 relative rounded-lg overflow-hidden p-6 sm:p-8 bg-[#1e3a47]">
-            {/* Background Image (update src once you upload coin image) */}
-            <img
-              src="/mnt/data/b2c2b802-c742-4bb4-9cb4-4728d3ed422c.png"
-              alt=""
-              className="absolute right-0 top-0 h-full object-contain opacity-30 pointer-events-none"
-            />
-
-            {/* Close Button */}
-            <button
-              onClick={() => setShowReferBanner(false)}
-              className="absolute top-4 right-4 text-gray-300 hover:text-white z-20"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            {/* Content */}
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
-              <div className="flex-1 pr-0 sm:pr-8">
-                <h3 className="text-white text-2xl font-normal leading-snug">
-                  Get up to USD 125 for every friend you refer
-                </h3>
-
-                <p className="text-gray-300 mt-2 text-sm sm:text-base">
-                  Invite a Like-Minded trader to create a live account and earn
-                  up to USD 125 per friend
-                </p>
-              </div>
-
-              <Link
-                to="/user/refer-a-friend"
-                className="bg-brand-500 hover:bg-brand-600 text-dark-base px-6 py-2 rounded-lg 
-        whitespace-nowrap text-sm sm:text-base transition-colors z-10"
-              >
-                Become Partner
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {showCopyTradingBanner && (
-          <div className="relative rounded-lg overflow-hidden p-6 sm:p-8 bg-[#1e3a47] mt-6">
-            {/* Background Image (update src once you upload chain image) */}
-            <img
-              src="/solitaire-markets-crm/public/copy-trade-banner-secondary.svg"
-              alt=""
-              className="absolute right-0 top-0 h-full object-contain opacity-30 pointer-events-none"
-            />
-
-            {/* Close Button */}
-            <button
-              onClick={() => setShowCopyTradingBanner(false)}
-              className="absolute top-4 right-4 text-gray-300 hover:text-white z-20"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            {/* Content */}
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
-              <div className="flex-1 pr-0 sm:pr-8">
-                <h3 className="text-white text-2xl font-normal leading-snug">
-                  Copy trades to diversify your portfolio
-                </h3>
-
-                <p className="text-gray-300 mt-2 text-sm sm:text-base">
-                  Follow successful traders to copy their strategies instantly
-                </p>
-              </div>
-
-              <button
-                className="bg-brand-500 hover:bg-brand-600 text-dark-base px-6 py-2 rounded-lg 
-        whitespace-nowrap text-sm sm:text-base transition-colors z-10"
-              >
-                Start now
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Promotional Banners Slider */}
+        <PromotionsSlider />
 
         {/* Account Summary */}
         <h2 className="text-sm md:text-md font-medium text-gray-800 mb-4">

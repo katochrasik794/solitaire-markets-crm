@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Users, User, ShieldCheck, Settings, ServerCog, PlugZap, Database, Building2, Mail,
   Boxes, FolderKanban, LineChart, BarChart3, Calculator, FileText, ClipboardList,
   KeySquare, UserCog, Banknote, IndianRupee, Newspaper, Signal, Link, Link2,
-  GitBranch, Network, Copy, Layers, ListChecks, Wallet, CreditCard, QrCode, Activity, Terminal, Headphones, Send
+  GitBranch, Network, Copy, Layers, ListChecks, Wallet, CreditCard, QrCode, Activity, Terminal, Headphones, Send, Image
 } from "lucide-react";
 
 // Extract all features dynamically from ADMIN_MENU
@@ -307,6 +307,7 @@ export const ADMIN_MENU = [
     label: "CONTENT MANAGEMENT",
     items: [
       { icon: Newspaper, label: "Manage Tickers", to: "content-management/tickers" },
+      { icon: Image, label: "Manage Promotions", to: "content-management/promotions" },
     ],
   },
   {

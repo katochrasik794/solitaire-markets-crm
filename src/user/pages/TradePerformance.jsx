@@ -108,7 +108,20 @@ function TradePerformance() {
       });
       const data = await response.json();
       if (data.success && data.data) {
-        setAccounts(data.data);
+        const all = Array.isArray(data.data) ? data.data : [];
+        
+        // Filter exactly like Dashboard: Only active, real MT5 accounts
+        const realAccounts = all.filter((acc) => {
+          const platform = (acc.platform || '').toUpperCase();
+          const status = (acc.account_status || '').toLowerCase();
+          const isMT5 = platform === 'MT5';
+          const isActive = status === '' || status === 'active' || !status;
+          const isReal = !acc.is_demo;
+          
+          return isMT5 && isActive && isReal;
+        });
+        
+        setAccounts(realAccounts);
       }
     } catch (error) {
       console.error('Error fetching accounts:', error);
@@ -432,12 +445,13 @@ function TradePerformance() {
     }
   };
 
+  // Match sidebar menu tabs
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'performance', label: 'Performance', icon: TrendingUp },
-    { id: 'risk', label: 'Risk Analysis', icon: Shield },
-    { id: 'statistics', label: 'Statistics', icon: Activity },
-    { id: 'comparison', label: 'Account Comparison', icon: Users }
+    { id: 'summary', label: 'Summary', icon: BarChart3 },
+    { id: 'net-profit', label: 'Net Profit', icon: TrendingUp },
+    { id: 'closed-orders', label: 'Closed Orders', icon: Target },
+    { id: 'trading-volume', label: 'Trading Volume', icon: Coins },
+    { id: 'equity', label: 'Equity', icon: Wallet }
   ];
 
   const renderOverview = () => (
@@ -741,7 +755,7 @@ function TradePerformance() {
           Compare performance across different accounts and time periods
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {accounts.filter(acc => !acc.is_demo && acc.platform === 'MT5').map((account) => (
+          {accounts.map((account) => (
             <div key={account.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-gray-900">Account {account.account_number}</span>
@@ -814,7 +828,7 @@ function TradePerformance() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Real Accounts</option>
-                {accounts.filter(acc => !acc.is_demo && acc.platform === 'MT5').map((account) => (
+                {accounts.map((account) => (
                   <option key={account.id} value={account.account_number}>
                     {account.account_number} - {account.account_type || 'MT5'}
                   </option>
@@ -922,11 +936,11 @@ function TradePerformance() {
               </div>
             ) : (
               <>
-                {activeTab === 'overview' && renderOverview()}
-                {activeTab === 'performance' && renderPerformance()}
-                {activeTab === 'risk' && renderRiskAnalysis()}
-                {activeTab === 'statistics' && renderStatistics()}
-                {activeTab === 'comparison' && renderComparison()}
+                {activeTab === 'summary' && renderOverview()}
+                {activeTab === 'net-profit' && renderPerformance()}
+                {activeTab === 'closed-orders' && renderStatistics()}
+                {activeTab === 'trading-volume' && renderPerformance()}
+                {activeTab === 'equity' && renderOverview()}
               </>
             )}
           </div>

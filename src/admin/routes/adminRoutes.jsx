@@ -57,6 +57,7 @@ import SendEmails from "../pages/SendEmails.jsx";
 import EmailTemplates from "../pages/EmailTemplates.jsx";
 import TemplateAssignments from "../pages/TemplateAssignments.jsx";
 import Tickers from "../pages/ContentManagement/Tickers.jsx";
+import Promotions from "../pages/ContentManagement/Promotions.jsx";
 import IBRequests from "../pages/IBRequests.jsx";
 import AllActions from "../pages/AllActions.jsx";
 /** Admin Dashboard */
@@ -162,6 +163,7 @@ export default [
 
   /* ------------------------ CONTENT MANAGEMENT ------------------------ */
   { path: "content-management/tickers", element: <Tickers /> },
+  { path: "content-management/promotions", element: <Promotions /> },
 
   /* ------------------------------ LOGS -------------------------------- */
   { path: "logs/admin", element: <AdminLogs /> },
