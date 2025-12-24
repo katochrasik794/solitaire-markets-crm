@@ -48,7 +48,16 @@ function Dashboard() {
   const isCalculatingRef = useRef(false);
   const hasCalculatedRef = useRef(false);
 
-
+  // Helper function to remove duplicate accounts by account_number
+  const deduplicateAccounts = (accounts) => {
+    const seen = new Set();
+    return accounts.filter(acc => {
+      if (!acc.account_number) return false;
+      if (seen.has(acc.account_number)) return false;
+      seen.add(acc.account_number);
+      return true;
+    });
+  };
 
   // Wallet modal state
   const [walletModalOpen, setWalletModalOpen] = useState(false);
@@ -253,8 +262,11 @@ function Dashboard() {
           const all = Array.isArray(data.data) ? data.data : [];
           console.log('All accounts fetched:', all.length, all.map(a => ({ id: a.account_number, status: a.account_status })));
           
+          // Remove duplicates by account_number (safety measure in case backend returns duplicates)
+          const uniqueAccounts = deduplicateAccounts(all);
+          
           // Store all active MT5 accounts (status is empty, 'active', or null)
-          const activeAccounts = all.filter((acc) => {
+          const activeAccounts = uniqueAccounts.filter((acc) => {
             const platform = (acc.platform || '').toUpperCase();
             const status = (acc.account_status || '').toLowerCase();
             const isActive = platform === 'MT5' && (status === '' || status === 'active' || !status);
@@ -768,7 +780,9 @@ function Dashboard() {
                 const data = await response.json();
                 if (data.success) {
                   const all = Array.isArray(data.data) ? data.data : [];
-                  const live = all.filter((acc) => {
+                  // Remove duplicates first
+                  const uniqueAll = deduplicateAccounts(all);
+                  const live = uniqueAll.filter((acc) => {
                     const platform = (acc.platform || '').toUpperCase();
                     const status = (acc.account_status || '').toLowerCase();
                     const isDemo = !!acc.is_demo; // actually fetchAccounts filters this better now with updated logic
@@ -776,7 +790,7 @@ function Dashboard() {
                     return platform === 'MT5' && (status === '' || status === 'active');
                   });
                   setAccounts(live);
-                  const archived = all.filter((acc) => {
+                  const archived = uniqueAll.filter((acc) => {
                     const platform = (acc.platform || '').toUpperCase();
                     const status = (acc.account_status || '').toLowerCase();
                     return platform === 'MT5' && (status === 'inactive' || status === 'suspended' || status === 'disabled');
@@ -823,13 +837,15 @@ function Dashboard() {
                 const data = await response.json();
                 if (data.success) {
                   const all = Array.isArray(data.data) ? data.data : [];
-                  const live = all.filter((acc) => {
+                  // Remove duplicates first
+                  const uniqueAll = deduplicateAccounts(all);
+                  const live = uniqueAll.filter((acc) => {
                     const platform = (acc.platform || '').toUpperCase();
                     const status = (acc.account_status || '').toLowerCase();
                     return platform === 'MT5' && (status === '' || status === 'active');
                   });
                   setAccounts(live);
-                  const archived = all.filter((acc) => {
+                  const archived = uniqueAll.filter((acc) => {
                     const platform = (acc.platform || '').toUpperCase();
                     const status = (acc.account_status || '').toLowerCase();
                     return platform === 'MT5' && (status === 'inactive' || status === 'suspended' || status === 'disabled');
@@ -878,13 +894,15 @@ function Dashboard() {
                   const data = await response.json();
                   if (data.success) {
                     const all = Array.isArray(data.data) ? data.data : [];
-                    const active = all.filter((acc) => {
+                    // Remove duplicates first
+                    const uniqueAll = deduplicateAccounts(all);
+                    const active = uniqueAll.filter((acc) => {
                       const platform = (acc.platform || '').toUpperCase();
                       const status = (acc.account_status || '').toLowerCase();
                       return platform === 'MT5' && (status === '' || status === 'active');
                     });
                     setAccounts(active);
-                    const archived = all.filter((acc) => {
+                    const archived = uniqueAll.filter((acc) => {
                       const platform = (acc.platform || '').toUpperCase();
                       const status = (acc.account_status || '').toLowerCase();
                       return platform === 'MT5' && (status === 'inactive' || status === 'suspended' || status === 'disabled');

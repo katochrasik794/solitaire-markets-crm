@@ -151,17 +151,6 @@ function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
                       <span className="text-sm font-medium">{userName}</span>
                     </div>
                     <Link
-                      to="/user/documents"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setProfileOpen(false)
-                      }}
-                    >
-                      My Documents
-                    </Link>
-                    <Link
                       to="/user/settings"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
                       style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
@@ -260,17 +249,6 @@ function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
                   onMouseDown={(e) => e.stopPropagation()}
                 >
                   <div className="py-2">
-                    <Link
-                      to="/user/documents"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setProfileOpen(false)
-                      }}
-                    >
-                      My Documents
-                    </Link>
                     <Link
                       to="/user/settings"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
