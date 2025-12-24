@@ -54,11 +54,11 @@ export default function TemplateAssignments() {
 
       if (actionsRes.data.ok) {
         setActions(actionsRes.data.actions || []);
-        // Build assignments map
+        // Build assignments map using action id
         const assignMap = {};
         actionsRes.data.actions.forEach(action => {
-          if (action.assigned_template) {
-            assignMap[action.action_type] = action.assigned_template.template_id;
+          if (action.template_id) {
+            assignMap[action.id] = action.template_id;
           }
         });
         setAssignments(assignMap);
@@ -79,15 +79,15 @@ export default function TemplateAssignments() {
     }
   };
 
-  const handleAssign = async (actionType, templateId) => {
+  const handleAssign = async (actionId, templateId) => {
     try {
-      setSaving(prev => ({ ...prev, [actionType]: true }));
+      setSaving(prev => ({ ...prev, [actionId]: true }));
       const token = localStorage.getItem('adminToken');
 
       await axios.put(
         `${BASE}/admin/email-templates/assign-action`,
         {
-          action_type: actionType,
+          action_id: actionId,
           template_id: templateId || null
         },
         {
@@ -99,9 +99,9 @@ export default function TemplateAssignments() {
       setAssignments(prev => {
         const newAssignments = { ...prev };
         if (templateId) {
-          newAssignments[actionType] = templateId;
+          newAssignments[actionId] = templateId;
         } else {
-          delete newAssignments[actionType];
+          delete newAssignments[actionId];
         }
         return newAssignments;
       });
@@ -118,10 +118,10 @@ export default function TemplateAssignments() {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: error.response?.data?.error || 'Failed to assign template',
+        text: error.response?.data?.error || error.response?.data?.message || 'Failed to assign template',
       });
     } finally {
-      setSaving(prev => ({ ...prev, [actionType]: false }));
+      setSaving(prev => ({ ...prev, [actionId]: false }));
     }
   };
 
@@ -137,12 +137,13 @@ export default function TemplateAssignments() {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
-  // Group actions by category
+  // Group actions by system_type (since we don't have category anymore)
   const groupedActions = actions.reduce((acc, action) => {
-    if (!acc[action.category]) {
-      acc[action.category] = [];
+    const category = action.system_type || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    acc[action.category].push(action);
+    acc[category].push(action);
     return acc;
   }, {});
 
@@ -208,19 +209,19 @@ export default function TemplateAssignments() {
             </div>
             <div className="p-4 space-y-4">
               {groupedActions[category].map(action => {
-                const assignedTemplateId = assignments[action.action_type];
+                const assignedTemplateId = assignments[action.id];
                 const assignedTemplate = templates.find(t => t.id === assignedTemplateId);
 
                 return (
                   <div
-                    key={action.action_type}
+                    key={action.id}
                     className="border border-gray-200 rounded-lg p-4 hover:border-brand-300 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <Mail className="w-5 h-5 text-brand-500" />
-                          <h3 className="font-semibold text-gray-900">{action.name}</h3>
+                          <h3 className="font-semibold text-gray-900">{action.action_name}</h3>
                           {assignedTemplate && (
                             <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full flex items-center gap-1">
                               <CheckCircle2 className="w-3 h-3" />
@@ -228,9 +229,11 @@ export default function TemplateAssignments() {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600">{action.description}</p>
                         <p className="text-xs text-gray-500 mt-1 font-mono">
-                          Action Type: <span className="font-semibold">{action.action_type}</span>
+                          System: <span className="font-semibold">{action.system_type}</span>
+                          {action.assigned_template_name && (
+                            <> • Template: <span className="font-semibold">{action.assigned_template_name}</span></>
+                          )}
                         </p>
                       </div>
                     </div>
@@ -240,9 +243,9 @@ export default function TemplateAssignments() {
                         value={assignedTemplateId || ''}
                         onChange={(e) => {
                           const newTemplateId = e.target.value ? parseInt(e.target.value) : null;
-                          handleAssign(action.action_type, newTemplateId);
+                          handleAssign(action.id, newTemplateId);
                         }}
-                        disabled={saving[action.action_type]}
+                        disabled={saving[action.id]}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <option value="">-- Select Template (or leave unassigned) --</option>
@@ -256,11 +259,11 @@ export default function TemplateAssignments() {
 
                       {assignedTemplate && (
                         <button
-                          onClick={() => handleAssign(action.action_type, null)}
-                          disabled={saving[action.action_type]}
+                          onClick={() => handleAssign(action.id, null)}
+                          disabled={saving[action.id]}
                           className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                         >
-                          {saving[action.action_type] ? (
+                          {saving[action.id] ? (
                             <>
                               <Loader2 className="w-4 h-4 animate-spin" />
                               Saving...
