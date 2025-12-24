@@ -56,6 +56,7 @@ import GroupReport from "../pages/GroupReport.jsx";
 import SendEmails from "../pages/SendEmails.jsx";
 import EmailTemplates from "../pages/EmailTemplates.jsx";
 import Tickers from "../pages/ContentManagement/Tickers.jsx";
+import IBRequests from "../pages/IBRequests.jsx";
 /** Admin Dashboard */
 
 export default [
@@ -138,6 +139,9 @@ export default [
   { path: "support/open",    element: <SupportTicketsList status="opened" /> },
   { path: "support/closed",  element: <SupportTicketsList status="closed" /> },
   { path: "support/tickets/:id", element: <SupportTicketView /> },
+
+  // IB Requests
+  { path: "ib-requests", element: <IBRequests /> },
 
   { path: "bulk-logs",          element: <BulkLogs /> },
 

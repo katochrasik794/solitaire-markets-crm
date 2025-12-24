@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Users, ShieldCheck, Settings, ServerCog, PlugZap, Database, Building2, Mail,
+  LayoutDashboard, Users, User, ShieldCheck, Settings, ServerCog, PlugZap, Database, Building2, Mail,
   Boxes, FolderKanban, LineChart, BarChart3, Calculator, FileText, ClipboardList,
   KeySquare, UserCog, Banknote, IndianRupee, Newspaper, Signal, Link,
   GitBranch, Network, Copy, Layers, ListChecks, Wallet, CreditCard, QrCode, Activity, Terminal, Headphones, Send
@@ -198,6 +198,12 @@ export const ADMIN_MENU = [
           { label: "Internal Transfer", to: "mt5/transfer" },
         ],
       },
+    ],
+  },
+  {
+    label: "IB MANAGEMENT",
+    items: [
+      { icon: User, label: "IB Requests", to: "ib-requests" },
     ],
   },
   {

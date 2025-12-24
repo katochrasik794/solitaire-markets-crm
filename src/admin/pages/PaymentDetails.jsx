@@ -294,45 +294,33 @@ export default function PaymentDetails() {
         return (
           <div className="flex items-center gap-3">
             {isApproved ? (
-              <div className="flex flex-col items-center gap-1">
-                <button 
-                  onClick={() => unapprove(row.id)}
-                  className="h-8 px-3 rounded-md border border-amber-200 text-amber-700 hover:bg-amber-50 inline-flex items-center gap-1"
-                >
-                  <ShieldX size={16} /> Unapprove
-                </button>
-                <span className="text-xs text-gray-500">Unapprove</span>
-              </div>
+              <button 
+                onClick={() => unapprove(row.id)}
+                className="h-8 px-3 rounded-md border border-amber-200 text-amber-700 hover:bg-amber-50 inline-flex items-center gap-1"
+              >
+                <ShieldX size={16} /> Unapprove
+              </button>
             ) : isRejected ? (
-              <div className="flex flex-col items-center gap-1">
+              <button 
+                onClick={() => approve(row.id)}
+                className="h-8 px-3 rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 inline-flex items-center gap-1"
+              >
+                <CheckCircle2 size={16} /> Approve
+              </button>
+            ) : (
+              <>
                 <button 
                   onClick={() => approve(row.id)}
                   className="h-8 px-3 rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 inline-flex items-center gap-1"
                 >
                   <CheckCircle2 size={16} /> Approve
                 </button>
-                <span className="text-xs text-gray-500">Approve</span>
-              </div>
-            ) : (
-              <>
-                <div className="flex flex-col items-center gap-1">
-                  <button 
-                    onClick={() => approve(row.id)}
-                    className="h-8 px-3 rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 inline-flex items-center gap-1"
-                  >
-                    <CheckCircle2 size={16} /> Approve
-                  </button>
-                  <span className="text-xs text-gray-500">Approve</span>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <button 
-                    onClick={() => reject(row.id)}
-                    className="h-8 px-3 rounded-md border border-red-200 text-red-700 hover:bg-red-50 inline-flex items-center gap-1"
-                  >
-                    <XCircle size={16} /> Reject
-                  </button>
-                  <span className="text-xs text-gray-500">Reject</span>
-                </div>
+                <button 
+                  onClick={() => reject(row.id)}
+                  className="h-8 px-3 rounded-md border border-red-200 text-red-700 hover:bg-red-50 inline-flex items-center gap-1"
+                >
+                  <XCircle size={16} /> Reject
+                </button>
               </>
             )}
           </div>
