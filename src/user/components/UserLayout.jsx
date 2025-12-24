@@ -122,6 +122,12 @@ function UserLayout() {
       try {
         // Fetch all active tickers (both positions)
         const response = await fetch(`${API_BASE_URL}/tickers?is_active=true`)
+        
+        if (!response.ok) {
+          console.error('Tickers API response not OK:', response.status, response.statusText)
+          return
+        }
+        
         const data = await response.json()
         
         console.log('Tickers API response:', data)
@@ -129,10 +135,10 @@ function UserLayout() {
         if (data.success && Array.isArray(data.data)) {
           // Separate by position and sort by priority
           const top = data.data
-            .filter(t => t.position === 'top')
+            .filter(t => t.position === 'top' && t.is_active === true)
             .sort((a, b) => (b.priority || 0) - (a.priority || 0))
           const middle = data.data
-            .filter(t => t.position === 'middle')
+            .filter(t => t.position === 'middle' && t.is_active === true)
             .sort((a, b) => (b.priority || 0) - (a.priority || 0))
           
           console.log('Top tickers:', top)
@@ -141,14 +147,25 @@ function UserLayout() {
           setTopTickers(top)
           setMiddleTickers(middle)
         } else {
-          console.error('Tickers API error:', data)
+          console.error('Tickers API error - invalid response format:', data)
+          // Set empty arrays if response is invalid
+          setTopTickers([])
+          setMiddleTickers([])
         }
       } catch (err) {
         console.error('Error fetching tickers:', err)
+        // Set empty arrays on error
+        setTopTickers([])
+        setMiddleTickers([])
       }
     }
 
     fetchTickers()
+    
+    // Refresh tickers every 30 seconds to get updates
+    const interval = setInterval(fetchTickers, 30000)
+    
+    return () => clearInterval(interval)
   }, [])
 
   const handleTickerClose = (tickerId) => {
@@ -186,21 +203,9 @@ function UserLayout() {
           sidebarCollapsed={sidebarCollapsed}
         />
         
-        {/* Tickers - Display directly below navbar */}
-        <div className="mt-[64px] md:mt-[77px]">
-          {/* Middle Position Tickers - Between navbar and content */}
+        {/* Middle Position Tickers - Between navbar and content (accounting for fixed header) */}
+        <div className="pt-[64px] md:pt-[77px] relative z-30">
           {middleTickers
-            .filter(ticker => !dismissedTickers.has(ticker.id))
-            .map(ticker => (
-              <Ticker
-                key={ticker.id}
-                ticker={ticker}
-                onClose={() => handleTickerClose(ticker.id)}
-              />
-            ))}
-
-          {/* Top Position Tickers - Above verification banner */}
-          {topTickers
             .filter(ticker => !dismissedTickers.has(ticker.id))
             .map(ticker => (
               <Ticker
@@ -212,6 +217,18 @@ function UserLayout() {
         </div>
 
         <main className="overflow-x-hidden flex-1">
+          {/* Top Position Tickers - Above verification banner */}
+          <div className="relative z-30">
+            {topTickers
+              .filter(ticker => !dismissedTickers.has(ticker.id))
+              .map(ticker => (
+                <Ticker
+                  key={ticker.id}
+                  ticker={ticker}
+                  onClose={() => handleTickerClose(ticker.id)}
+                />
+              ))}
+          </div>
 
           {/* Deposit Banner - Hide when KYC is approved */}
           {kycStatus !== 'approved' && (
