@@ -32,26 +32,20 @@ function Ticker({ ticker, onClose }) {
       
       const contentWidth = firstCopy.offsetWidth;
       
-      // Always animate if content is wider than container
-      // If content fits, we can still animate it for a smooth effect, but it's optional
-      if (contentWidth <= containerWidth) {
-        // Content fits - center it or keep it static
-        // For now, keep it static if it fits, but ensure it's visible
-        content.style.animation = 'none';
-        content.style.justifyContent = 'center';
-        return;
-      }
-      
+      // Always animate continuously regardless of content length
       // Reset justify-content for scrolling content
       content.style.justifyContent = 'flex-start';
 
       // Calculate duration for one full cycle (one copy width)
-      const duration = contentWidth / speed; // seconds to scroll one copy
+      // Use minimum duration to ensure smooth continuous movement
+      const minContentWidth = Math.max(contentWidth, containerWidth * 0.5); // Ensure minimum width for smooth animation
+      const duration = minContentWidth / speed; // seconds to scroll one copy
 
       // Create unique animation name
       const animationId = `ticker-scroll-${ticker.id || Date.now()}`;
       
       // Create infinite scroll animation - moves from right edge to left edge
+      // Always animate continuously
       const keyframes = `
         @keyframes ${animationId} {
           0% {
@@ -72,7 +66,7 @@ function Ticker({ ticker, onClose }) {
       }
       styleSheet.textContent = keyframes;
 
-      // Apply animation - infinite loop
+      // Apply animation - infinite loop, always running
       content.style.animation = `${animationId} ${duration}s linear infinite`;
       content.style.animationPlayState = 'running';
     };
@@ -125,38 +119,25 @@ function Ticker({ ticker, onClose }) {
         }}
       >
         <div className="flex items-center h-full relative overflow-hidden">
-          {/* Content wrapper for scrolling - duplicate for seamless loop */}
+          {/* Content wrapper for scrolling - duplicate multiple times for seamless loop */}
           <div className="ticker-content flex items-center gap-4 px-4 py-3 whitespace-nowrap">
-            {/* First copy */}
-            <div className="flex items-center gap-4 flex-shrink-0">
-              {ticker.title && (
-                <span className="font-semibold text-sm md:text-base text-dark-base">{ticker.title}</span>
-              )}
-              {ticker.message && (
-                <span className="text-sm md:text-base text-dark-base">{ticker.message}</span>
-              )}
-              {ticker.image_url && (
-                <ImageIcon className="w-5 h-5 flex-shrink-0 cursor-pointer hover:opacity-80 transition text-dark-base" />
-              )}
-              {ticker.link_url && !ticker.image_url && (
-                <span className="text-xs underline opacity-90 text-dark-base">Click to view</span>
-              )}
-            </div>
-            {/* Duplicate for seamless infinite scroll */}
-            <div className="flex items-center gap-4 flex-shrink-0">
-              {ticker.title && (
-                <span className="font-semibold text-sm md:text-base text-dark-base">{ticker.title}</span>
-              )}
-              {ticker.message && (
-                <span className="text-sm md:text-base text-dark-base">{ticker.message}</span>
-              )}
-              {ticker.image_url && (
-                <ImageIcon className="w-5 h-5 flex-shrink-0 cursor-pointer hover:opacity-80 transition text-dark-base" />
-              )}
-              {ticker.link_url && !ticker.image_url && (
-                <span className="text-xs underline opacity-90 text-dark-base">Click to view</span>
-              )}
-            </div>
+            {/* Multiple copies for seamless infinite scroll - ensures continuous movement */}
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="flex items-center gap-4 flex-shrink-0">
+                {ticker.title && (
+                  <span className="font-semibold text-sm md:text-base text-dark-base">{ticker.title}</span>
+                )}
+                {ticker.message && (
+                  <span className="text-sm md:text-base text-dark-base">{ticker.message}</span>
+                )}
+                {ticker.image_url && (
+                  <ImageIcon className="w-5 h-5 flex-shrink-0 cursor-pointer hover:opacity-80 transition text-dark-base" />
+                )}
+                {ticker.link_url && !ticker.image_url && (
+                  <span className="text-xs underline opacity-90 text-dark-base">Click to view</span>
+                )}
+              </div>
+            ))}
           </div>
 
           {/* Close button */}
