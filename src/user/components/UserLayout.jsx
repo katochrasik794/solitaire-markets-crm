@@ -204,8 +204,8 @@ function UserLayout() {
           sidebarCollapsed={sidebarCollapsed}
         />
         
-        {/* Middle Position Tickers - Between navbar and content (accounting for fixed header) */}
-        <div className="pt-[64px] md:pt-[77px] relative z-30">
+        {/* Middle Position Tickers - Between navbar and content (accounting for fixed header + margin) */}
+        <div className="pt-[64px] md:pt-[68px] lg:pt-[72px] relative z-30">
           {middleTickers
             .filter(ticker => !dismissedTickers.has(ticker.id))
             .map(ticker => (

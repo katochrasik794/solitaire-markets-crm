@@ -5,10 +5,13 @@ import authService from '../../services/auth.js'
 function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
   const [languageOpen, setLanguageOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [notificationCount] = useState(0) // TODO: Implement actual notification count
   const [userName, setUserName] = useState('User')
   const languageRef = useRef(null)
   const profileRef = useRef(null)
-  const mobileProfileRef = useRef(null)
+  const notificationsRef = useRef(null)
   const navigate = useNavigate()
 
   // Fetch user data on component mount
@@ -62,9 +65,9 @@ function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false)
       }
-      // Check if click is outside mobile profile dropdown
-      if (mobileProfileRef.current && !mobileProfileRef.current.contains(event.target)) {
-        setProfileOpen(false)
+      // Check if click is outside notifications dropdown
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setNotificationsOpen(false)
       }
     }
 
@@ -88,203 +91,187 @@ function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
 
   return (
     <>
-      {/* Header Bar - Fixed */}
-      <div className="bg-white fixed top-0 left-0 right-0 z-50">
-        <div className="flex justify-between items-center px-6 py-4 md:py-7 relative">
-          {/* Left side - Hamburger menu (Mobile only) and Desktop toggle */}
-          <div className="flex items-center gap-4">
-            {/* Mobile hamburger */}
-            <button
-              onClick={onMenuClick}
-              className="lg:hidden text-gray-700 hover:text-gray-900"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            
-            {/* Desktop sidebar toggle */}
-            <button
-              onClick={onSidebarToggle}
-              className="hidden lg:flex items-center justify-center w-10 h-10 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {sidebarCollapsed ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              )}
-            </button>
-          </div>
-          
-          {/* Logo (Mobile - centered, Desktop - hidden) */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden">
-            <Link to="/user/dashboard">
-              <img src="/logo.png" alt="Solitaire Markets" className="h-12 w-auto" style={{ background: 'transparent' }} />
-            </Link>
-          </div>
-
-          {/* Right side - Language, Profile, and 3-dots menu */}
-          <div className="flex items-center gap-4 ml-auto">
-            {/* User Profile Icon - Mobile only */}
-            <div className="relative lg:hidden" ref={mobileProfileRef}>
-              <button
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </button>
-              
-              {profileOpen && (
-                <div 
-                  className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
-                  onMouseDown={(e) => e.stopPropagation()}
+      {/* Header Bar - Fixed with rounded corners and shadow */}
+      {/* On mobile: full width, On desktop: starts after sidebar */}
+      <div className={`bg-white fixed top-0 left-0 right-0 lg:right-0 z-40 transition-all duration-300 ${sidebarCollapsed ? 'lg:left-[80px]' : 'lg:left-[240px]'}`}>
+        <div className="mx-1.5 md:mx-2 mt-1.5 mb-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="flex justify-between items-center px-2 md:px-3 lg:px-4 py-1.5 md:py-2 lg:py-2.5">
+              {/* Left side - Sidebar toggle, Grid icon, User name */}
+              <div className="flex items-center gap-2 md:gap-3 lg:gap-4 flex-1 min-w-0">
+                {/* Mobile hamburger - only on mobile */}
+                <button
+                  onClick={onMenuClick}
+                  className="lg:hidden flex items-center justify-center w-8 h-8 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                 >
-                  <div className="py-2">
-                    <div className="px-4 py-2 text-gray-700 border-b border-gray-200">
-                      <span className="text-sm font-medium">{userName}</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+
+                {/* Grid icon - hidden on mobile */}
+                <button className="hidden md:flex items-center justify-center w-9 h-9 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
+
+                {/* User name / Dashboard text - hidden on mobile */}
+                <div className="hidden md:block text-gray-700 font-medium text-sm lg:text-base truncate ml-1">
+                  <span className="hidden lg:inline">Welcome {userName}</span>
+                  <span className="lg:hidden">Dashboard</span>
+                </div>
+
+                {/* Mobile logo - centered */}
+                <div className="lg:hidden absolute left-1/2 transform -translate-x-1/2">
+                  <Link to="/user/dashboard">
+                    <img src="/logo.png" alt="Solitaire Markets" className="h-7 w-auto" style={{ background: 'transparent' }} />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Center - Search bar (hidden on mobile and small tablets) */}
+              {/* <div className="hidden lg:flex items-center flex-1 max-w-lg mx-4">
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    placeholder="Search sidebar features..."
+                    className="block w-full pl-4 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#c8f300] focus:border-transparent transition-all"
+                    style={{ fontFamily: 'Roboto, sans-serif' }}
+                  />
+                </div>
+              </div> */}
+
+              {/* Right side - Language, Notifications, Profile */}
+              <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3 flex-shrink-0">
+                {/* Language Selector - hidden on mobile */}
+                <div className="relative hidden md:block" ref={languageRef}>
+                  <button
+                    onClick={() => setLanguageOpen(!languageOpen)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                    style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', fontWeight: '400' }}
+                  >
+                    <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="hidden lg:inline text-sm">English</span>
+                    <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {languageOpen && (
+                    <div 
+                      className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <div className="py-2">
+                        {languages.map((lang, index) => (
+                          <button
+                            key={index}
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
+                              lang === 'Española' ? 'text-[#00A896]' : 'text-gray-700'
+                            }`}
+                            style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setLanguageOpen(false)
+                            }}
+                          >
+                            {lang}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <Link
-                      to="/user/settings"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setProfileOpen(false)
-                      }}
-                    >
-                      My Settings
-                    </Link>
-                    <Link
-                      to="/user/support"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setProfileOpen(false)
-                      }}
-                    >
-                      Solitaire Support
-                    </Link>
-                    <div className="border-t border-gray-200 my-1"></div>
-                    <button
-                      className="block w-full text-left px-4 py-2 text-[#00A896] hover:bg-gray-50"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleLogout()
-                      }}
-                    >
-                      Logout
-                    </button>
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Language Selector - Hidden on mobile */}
-            <div className="relative hidden lg:flex items-center" ref={languageRef}>
-              <button
-                onClick={() => setLanguageOpen(!languageOpen)}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-                style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>English</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {languageOpen && (
-                <div 
-                  className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <div className="py-2">
-                    {languages.map((lang, index) => (
-                      <button
-                        key={index}
-                        className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
-                          lang === 'Española' ? 'text-[#00A896]' : 'text-gray-700'
-                        }`}
-                        style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setLanguageOpen(false)
-                        }}
-                      >
-                        {lang}
-                      </button>
-                    ))}
-                  </div>
+                {/* Notifications Bell */}
+                <div className="relative" ref={notificationsRef}>
+                  <button
+                    onClick={() => setNotificationsOpen(!notificationsOpen)}
+                    className="relative flex items-center justify-center w-8 h-8 lg:w-9 lg:h-9 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    {notificationCount > 0 && (
+                      <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                        {notificationCount > 9 ? '9+' : notificationCount}
+                      </span>
+                    )}
+                  </button>
+                  
+                  {notificationsOpen && (
+                    <div 
+                      className="absolute right-0 top-full mt-2 w-72 md:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <div className="p-4">
+                        <p className="text-sm text-gray-500 text-center">No new notifications</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* User Profile - Hidden on mobile */}
-            <div className="relative hidden lg:block" ref={profileRef}>
-              <button
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-                style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-              >
-                <span>Welcome {userName}</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {profileOpen && (
-                <div 
-                  className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <div className="py-2">
-                    <Link
-                      to="/user/settings"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setProfileOpen(false)
-                      }}
+                {/* User Profile */}
+                <div className="relative" ref={profileRef}>
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-[#c8f300] hover:bg-[#c8f300] text-black transition-all duration-200 shadow-sm hover:shadow-md"
+                  >
+                    <svg className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </button>
+                  
+                  {profileOpen && (
+                    <div 
+                      className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                      onMouseDown={(e) => e.stopPropagation()}
                     >
-                      My Settings
-                    </Link>
-                    <Link
-                      to="/user/support"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setProfileOpen(false)
-                      }}
-                    >
-                      Solitaire Support
-                    </Link>
-                    <div className="border-t border-gray-200 my-1"></div>
-                    <button
-                      className="block w-full text-left px-4 py-2 text-[#00A896] hover:bg-gray-50"
-                      style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleLogout()
-                      }}
-                    >
-                      Logout
-                    </button>
-                  </div>
+                      <div className="py-2">
+                        <div className="px-4 py-2 text-gray-700 border-b border-gray-200">
+                          <span className="text-sm font-medium">{userName}</span>
+                        </div>
+                        <Link
+                          to="/user/settings"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                          style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setProfileOpen(false)
+                          }}
+                        >
+                          My Settings
+                        </Link>
+                        <Link
+                          to="/user/support"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                          style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setProfileOpen(false)
+                          }}
+                        >
+                          Solitaire Support
+                        </Link>
+                        <div className="border-t border-gray-200 my-1"></div>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-[#00A896] hover:bg-gray-50"
+                          style={{ fontFamily: 'Roboto, sans-serif', fontSize: '14px', fontWeight: '400' }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleLogout()
+                          }}
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
