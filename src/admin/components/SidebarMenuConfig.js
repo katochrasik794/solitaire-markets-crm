@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, User, ShieldCheck, Settings, ServerCog, PlugZap, Database, Building2, Mail,
   Boxes, FolderKanban, LineChart, BarChart3, Calculator, FileText, ClipboardList,
-  KeySquare, UserCog, Banknote, IndianRupee, Newspaper, Signal, Link,
+  KeySquare, UserCog, Banknote, IndianRupee, Newspaper, Signal, Link, Link2,
   GitBranch, Network, Copy, Layers, ListChecks, Wallet, CreditCard, QrCode, Activity, Terminal, Headphones, Send
 } from "lucide-react";
 
@@ -165,7 +165,15 @@ export const ADMIN_MENU = [
       },
       { icon: ShieldCheck, label: "KYC Verifications", to: "kyc" },
       { icon: Send, label: "Send Emails", to: "send-emails" },
-      { icon: FileText, label: "Email Templates", to: "email-templates" },
+      {
+        icon: FileText,
+        label: "Email Templates",
+        to: "email-templates",
+        children: [
+          { label: "Manage Templates", to: "email-templates" },
+          { icon: Link2, label: "Template Assignments", to: "email-templates/assignments" },
+        ],
+      },
       { icon: ClipboardList, label: "Activity Logs", to: "activity-logs" },
     ],
   },
@@ -269,6 +277,7 @@ export const ADMIN_MENU = [
     items: [
       { icon: FileText, label: "Admin Logs", to: "logs/admin" },
       { icon: FileText, label: "User Logs", to: "logs/user" },
+      { icon: Activity, label: "All Actions", to: "logs/all-actions" },
     ],
   },
   {

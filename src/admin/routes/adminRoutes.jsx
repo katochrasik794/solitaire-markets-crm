@@ -55,8 +55,10 @@ import AdminLogsByAdmin from "../pages/AdminLogsByAdmin.jsx";
 import GroupReport from "../pages/GroupReport.jsx";
 import SendEmails from "../pages/SendEmails.jsx";
 import EmailTemplates from "../pages/EmailTemplates.jsx";
+import TemplateAssignments from "../pages/TemplateAssignments.jsx";
 import Tickers from "../pages/ContentManagement/Tickers.jsx";
 import IBRequests from "../pages/IBRequests.jsx";
+import AllActions from "../pages/AllActions.jsx";
 /** Admin Dashboard */
 
 export default [
@@ -112,6 +114,7 @@ export default [
   /* ----------------------- EMAIL MANAGEMENT ------------------------ */
   { path: "send-emails", element: <SendEmails /> },
   { path: "email-templates", element: <EmailTemplates /> },
+  { path: "email-templates/assignments", element: <TemplateAssignments /> },
 
   /* --------------------------- FINANCE & OPS -------------------------- */
   // Deposits
@@ -166,6 +169,7 @@ export default [
   { path: "logs/admin/detail/:logId", element: <LogDetail /> },
   { path: "logs/user/detail/:logId", element: <LogDetail /> },
   { path: "logs/admin/by-admin", element: <AdminLogsByAdmin /> },
+  { path: "logs/all-actions", element: <AllActions /> },
 
   /* ------------------------------ AUTH -------------------------------- */
   { path: "logout", element: <Logout /> },
