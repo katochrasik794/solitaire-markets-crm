@@ -30,7 +30,7 @@ function Loader() {
     <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
       <div className="animate-pulse">
         <img 
-          src="/logo.svg" 
+          src="/logo.png" 
           alt="Loading" 
           className="h-16 w-auto"
           style={{ maxWidth: '300px' }}

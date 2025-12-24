@@ -8,7 +8,7 @@ function NotFound() {
       {/* Logo */}
       <div className="mb-8">
         <img 
-          src="/logo.svg" 
+          src="/logo.png" 
           alt="Logo" 
           className="h-20 w-auto"
           style={{ maxWidth: '300px' }}

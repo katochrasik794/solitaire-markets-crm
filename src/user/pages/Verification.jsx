@@ -669,6 +669,16 @@ function Verification() {
         {/* Step 2: Sumsub ID Verification */}
         {currentStep === 2 && (
           <div className="bg-white rounded-lg shadow-lg p-8">
+            {/* Logo at the top */}
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/logo.svg" 
+                alt="Solitaire Markets" 
+                className="h-16 w-auto" 
+                style={{ background: 'transparent' }} 
+              />
+            </div>
+            
             <h1 className="text-2xl font-bold text-gray-900 mb-4" style={{ fontFamily: 'Roboto, sans-serif' }}>
               We need to verify your identity.
             </h1>

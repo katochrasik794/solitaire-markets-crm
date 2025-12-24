@@ -68,8 +68,8 @@ function Login() {
           {/* Logo - Centered */}
           <div className="mb-4">
             <img
-              src="/logo.svg"
-              alt="Logo"
+              src="/logo.png"
+              alt="Solitaire Markets"
               className="h-14 w-auto mx-auto"
               style={{ filter: 'none' }}
             />

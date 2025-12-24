@@ -114,7 +114,7 @@ function AdminLogin() {
           {/* Logo - Centered */}
           <div className="mb-4">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="Logo"
               className="h-14 w-auto mx-auto"
               style={{ filter: 'none' }}

@@ -124,7 +124,7 @@ function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
           {/* Logo (Mobile - centered, Desktop - hidden) */}
           <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden">
             <Link to="/user/dashboard">
-              <img src="/logo.svg" alt="Solitaire Logo" className="h-12 w-auto" style={{ background: 'transparent' }} />
+              <img src="/logo.png" alt="Solitaire Markets" className="h-12 w-auto" style={{ background: 'transparent' }} />
             </Link>
           </div>
 

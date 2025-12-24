@@ -52,10 +52,10 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
       {/* Logo with Close Button */}
       <div className={`bg-transparent pt-4 pb-2 flex-shrink-0 flex items-center ${collapsed ? 'justify-center px-2' : 'justify-between pl-8 pr-6'}`}>
         {collapsed ? (
-          <img src="/logo.svg" alt="Solitaire Logo" className="h-8 w-8 object-contain" style={{ background: 'transparent' }} />
+          <img src="/logo.png" alt="Solitaire Markets" className="h-8 w-8 object-contain" style={{ background: 'transparent' }} />
         ) : (
           <>
-            <img src="/logo.svg" alt="Solitaire Logo" className="h-14 w-auto " style={{ background: 'transparent' }} />
+            <img src="/logo.png" alt="Solitaire Markets" className="h-14 w-auto " style={{ background: 'transparent' }} />
             {/* Close button for mobile */}
             <button
               onClick={onClose}

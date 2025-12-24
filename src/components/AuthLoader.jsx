@@ -14,7 +14,7 @@ function AuthLoader({ message = 'Processing...' }) {
           {/* Logo in center */}
           <div className="relative z-10 w-24 h-24 flex items-center justify-center">
             <img 
-              src="/logo.svg" 
+              src="/logo.png" 
               alt="Solitaire Logo" 
               className="w-20 h-20 animate-pulse"
               style={{ filter: 'none' }}

@@ -124,9 +124,9 @@ function Header({ role, collapsed = false }) {
     <div className="p-4">
       <div className="flex items-center justify-center">
         {collapsed ? (
-          <img src="/logo.svg" alt="Equiti Admin" className="h-8 w-8 object-contain" />
+          <img src="/logo.svg" alt="Solitaire Markets" className="h-8 w-8 object-contain" style={{ background: 'transparent' }} />
         ) : (
-          <img src="/logo.svg" alt="Equiti Admin" className="h-12 w-auto" />
+          <img src="/logo.svg" alt="Solitaire Markets" className="h-14 w-auto" style={{ background: 'transparent' }} />
         )}
       </div>
     </div>
