@@ -108,6 +108,7 @@ export default function AssignRoles() {
   const [showFeatureModal, setShowFeatureModal] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
+  const [featurePermissions, setFeaturePermissions] = useState({}); // { "feature_path": { view: false, add: false, edit: false, delete: false } }
   const [showRoleDropdown, setShowRoleDropdown] = useState(null);
   const [dropdownAnchor, setDropdownAnchor] = useState(null); // { id, rect }
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -405,17 +406,45 @@ export default function AssignRoles() {
       features = custom?.permissions?.features || [];
     }
     
+    // Get feature permissions from admin table (default to all false)
+    const permissions = adminUser.feature_permissions || {};
+    
     setSelectedFeatures(features);
+    setFeaturePermissions(permissions);
     setShowFeatureModal(true);
   };
 
   const handleFeatureToggle = (feature) => {
     setSelectedFeatures(prev => {
       if (prev.includes(feature)) {
+        // When unchecking feature, also clear its permissions
+        setFeaturePermissions(prevPerms => {
+          const newPerms = { ...prevPerms };
+          delete newPerms[feature];
+          return newPerms;
+        });
         return prev.filter(f => f !== feature);
       } else {
+        // When checking feature, initialize permissions to all false
+        setFeaturePermissions(prevPerms => ({
+          ...prevPerms,
+          [feature]: { view: false, add: false, edit: false, delete: false }
+        }));
         return [...prev, feature];
       }
+    });
+  };
+
+  const handlePermissionToggle = (featurePath, action) => {
+    setFeaturePermissions(prev => {
+      const currentPerms = prev[featurePath] || { view: false, add: false, edit: false, delete: false };
+      return {
+        ...prev,
+        [featurePath]: {
+          ...currentPerms,
+          [action]: !currentPerms[action]
+        }
+      };
     });
   };
 
@@ -436,12 +465,24 @@ export default function AssignRoles() {
     try {
       const token = localStorage.getItem('adminToken');
       
-      // Save features directly to admin table
+      // Prepare feature permissions - only include permissions for selected features
+      const permissionsToSave = {};
+      selectedFeatures.forEach(featurePath => {
+        if (featurePermissions[featurePath]) {
+          permissionsToSave[featurePath] = featurePermissions[featurePath];
+        } else {
+          // Initialize to all false if not set
+          permissionsToSave[featurePath] = { view: false, add: false, edit: false, delete: false };
+        }
+      });
+      
+      // Save features and permissions directly to admin table
       const res = await fetch(`${BASE}/admin/admins/${selectedAdmin.id}/features`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          features: selectedFeatures
+          features: selectedFeatures,
+          featurePermissions: permissionsToSave
         })
       });
       
@@ -453,7 +494,7 @@ export default function AssignRoles() {
       // Update local state
       setAdmins(admins.map(admin =>
         admin.id === selectedAdmin.id 
-          ? { ...admin, features: selectedFeatures }
+          ? { ...admin, features: selectedFeatures, feature_permissions: permissionsToSave }
           : admin
       ));
       
@@ -461,6 +502,7 @@ export default function AssignRoles() {
       setShowFeatureModal(false);
       setSelectedAdmin(null);
       setSelectedFeatures([]);
+      setFeaturePermissions({});
     } catch (err) {
       console.error(err);
       Swal.fire({ icon: 'error', title: 'Failed to save features', text: err.message || 'Unable to save features' });
@@ -1300,6 +1342,7 @@ export default function AssignRoles() {
                       setShowFeatureModal(false);
                       setSelectedAdmin(null);
                       setSelectedFeatures([]);
+      setFeaturePermissions({});
                     }}
                     className="text-gray-400 hover:text-gray-600"
                   >
@@ -1307,7 +1350,7 @@ export default function AssignRoles() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-4">
                   {/* Group features by category from sidebar */}
                   {ALL_AVAILABLE_FEATURES
                     .filter(f => {
@@ -1324,18 +1367,46 @@ export default function AssignRoles() {
                       }
                       return true;
                     })
-                    .map((feature, index) => (
-                      <label key={index} className="flex items-center gap-2 text-sm cursor-pointer border border-gray-200 rounded-lg p-3 hover:bg-gray-50">
-                        <input
-                          type="checkbox"
-                          checked={selectedFeatures.includes(feature.path)}
-                          onChange={() => handleFeatureToggle(feature.path)}
-                          className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                        />
-                        <feature.icon className="h-4 w-4 text-gray-500" />
-                        <span>{feature.name}</span>
-                      </label>
-                    ))}
+                    .map((feature, index) => {
+                      const isSelected = selectedFeatures.includes(feature.path);
+                      const perms = featurePermissions[feature.path] || { view: false, add: false, edit: false, delete: false };
+                      
+                      return (
+                        <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                          {/* Main feature checkbox */}
+                          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer mb-3">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleFeatureToggle(feature.path)}
+                              className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                            />
+                            <feature.icon className="h-4 w-4 text-gray-500" />
+                            <span>{feature.name}</span>
+                          </label>
+                          
+                          {/* Granular permissions - only show if feature is selected */}
+                          {isSelected && (
+                            <div className="ml-6 mt-2 space-y-2">
+                              <div className="text-xs font-medium text-gray-600 mb-2">Permissions:</div>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                {['view', 'add', 'edit', 'delete'].map((action) => (
+                                  <label key={action} className="flex items-center gap-1.5 text-xs cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={perms[action] || false}
+                                      onChange={() => handlePermissionToggle(feature.path, action)}
+                                      className="rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-3 w-3"
+                                    />
+                                    <span className="capitalize text-gray-700">{action}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                 </div>
 
                 <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
@@ -1344,6 +1415,8 @@ export default function AssignRoles() {
                       setShowFeatureModal(false);
                       setSelectedAdmin(null);
                       setSelectedFeatures([]);
+      setFeaturePermissions({});
+                      setFeaturePermissions({});
                     }}
                     className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
                   >

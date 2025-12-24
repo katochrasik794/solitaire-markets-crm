@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import Header from './Header'
@@ -42,6 +42,7 @@ const routeTitles = {
 
 function UserLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Open sidebar by default on small screens, closed on desktop
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -246,7 +247,10 @@ function UserLayout() {
                 </div>
 
                 {/* Deposit Button */}
-                <button className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base text-sm py-3 rounded-md font-semibold transition">
+                <button 
+                  onClick={() => navigate('/user/deposits')}
+                  className="w-full bg-brand-500 hover:bg-brand-600 text-dark-base text-sm py-3 rounded-md font-semibold transition"
+                >
                   DEPOSIT NOW
                 </button>
 
@@ -270,7 +274,10 @@ function UserLayout() {
 
                 {/* Right Section */}
                 <div className="flex items-center gap-4">
-                  <button className="bg-brand-500 hover:bg-brand-600 text-dark-base text-sm md:text-base px-6 py-2 rounded-md font-medium transition">
+                  <button 
+                    onClick={() => navigate('/user/deposits')}
+                    className="bg-brand-500 hover:bg-brand-600 text-dark-base text-sm md:text-base px-6 py-2 rounded-md font-medium transition"
+                  >
                     DEPOSIT NOW
                   </button>
 
