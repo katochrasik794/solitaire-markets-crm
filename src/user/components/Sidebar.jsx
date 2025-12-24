@@ -348,22 +348,6 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
             {!collapsed && <span className="text-sm font-normal">Platforms</span>}
           </Link>
 
-          {/* Partner's Cabinet */}
-          <Link
-            to="/user/refer-a-friend"
-            className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/refer-a-friend')
-              ? 'bg-brand-500 text-dark-base'
-              : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
-              }`}
-            style={{}}
-            title={collapsed ? "Partner's Cabinet" : undefined}
-          >
-            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={collapsed ? {} : { marginRight: '12px' }}>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            {!collapsed && <span className="text-sm font-normal">Partner's Cabinet</span>}
-          </Link>
-
           {/* Solitaire Support */}
           <Link
             to="/user/support"

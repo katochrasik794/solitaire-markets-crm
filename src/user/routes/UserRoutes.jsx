@@ -9,7 +9,6 @@ import CreateAccount from '../pages/CreateAccount'
 import Transfers from '../pages/Transfers'
 import Reports from '../pages/Reports'
 import Platforms from '../pages/Platforms'
-import ReferAFriend from '../pages/ReferAFriend'
 import Legal from '../pages/Legal'
 import Support from '../pages/Support'
 import PaymentDetails from '../pages/PaymentDetails'
@@ -68,7 +67,6 @@ const userRoutes = [
   { path: 'analysis/research-terminal', element: <ResearchTerminal /> },
   { path: 'trade-performance', element: <TradePerformance /> },
   { path: 'platforms', element: <Platforms /> },
-  { path: 'refer-a-friend', element: <ReferAFriend /> },
   { path: 'legal', element: <Legal /> },
   { path: 'support', element: <Support /> },
   { path: 'payment-details', element: <PaymentDetails /> },

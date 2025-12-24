@@ -36,7 +36,6 @@ const routeTitles = {
   '/user/analysis/market-calendar': 'Market Calendar',
   '/user/analysis/research-terminal': 'Research Terminal',
   '/user/platforms': 'Platforms',
-  '/user/refer-a-friend': "Partner's Cabinet",
   '/user/legal': 'Legal Terms'
 };
 
