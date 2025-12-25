@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
 import { Bar, Line, Doughnut, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -59,11 +58,8 @@ ChartJS.register(
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 function TradePerformance() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const chartParam = searchParams.get('chart') || 'overview';
   const [selectedAccount, setSelectedAccount] = useState("all");
   const [timeframe, setTimeframe] = useState("365");
-  const [activeTab, setActiveTab] = useState(chartParam);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,10 +91,6 @@ function TradePerformance() {
   useEffect(() => {
     fetchSummary();
   }, [selectedAccount, timeframe]);
-
-  useEffect(() => {
-    setSearchParams({ chart: activeTab });
-  }, [activeTab]);
 
   const fetchAccounts = async () => {
     try {
@@ -444,15 +436,6 @@ function TradePerformance() {
       }
     }
   };
-
-  // Match sidebar menu tabs
-  const tabs = [
-    { id: 'summary', label: 'Summary', icon: BarChart3 },
-    { id: 'net-profit', label: 'Net Profit', icon: TrendingUp },
-    { id: 'closed-orders', label: 'Closed Orders', icon: Target },
-    { id: 'trading-volume', label: 'Trading Volume', icon: Coins },
-    { id: 'equity', label: 'Equity', icon: Wallet }
-  ];
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -893,57 +876,53 @@ function TradePerformance() {
           />
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="flex flex-wrap -mb-px">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm transition-colors border-b-2 ${
-                      activeTab === tab.id
-                        ? "text-blue-600 border-blue-600"
-                        : "text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+        {/* Main Content - Combined View */}
+        <div className="bg-white rounded-lg shadow-sm mb-6 p-6">
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500">Loading analytics data...</div>
+            </div>
+          ) : !metrics.hasRealData ? (
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+              <AlertCircle className="w-16 h-16 text-gray-400 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Trading Data Available</h3>
+              <p className="text-gray-600 mb-4">
+                No real MT5 account data found for the selected timeframe.
+              </p>
+              <p className="text-sm text-gray-500">
+                Please ensure you have real MT5 accounts with trading activity.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {/* Overview Section - Key Metrics */}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                  <BarChart3 className="w-6 h-6" />
+                  Performance Overview
+                </h2>
+                {renderOverview()}
+              </div>
 
-          {/* Tab Content */}
-          <div className="p-6">
-            {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-gray-500">Loading analytics data...</div>
+              {/* Performance Metrics Section */}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                  <TrendingUp className="w-6 h-6" />
+                  Performance Metrics
+                </h2>
+                {renderPerformance()}
               </div>
-            ) : !metrics.hasRealData ? (
-              <div className="flex flex-col items-center justify-center h-64 text-center">
-                <AlertCircle className="w-16 h-16 text-gray-400 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Trading Data Available</h3>
-                <p className="text-gray-600 mb-4">
-                  No real MT5 account data found for the selected timeframe.
-                </p>
-                <p className="text-sm text-gray-500">
-                  Please ensure you have real MT5 accounts with trading activity.
-                </p>
+
+              {/* Statistics Section */}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                  <Target className="w-6 h-6" />
+                  Trade Statistics
+                </h2>
+                {renderStatistics()}
               </div>
-            ) : (
-              <>
-                {activeTab === 'summary' && renderOverview()}
-                {activeTab === 'net-profit' && renderPerformance()}
-                {activeTab === 'closed-orders' && renderStatistics()}
-                {activeTab === 'trading-volume' && renderPerformance()}
-                {activeTab === 'equity' && renderOverview()}
-              </>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Note */}
