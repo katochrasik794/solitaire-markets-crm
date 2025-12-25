@@ -21,7 +21,7 @@ function CreateAccount() {
   const [formData, setFormData] = useState({
     platform: 'MT5',
     mt5GroupId: '',
-    leverage: 2000,
+    leverage: 500,
     isCopyAccount: false,
     reasonForAccount: 'Different trading strategy',
     masterPassword: '',
@@ -332,9 +332,6 @@ function CreateAccount() {
                   <option value="100">1:100</option>
                   <option value="200">1:200</option>
                   <option value="500">1:500</option>
-                  <option value="1000">1:1000</option>
-                  <option value="1500">1:1500</option>
-                  <option value="2000">1:2000</option>
                 </select>
               </div>
 

@@ -314,6 +314,7 @@ export const ADMIN_MENU = [
     label: "SYSTEM",
     items: [
       { icon: KeySquare, label: "Assign Roles", to: "assign-roles" },
+      { icon: ListChecks, label: "Manage Menus", to: "menu-management" },
       { icon: UserCog, label: "Admin Profile", to: "profile" },
       { icon: Settings, label: "Logout", to: "logout" },
     ],

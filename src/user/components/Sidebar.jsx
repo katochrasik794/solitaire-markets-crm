@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import authService from '../../services/auth.js'
+import { getEnabledMenuPaths, getEnabledMenuPathsSync } from '../../services/menuService.js'
 
 function Sidebar({ isOpen, onClose, collapsed = false }) {
   const location = useLocation()
@@ -9,6 +10,37 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
     analysis: false,
     tradePerformance: false
   })
+  // Initialize with cached data immediately (synchronous) to prevent flicker
+  const [enabledMenus, setEnabledMenus] = useState(() => getEnabledMenuPathsSync())
+  const [menusLoading, setMenusLoading] = useState(false) // Start as false since we have cache
+
+  // Fetch enabled menus on mount (refresh from API in background)
+  useEffect(() => {
+    const loadEnabledMenus = async () => {
+      try {
+        const enabledPaths = await getEnabledMenuPaths()
+        setEnabledMenus(enabledPaths)
+      } catch (error) {
+        console.error('Error loading enabled menus:', error)
+        // On error, keep using cached data or show all menus
+        const cached = getEnabledMenuPathsSync()
+        if (cached.size > 0) {
+          setEnabledMenus(cached)
+        } else {
+          // Only show all menus if no cache exists
+          setEnabledMenus(new Set())
+        }
+      }
+    }
+    // Only fetch if we don't have cached data
+    if (enabledMenus.size === 0) {
+      setMenusLoading(true)
+      loadEnabledMenus().finally(() => setMenusLoading(false))
+    } else {
+      // Still refresh in background to get latest data
+      loadEnabledMenus()
+    }
+  }, [])
 
   // Auto-open submenus when on a submenu page
   useEffect(() => {
@@ -42,6 +74,52 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
 
   const isActive = (path) => location.pathname === `/user${path}`
   const isSubmenuActive = (paths) => paths.some(path => location.pathname === `/user${path}`)
+  
+  // Check if a menu is enabled
+  const isMenuEnabled = (routePath) => {
+    // If we have cached data (even if loading), use it to prevent flicker
+    if (enabledMenus.size === 0 && !menusLoading) {
+      // If no menus configured and not loading, show all (backward compatibility)
+      return true
+    }
+    // Use cached data immediately - no need to wait for API
+    return enabledMenus.has(routePath)
+  }
+  
+  // Check if a submenu item is enabled (also checks if parent is enabled)
+  const isSubMenuEnabled = (routePath) => {
+    if (enabledMenus.size === 0 && !menusLoading) {
+      return true
+    }
+    
+    // Extract parent path
+    const parts = routePath.split('/')
+    if (parts.length > 1) {
+      const parentPath = parts[0]
+      // Check if parent is enabled first
+      if (!enabledMenus.has(parentPath)) {
+        return false // Parent disabled, so submenu is disabled
+      }
+    }
+    
+    // Check if the specific sub-menu is enabled
+    return enabledMenus.has(routePath)
+  }
+  
+  // Check if a parent menu has any enabled children (and parent itself is enabled)
+  const hasEnabledChildren = (parentPath) => {
+    if (enabledMenus.size === 0 && !menusLoading) {
+      return true
+    }
+    
+    // First check if parent itself is enabled
+    if (!enabledMenus.has(parentPath)) {
+      return false // Parent disabled, so no children shown
+    }
+    
+    // Check if there are any enabled submenus
+    return Array.from(enabledMenus).some(path => path.startsWith(parentPath + '/'))
+  }
 
   return (
     <div
@@ -76,7 +154,7 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
       <nav className="flex-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
         <div className="px-3 space-y-0.5 pb-4 pt-2">
           {/* Dashboard */}
-          <Link
+          {isMenuEnabled('dashboard') && <Link
             to="/user/dashboard"
             className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/dashboard')
               ? 'bg-brand-500 text-dark-base'
@@ -89,10 +167,10 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             {!collapsed && <span className="text-sm font-normal">Dashboard</span>}
-          </Link>
+          </Link>}
 
           {/* Deposits */}
-          <Link
+          {isMenuEnabled('deposits') && <Link
             to="/user/deposits"
             className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/deposits')
               ? 'bg-brand-500 text-dark-base'
@@ -106,10 +184,10 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0l-3-3m3 3l3-3" />
             </svg>
             {!collapsed && <span className="text-sm font-normal">Deposits</span>}
-          </Link>
+          </Link>}
 
           {/* Withdrawals */}
-          <Link
+          {isMenuEnabled('withdrawals') && <Link
             to="/user/withdrawals"
             className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/withdrawals') || isActive('/withdrawals/crypto')
               ? 'bg-brand-500 text-dark-base'
@@ -123,10 +201,10 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18V12m0 0l-3 3m3-3l3 3" />
             </svg>
             {!collapsed && <span className="text-sm font-normal">Withdrawals</span>}
-          </Link>
+          </Link>}
 
           {/* Transfers */}
-          <Link
+          {isMenuEnabled('transfers') && <Link
             to="/user/transfers"
             className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/transfers')
               ? 'bg-brand-500 text-dark-base'
@@ -139,10 +217,10 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
             </svg>
             {!collapsed && <span className="text-sm font-normal">Transfers</span>}
-          </Link>
+          </Link>}
 
           {/* Payment Details */}
-          <Link
+          {isMenuEnabled('payment-details') && <Link
             to="/user/payment-details"
             className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/payment-details')
               ? 'bg-brand-500 text-dark-base'
@@ -155,10 +233,10 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
             {!collapsed && <span className="text-sm font-normal">Payment Details</span>}
-          </Link>
+          </Link>}
 
           {/* Reports */}
-          <Link
+          {isMenuEnabled('reports') && <Link
             to="/user/reports"
             className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/reports')
               ? 'bg-brand-500 text-dark-base'
@@ -171,10 +249,10 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             {!collapsed && <span className="text-sm font-normal">Reports</span>}
-          </Link>
+          </Link>}
 
           {/* Trade Performance */}
-          <div>
+          {isMenuEnabled('trade-performance') && <div>
             <button
               onClick={() => toggleSubmenu('tradePerformance')}
               className={`w-full flex items-center ${collapsed ? 'justify-center' : 'justify-between'} ${collapsed ? 'px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/trade-performance')
@@ -250,10 +328,10 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
                 </Link>
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Analysis */}
-          <div>
+          {hasEnabledChildren('analysis') && <div>
             <button
               onClick={() => toggleSubmenu('analysis')}
               className={`w-full flex items-center ${collapsed ? 'justify-center' : 'justify-between'} ${collapsed ? 'px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isSubmenuActive(['/analysis', '/analysis/signal-centre', '/analysis/assets-overview', '/analysis/market-news', '/analysis/market-calendar', '/analysis/research-terminal'])
@@ -283,7 +361,7 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
             </button>
             {openSubmenus.analysis && !collapsed && (
               <div className="ml-8 mt-1 space-y-1">
-                <Link
+                {isSubMenuEnabled('analysis/signal-centre') && <Link
                   to="/user/analysis/signal-centre"
                   className={`block px-4 py-2 rounded-lg transition-colors ${isActive('/analysis/signal-centre')
                     ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
@@ -291,8 +369,8 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
                     }`}
                 >
                   <span className="text-sm font-normal">Signal Centre</span>
-                </Link>
-                <Link
+                </Link>}
+                {isSubMenuEnabled('analysis/assets-overview') && <Link
                   to="/user/analysis/assets-overview"
                   className={`block px-4 py-2 rounded-lg transition-colors ${isActive('/analysis/assets-overview')
                     ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
@@ -300,8 +378,8 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
                     }`}
                 >
                   <span style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>Assets Overview</span>
-                </Link>
-                <Link
+                </Link>}
+                {isSubMenuEnabled('analysis/market-news') && <Link
                   to="/user/analysis/market-news"
                   className={`block px-4 py-2 rounded-lg transition-colors ${isActive('/analysis/market-news')
                     ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
@@ -309,8 +387,8 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
                     }`}
                 >
                   <span style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>Market News</span>
-                </Link>
-                <Link
+                </Link>}
+                {isSubMenuEnabled('analysis/market-calendar') && <Link
                   to="/user/analysis/market-calendar"
                   className={`block px-4 py-2 rounded-lg transition-colors ${isActive('/analysis/market-calendar')
                     ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
@@ -318,8 +396,8 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
                     }`}
                 >
                   <span style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>Market Calendar</span>
-                </Link>
-                <Link
+                </Link>}
+                {isSubMenuEnabled('analysis/research-terminal') && <Link
                   to="/user/analysis/research-terminal"
                   className={`block px-4 py-2 rounded-lg transition-colors ${isActive('/analysis/research-terminal')
                     ? 'bg-brand-50 hover:bg-brand-100 text-brand-900 font-medium'
@@ -327,13 +405,13 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
                     }`}
                 >
                   <span style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif', fontWeight: '400' }}>Research Terminal</span>
-                </Link>
+                </Link>}
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Platforms */}
-          <Link
+          {isMenuEnabled('platforms') && <Link
             to="/user/platforms"
             className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/platforms')
               ? 'bg-brand-500 text-dark-base'
@@ -346,10 +424,10 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             {!collapsed && <span className="text-sm font-normal">Platforms</span>}
-          </Link>
+          </Link>}
 
           {/* Solitaire Support */}
-          <Link
+          {isMenuEnabled('support') && <Link
             to="/user/support"
             className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-4'} py-3 transition-colors relative rounded-lg ${isActive('/support')
               ? 'bg-brand-500 text-dark-base'
@@ -362,7 +440,7 @@ function Sidebar({ isOpen, onClose, collapsed = false }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
             {!collapsed && <span className="text-sm font-normal">Solitaire Support</span>}
-          </Link>
+          </Link>}
         </div>
       </nav>
 

@@ -58,6 +58,7 @@ import EmailTemplates from "../pages/EmailTemplates.jsx";
 import TemplateAssignments from "../pages/TemplateAssignments.jsx";
 import Tickers from "../pages/ContentManagement/Tickers.jsx";
 import Promotions from "../pages/ContentManagement/Promotions.jsx";
+import MenuManagement from "../pages/MenuManagement.jsx";
 import IBRequests from "../pages/IBRequests.jsx";
 import AllActions from "../pages/AllActions.jsx";
 /** Admin Dashboard */
@@ -158,6 +159,7 @@ export default [
   { path: "prize-distribution",  element: <EmptyState title="Prize Distribution" subtitle="Campaign payouts" /> },
   { path: "profile",             element: <AdminProfile /> },
   { path: "assign-roles",        element: <AssignRoles /> },
+  { path: "menu-management",    element: <MenuManagement /> },
   { path: "assign-country-partner", element: <AssignCountryPartner /> },
   { path: "assigned-country-admins", element: <AssignedCountryAdmins /> },
 
