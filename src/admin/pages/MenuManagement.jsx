@@ -355,7 +355,6 @@ export default function MenuManagement() {
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
         <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-          <li>Menus are automatically discovered from <code className="bg-blue-100 px-1 rounded">client/src/user/components/Sidebar.jsx</code></li>
           <li>Click "Fetch New Menus" to discover any new routes that have been added</li>
           <li>New menus are enabled by default</li>
           <li>Disabling a menu will hide it from the client-side sidebar</li>
