@@ -165,8 +165,10 @@ function Verification() {
           // Configure logo URL
           theme: 'light',
           // Add logo configuration if supported
+          // Note: Logo should also be configured in Sumsub Dashboard > Settings > Branding
           uiConf: {
-            logoUrl: 'https://portal.solitairemarkets.com/logo.png'
+            // Use current logo.png - ensure this matches the logo in public/logo.png
+            logoUrl: `${import.meta.env.VITE_FRONTEND_URL || 'https://portal.solitairemarkets.com'}/logo.png`
           }
         })
         .on('onError', (error) => {
@@ -678,13 +680,13 @@ function Verification() {
             {/* Logo at the top */}
             <div className="flex justify-center mb-6">
               <img 
-                src="https://portal.solitairemarkets.com/logo.png?v=2" 
+                src={`${import.meta.env.VITE_FRONTEND_URL || 'https://portal.solitairemarkets.com'}/logo.png`}
                 alt="Solitaire Markets" 
                 className="h-16 w-auto" 
                 style={{ background: 'transparent' }} 
                 onError={(e) => {
                   // Fallback to local logo if external fails
-                  e.target.src = '/logo.svg';
+                  e.target.src = '/logo.png';
                 }}
               />
             </div>

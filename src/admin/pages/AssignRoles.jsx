@@ -127,6 +127,8 @@ export default function AssignRoles() {
   const [showEditRoleModal, setShowEditRoleModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
   const [editRole, setEditRole] = useState({ name: "", description: "", features: [] });
+  const [editRoleFeaturePermissions, setEditRoleFeaturePermissions] = useState({}); // { "feature_path": { view: false, add: false, edit: false, delete: false } }
+  const [newRoleFeaturePermissions, setNewRoleFeaturePermissions] = useState({}); // For create role modal
   const [newAdmin, setNewAdmin] = useState({
     username: "",
     email: "",
@@ -448,6 +450,75 @@ export default function AssignRoles() {
     });
   };
 
+  // Handlers for role feature permissions (similar to admin permissions)
+  const handleRoleFeatureToggle = (featurePath, isEditRole = true) => {
+    if (isEditRole) {
+      setEditRole(prev => {
+        if (prev.features.includes(featurePath)) {
+          // When unchecking feature, also clear its permissions
+          setEditRoleFeaturePermissions(prevPerms => {
+            const newPerms = { ...prevPerms };
+            delete newPerms[featurePath];
+            return newPerms;
+          });
+          return { ...prev, features: prev.features.filter(f => f !== featurePath) };
+        } else {
+          // When checking feature, initialize permissions to all false
+          setEditRoleFeaturePermissions(prevPerms => ({
+            ...prevPerms,
+            [featurePath]: { view: false, add: false, edit: false, delete: false }
+          }));
+          return { ...prev, features: [...prev.features, featurePath] };
+        }
+      });
+    } else {
+      setNewRole(prev => {
+        if (prev.features.includes(featurePath)) {
+          // When unchecking feature, also clear its permissions
+          setNewRoleFeaturePermissions(prevPerms => {
+            const newPerms = { ...prevPerms };
+            delete newPerms[featurePath];
+            return newPerms;
+          });
+          return { ...prev, features: prev.features.filter(f => f !== featurePath) };
+        } else {
+          // When checking feature, initialize permissions to all false
+          setNewRoleFeaturePermissions(prevPerms => ({
+            ...prevPerms,
+            [featurePath]: { view: false, add: false, edit: false, delete: false }
+          }));
+          return { ...prev, features: [...prev.features, featurePath] };
+        }
+      });
+    }
+  };
+
+  const handleRolePermissionToggle = (featurePath, action, isEditRole = true) => {
+    if (isEditRole) {
+      setEditRoleFeaturePermissions(prev => {
+        const currentPerms = prev[featurePath] || { view: false, add: false, edit: false, delete: false };
+        return {
+          ...prev,
+          [featurePath]: {
+            ...currentPerms,
+            [action]: !currentPerms[action]
+          }
+        };
+      });
+    } else {
+      setNewRoleFeaturePermissions(prev => {
+        const currentPerms = prev[featurePath] || { view: false, add: false, edit: false, delete: false };
+        return {
+          ...prev,
+          [featurePath]: {
+            ...currentPerms,
+            [action]: !currentPerms[action]
+          }
+        };
+      });
+    }
+  };
+
   const handleSaveFeatures = async () => {
     if (!selectedAdmin) return;
 
@@ -646,7 +717,8 @@ export default function AssignRoles() {
         body: JSON.stringify({
           name: newRole.name,
           description: newRole.description,
-          features: newRole.features
+          permissions: { features: newRole.features },
+          featurePermissions: permissionsToSave
         })
       });
 
@@ -660,6 +732,7 @@ export default function AssignRoles() {
           description: "",
           features: []
         });
+        setNewRoleFeaturePermissions({});
         setError("");
 
         // Show success message
@@ -892,7 +965,12 @@ export default function AssignRoles() {
                             <div className="flex items-end gap-6">
                               {r.name.toLowerCase() !== 'superadmin' && (
                                 <button
-                                  onClick={() => { setSelectedRole(r); setShowEditRoleModal(true); setEditRole({ name: r.name || '', description: r.description || '', features: (r.permissions?.features) || [] }); }}
+                                  onClick={() => { 
+                                    setSelectedRole(r); 
+                                    setShowEditRoleModal(true); 
+                                    setEditRole({ name: r.name || '', description: r.description || '', features: (r.permissions?.features) || [] }); 
+                                    setEditRoleFeaturePermissions(r.permissions?.feature_permissions || {}); 
+                                  }}
                                   className="flex flex-col items-center text-green-600 hover:text-green-700"
                                   title="Edit Features"
                                 >
@@ -1529,6 +1607,7 @@ export default function AssignRoles() {
                         description: "",
                         features: []
                       });
+                      setNewRoleFeaturePermissions({});
                     }}
                     className="text-gray-400 hover:text-gray-600"
                   >
@@ -1570,7 +1649,7 @@ export default function AssignRoles() {
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       Select Features for this Role * {isCountryAdmin ? '(Only features you have access to)' : '(All sidebar pages are available)'}
                     </label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-4">
                       {ALL_AVAILABLE_FEATURES
                         .filter((feature) => {
                           // Exclude system pages
@@ -1586,30 +1665,46 @@ export default function AssignRoles() {
                           }
                           return true;
                         })
-                        .map((feature, index) => (
-                          <label key={index} className="flex items-center gap-2 text-sm cursor-pointer border border-gray-200 rounded-lg p-3 hover:bg-gray-50">
-                            <input
-                              type="checkbox"
-                              checked={newRole.features.includes(feature.path)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setNewRole({
-                                    ...newRole,
-                                    features: [...newRole.features, feature.path]
-                                  });
-                                } else {
-                                  setNewRole({
-                                    ...newRole,
-                                    features: newRole.features.filter(f => f !== feature.path)
-                                  });
-                                }
-                              }}
-                              className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                            />
-                            <feature.icon className="h-4 w-4 text-gray-500" />
-                            <span>{feature.name}</span>
-                          </label>
-                        ))}
+                        .map((feature, index) => {
+                          const isSelected = newRole.features.includes(feature.path);
+                          const perms = newRoleFeaturePermissions[feature.path] || { view: false, add: false, edit: false, delete: false };
+                          
+                          return (
+                            <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                              {/* Main feature checkbox */}
+                              <label className="flex items-center gap-2 text-sm font-medium cursor-pointer mb-3">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => handleRoleFeatureToggle(feature.path, false)}
+                                  className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                                />
+                                <feature.icon className="h-4 w-4 text-gray-500" />
+                                <span>{feature.name}</span>
+                              </label>
+                              
+                              {/* Granular permissions - only show if feature is selected */}
+                              {isSelected && (
+                                <div className="ml-6 mt-2 space-y-2">
+                                  <div className="text-xs font-medium text-gray-600 mb-2">Permissions:</div>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    {['view', 'add', 'edit', 'delete'].map((action) => (
+                                      <label key={action} className="flex items-center gap-1.5 text-xs cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={perms[action] || false}
+                                          onChange={() => handleRolePermissionToggle(feature.path, action, false)}
+                                          className="rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-3 w-3"
+                                        />
+                                        <span className="capitalize text-gray-700">{action}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
 
@@ -1623,6 +1718,7 @@ export default function AssignRoles() {
                           description: "",
                           features: []
                         });
+                        setNewRoleFeaturePermissions({});
                       }}
                       className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
                     >
@@ -1655,15 +1751,31 @@ export default function AssignRoles() {
               <div className="p-4 sm:p-6">
                 <p className="text-sm text-gray-600 mb-4">{selectedRole.description || '—'}</p>
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">Enabled Features</h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="space-y-3">
                   {(selectedRole.permissions?.features || []).map((p, idx) => {
                     const feature = FEATURE_MAP[p] || { name: p, icon: Settings };
                     const Icon = feature.icon;
+                    const perms = selectedRole.permissions?.feature_permissions?.[p] || {};
+                    const hasPermissions = perms.view || perms.add || perms.edit || perms.delete;
+                    
                     return (
-                      <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                        <Icon className="h-3 w-3" />
-                        {feature.name}
-                      </span>
+                      <div key={idx} className="border border-gray-200 rounded-lg p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Icon className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm font-medium text-gray-900">{feature.name}</span>
+                        </div>
+                        {hasPermissions && (
+                          <div className="ml-6 mt-2">
+                            <div className="text-xs font-medium text-gray-600 mb-1">Permissions:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {perms.view && <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">View</span>}
+                              {perms.add && <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">Add</span>}
+                              {perms.edit && <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded">Edit</span>}
+                              {perms.delete && <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded">Delete</span>}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                   {(selectedRole.permissions?.features || []).length === 0 && (
@@ -1713,7 +1825,7 @@ export default function AssignRoles() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">Select Features * {isCountryAdmin ? '(Only features you have access to)' : '(All sidebar pages are available)'}</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-4">
                     {ALL_AVAILABLE_FEATURES
                       .filter((feature) => {
                         // Exclude system pages
@@ -1729,24 +1841,46 @@ export default function AssignRoles() {
                         }
                         return true;
                       })
-                      .map((feature, index) => (
-                        <label key={index} className="flex items-center gap-2 text-sm cursor-pointer border border-gray-200 rounded-lg p-3 hover:bg-gray-50">
-                          <input
-                            type="checkbox"
-                            checked={editRole.features.includes(feature.path)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setEditRole({ ...editRole, features: [...editRole.features, feature.path] });
-                              } else {
-                                setEditRole({ ...editRole, features: editRole.features.filter(f => f !== feature.path) });
-                              }
-                            }}
-                            className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                          />
-                          <feature.icon className="h-4 w-4 text-gray-500" />
-                          <span>{feature.name}</span>
-                        </label>
-                      ))}
+                      .map((feature, index) => {
+                        const isSelected = editRole.features.includes(feature.path);
+                        const perms = editRoleFeaturePermissions[feature.path] || { view: false, add: false, edit: false, delete: false };
+                        
+                        return (
+                          <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            {/* Main feature checkbox */}
+                            <label className="flex items-center gap-2 text-sm font-medium cursor-pointer mb-3">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleRoleFeatureToggle(feature.path, true)}
+                                className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                              />
+                              <feature.icon className="h-4 w-4 text-gray-500" />
+                              <span>{feature.name}</span>
+                            </label>
+                            
+                            {/* Granular permissions - only show if feature is selected */}
+                            {isSelected && (
+                              <div className="ml-6 mt-2 space-y-2">
+                                <div className="text-xs font-medium text-gray-600 mb-2">Permissions:</div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                  {['view', 'add', 'edit', 'delete'].map((action) => (
+                                    <label key={action} className="flex items-center gap-1.5 text-xs cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={perms[action] || false}
+                                        onChange={() => handleRolePermissionToggle(feature.path, action, true)}
+                                        className="rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-3 w-3"
+                                      />
+                                      <span className="capitalize text-gray-700">{action}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
 
@@ -1770,16 +1904,35 @@ export default function AssignRoles() {
                       }
                       try {
                         const token = localStorage.getItem('adminToken');
+                        
+                        // Prepare feature permissions - only include permissions for selected features
+                        const permissionsToSave = {};
+                        editRole.features.forEach(featurePath => {
+                          if (editRoleFeaturePermissions[featurePath]) {
+                            permissionsToSave[featurePath] = editRoleFeaturePermissions[featurePath];
+                          } else {
+                            // Initialize to all false if not set
+                            permissionsToSave[featurePath] = { view: false, add: false, edit: false, delete: false };
+                          }
+                        });
+                        
                         const res = await fetch(`${BASE}/admin/roles/${selectedRole.id}`, {
-                          method: 'PUT',
+                          method: 'PATCH',
                           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ name: editRole.name, description: editRole.description, features: editRole.features })
+                          body: JSON.stringify({ 
+                            name: editRole.name, 
+                            description: editRole.description, 
+                            permissions: { features: editRole.features },
+                            featurePermissions: permissionsToSave
+                          })
                         });
                         const data = await res.json();
                         if (!res.ok || !data?.ok) throw new Error(data?.error || 'Failed to update role');
                         await fetchRoles();
                         setShowEditRoleModal(false);
                         setSelectedRole(null);
+                        setEditRole({ name: "", description: "", features: [] });
+                        setEditRoleFeaturePermissions({});
                         Swal.fire({ icon: 'success', title: 'Role updated', timer: 1500, showConfirmButton: false });
                       } catch (err) {
                         Swal.fire({ icon: 'error', title: 'Update failed', text: err.message || 'Unable to update role' });
