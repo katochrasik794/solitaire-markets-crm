@@ -60,11 +60,36 @@ export async function getEnabledMenus() {
 
   try {
     const token = localStorage.getItem('token');
+    
+    // If no token, return cached data or empty array
+    if (!token) {
+      if (storageCache) {
+        return storageCache;
+      }
+      return [];
+    }
+
     const response = await fetch(`${BASE}/menus/user`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
+
+    // Handle 401 Unauthorized - token expired or invalid
+    if (response.status === 401) {
+      // Clear invalid token
+      localStorage.removeItem('token');
+      // Return cached data if available, otherwise empty array
+      if (storageCache) {
+        return storageCache;
+      }
+      return [];
+    }
+
+    // Check if response is ok before parsing JSON
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
     const data = await response.json();
     

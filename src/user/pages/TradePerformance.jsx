@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bar, Line, Doughnut, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -58,6 +59,7 @@ ChartJS.register(
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 function TradePerformance() {
+  const navigate = useNavigate();
   const [selectedAccount, setSelectedAccount] = useState("all");
   const [timeframe, setTimeframe] = useState("365");
   const [accounts, setAccounts] = useState([]);
@@ -95,9 +97,26 @@ function TradePerformance() {
   const fetchAccounts = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
       const response = await fetch(`${API_BASE_URL}/accounts`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       if (data.success && data.data) {
         const all = Array.isArray(data.data) ? data.data : [];
@@ -126,6 +145,11 @@ function TradePerformance() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
       const params = new URLSearchParams({
         accountNumber: selectedAccount,
         timeframe: timeframe
@@ -134,6 +158,18 @@ function TradePerformance() {
       const response = await fetch(`${API_BASE_URL}/reports/trading-performance?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       
       if (data.success && data.data) {
