@@ -20,6 +20,7 @@ import AssignRoles from "../pages/AssignRoles.jsx";
 import AdminProfile from "../pages/AdminProfile.jsx";
 import PaymentGatewaysAutomatic from "../pages/PaymentGatewaysAutomatic.jsx";
 import PaymentGatewaysManual from "../pages/PaymentGatewaysManual.jsx";
+import PaymentGatewaysWithdrawal from "../pages/PaymentGatewaysWithdrawal.jsx";
 import UsersView from "../pages/UsersView.jsx";
 import UsersActive from "../pages/UsersActive.jsx";
 import UsersBanned from "../pages/UsersBanned.jsx";
@@ -137,6 +138,7 @@ export default [
   { path: "payment-gateways",              element: <EmptyState title="Payment Gateways" subtitle="Automatic & manual gateways" /> },
   { path: "payment-gateways/automatic",    element: <PaymentGatewaysAutomatic /> },
   { path: "payment-gateways/manual",       element: <PaymentGatewaysManual /> },
+  { path: "payment-gateways/withdrawal",   element: <PaymentGatewaysWithdrawal /> },
   { path: "payment-details",               element: <PaymentDetails /> },
   { path: "usdt-gateways/manual",       element: <EmptyState title="USDT Gateway" subtitle="USDT Gateway Integration" /> },
 

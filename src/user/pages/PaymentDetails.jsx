@@ -13,6 +13,8 @@ function PaymentDetails() {
   const [showForm, setShowForm] = useState(false);
   const [step, setStep] = useState(1); // 1: Select method, 2: Fill form
   const [selectedMethod, setSelectedMethod] = useState('');
+  const [withdrawalGateways, setWithdrawalGateways] = useState([]);
+  const [loadingGateways, setLoadingGateways] = useState(true);
   const [formData, setFormData] = useState({
     // Bank Transfer fields
     name: '',
@@ -32,6 +34,7 @@ function PaymentDetails() {
   useEffect(() => {
     fetchPaymentDetails();
     fetchUserData();
+    fetchWithdrawalGateways();
   }, []);
 
   // Re-validate accountName when name changes
@@ -103,6 +106,65 @@ function PaymentDetails() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchWithdrawalGateways = async () => {
+    try {
+      setLoadingGateways(true);
+      const token = authService.getToken();
+      const response = await fetch(`${API_BASE_URL}/withdrawals/gateways`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setWithdrawalGateways(data.gateways || []);
+      }
+    } catch (error) {
+      console.error('Error fetching withdrawal gateways:', error);
+      // Don't show error to user, just log it - gateways are optional
+    } finally {
+      setLoadingGateways(false);
+    }
+  };
+
+  // Map gateway type to payment_method value
+  const mapGatewayTypeToPaymentMethod = (gateway) => {
+    const type = gateway.type;
+    if (type === 'wire') return 'bank_transfer';
+    if (type === 'crypto') {
+      // Check gateway name for specific crypto type
+      const name = (gateway.name || '').toLowerCase();
+      if (name.includes('trc20')) return 'usdt_trc20';
+      if (name.includes('erc20')) return 'usdt_erc20';
+      if (name.includes('bep20')) return 'usdt_bep20';
+      // Default to TRC20 if not specified
+      return 'usdt_trc20';
+    }
+    if (type === 'upi') return 'upi';
+    return type;
+  };
+
+  // Get gateway label for display
+  const getGatewayLabel = (gateway) => {
+    return gateway.name || gateway.type.toUpperCase();
+  };
+
+  // Get gateway description
+  const getGatewayDescription = (gateway) => {
+    const type = gateway.type;
+    if (type === 'wire') return 'Add your bank account details';
+    if (type === 'crypto') {
+      const name = (gateway.name || '').toLowerCase();
+      if (name.includes('trc20')) return 'Add your USDT TRC20 wallet address';
+      if (name.includes('erc20')) return 'Add your USDT ERC20 wallet address';
+      if (name.includes('bep20')) return 'Add your USDT BEP20 wallet address';
+      return 'Add your cryptocurrency wallet address';
+    }
+    if (type === 'upi') return 'Add your UPI ID';
+    return 'Add your payment details';
   };
 
   const handleMethodSelect = async (method) => {
@@ -536,8 +598,14 @@ function PaymentDetails() {
         return 'Bank Transfer';
       case 'usdt_trc20':
         return 'USDT TRC20';
+      case 'usdt_erc20':
+        return 'USDT ERC20';
+      case 'usdt_bep20':
+        return 'USDT BEP20';
+      case 'upi':
+        return 'UPI';
       default:
-        return method;
+        return method.replace(/_/g, ' ').toUpperCase();
     }
   };
 
@@ -606,37 +674,47 @@ function PaymentDetails() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 text-center mb-6">Select Payment Method</h3>
                 <div className="flex flex-col items-center gap-4">
-                  {loadingMethod ? (
+                  {loadingMethod || loadingGateways ? (
                     <div className="py-12 flex items-center justify-center">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
                     </div>
+                  ) : withdrawalGateways.length === 0 ? (
+                    <div className="py-8 text-center">
+                      <p className="text-gray-600 mb-4">No withdrawal methods are currently available.</p>
+                      <p className="text-sm text-gray-500">Please contact support if you need to add a payment method.</p>
+                    </div>
                   ) : (
                     <>
-                      <button
-                        onClick={() => handleMethodSelect('bank_transfer')}
-                        className="w-full max-w-md px-6 py-4 border-2 border-gray-200 rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-all text-left group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-semibold text-black mb-1">Bank Transfer</div>
-                            <div className="text-sm text-black">Add your bank account details</div>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-brand-500 transition" />
-                        </div>
-                      </button>
-
-                      <button
-                        onClick={() => handleMethodSelect('usdt_trc20')}
-                        className="w-full max-w-md px-6 py-4 border-2 border-gray-200 rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-all text-left group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-semibold text-black mb-1">USDT TRC20</div>
-                            <div className="text-sm text-black">Add your USDT TRC20 wallet address</div>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-brand-500 transition" />
-                        </div>
-                      </button>
+                      {withdrawalGateways.map((gateway) => {
+                        const paymentMethod = mapGatewayTypeToPaymentMethod(gateway);
+                        return (
+                          <button
+                            key={gateway.id}
+                            onClick={() => handleMethodSelect(paymentMethod)}
+                            className="w-full max-w-md px-6 py-4 border-2 border-gray-200 rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-all text-left group"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3 flex-1">
+                                {gateway.icon_url && (
+                                  <img 
+                                    src={gateway.icon_url} 
+                                    alt={gateway.name}
+                                    className="w-10 h-10 object-contain"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                    }}
+                                  />
+                                )}
+                                <div>
+                                  <div className="font-semibold text-black mb-1">{getGatewayLabel(gateway)}</div>
+                                  <div className="text-sm text-black">{getGatewayDescription(gateway)}</div>
+                                </div>
+                              </div>
+                              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-brand-500 transition flex-shrink-0" />
+                            </div>
+                          </button>
+                        );
+                      })}
                     </>
                   )}
                 </div>
@@ -663,7 +741,10 @@ function PaymentDetails() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-black">
-                    {selectedMethod === 'bank_transfer' ? 'Bank Transfer Details' : 'USDT TRC20 Details'}
+                    {selectedMethod === 'bank_transfer' ? 'Bank Transfer Details' : 
+                     selectedMethod.startsWith('usdt_') ? `${selectedMethod.toUpperCase().replace('_', ' ')} Details` :
+                     selectedMethod === 'upi' ? 'UPI Details' :
+                     'Payment Details'}
                   </h3>
                   <button
                     type="button"

@@ -31,7 +31,7 @@ const GATEWAY_TYPES = [
   { value: 'local', label: 'Local Depositor', icon: Banknote, color: 'bg-brand-100 text-brand-900' }
 ];
 
-export default function PaymentGatewaysManual() {
+export default function PaymentGatewaysWithdrawal() {
   const [gateways, setGateways] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -46,8 +46,8 @@ export default function PaymentGatewaysManual() {
     icon: null,
     qr_code: null,
     is_active: true,
-    is_deposit_enabled: true,
-    is_withdrawal_enabled: false,
+    is_deposit_enabled: false,
+    is_withdrawal_enabled: true,
     // UPI / Crypto
     vpa_address: "",
     crypto_address: "",
@@ -102,16 +102,20 @@ export default function PaymentGatewaysManual() {
 
       if (response.ok) {
         const data = await response.json();
-        setGateways(Array.isArray(data.gateways) ? data.gateways : []);
+        // Filter only withdrawal-enabled gateways
+        const withdrawalGateways = (Array.isArray(data.gateways) ? data.gateways : []).filter(
+          g => g.is_withdrawal_enabled === true
+        );
+        setGateways(withdrawalGateways);
         setError('');
       } else {
         const errorData = await response.json().catch(() => ({}));
-        setError(errorData.error || errorData.message || 'Failed to fetch manual gateways');
+        setError(errorData.error || errorData.message || 'Failed to fetch withdrawal gateways');
         setGateways([]);
       }
     } catch (err) {
       console.error('Fetch gateways error:', err);
-      setError('Failed to fetch manual gateways. Please check your connection.');
+      setError('Failed to fetch withdrawal gateways. Please check your connection.');
       setGateways([]);
     } finally {
       setLoading(false);
@@ -164,11 +168,7 @@ export default function PaymentGatewaysManual() {
 
       if (response.ok) {
         const data = await response.json();
-        if (editingGateway) {
-          setGateways(gateways.map(g => g.id === editingGateway.id ? data.gateway : g));
-        } else {
-          setGateways([...gateways, data.gateway]);
-        }
+        await fetchGateways(); // Refresh list
         setShowForm(false);
         setEditingGateway(null);
         setFormData({
@@ -178,8 +178,8 @@ export default function PaymentGatewaysManual() {
           icon: null,
           qr_code: null,
           is_active: true,
-          is_deposit_enabled: true,
-          is_withdrawal_enabled: false,
+          is_deposit_enabled: false,
+          is_withdrawal_enabled: true,
           vpa_address: "",
           crypto_address: "",
           bank_name: "",
@@ -213,8 +213,8 @@ export default function PaymentGatewaysManual() {
       icon: null,
       qr_code: null,
       is_active: gateway.is_active,
-      is_deposit_enabled: gateway.is_deposit_enabled !== undefined ? gateway.is_deposit_enabled : true,
-      is_withdrawal_enabled: gateway.is_withdrawal_enabled !== undefined ? gateway.is_withdrawal_enabled : false,
+      is_deposit_enabled: gateway.is_deposit_enabled !== undefined ? gateway.is_deposit_enabled : false,
+      is_withdrawal_enabled: gateway.is_withdrawal_enabled !== undefined ? gateway.is_withdrawal_enabled : true,
       vpa_address: gateway.vpa_address || '',
       crypto_address: gateway.crypto_address || '',
       bank_name: gateway.bank_name || '',
@@ -242,7 +242,7 @@ export default function PaymentGatewaysManual() {
       });
 
       if (response.ok) {
-        setGateways(gateways.filter(g => g.id !== id));
+        await fetchGateways(); // Refresh list
         setError("");
         Swal.fire({ icon: 'success', title: 'Gateway deleted', timer: 1200, showConfirmButton: false });
       } else {
@@ -270,7 +270,7 @@ export default function PaymentGatewaysManual() {
 
       if (response.ok) {
         const data = await response.json();
-        setGateways(gateways.map(g => g.id === gateway.id ? data.gateway : g));
+        await fetchGateways(); // Refresh list
         setError("");
         Swal.fire({
           icon: 'success',
@@ -304,7 +304,7 @@ export default function PaymentGatewaysManual() {
 
       if (response.ok) {
         const data = await response.json();
-        setGateways(gateways.map(g => g.id === gateway.id ? data.gateway : g));
+        await fetchGateways(); // Refresh list
         setError("");
         Swal.fire({
           icon: 'success',
@@ -314,176 +314,128 @@ export default function PaymentGatewaysManual() {
         });
       } else {
         const errorData = await response.json().catch(() => ({}));
-        const msg = errorData.error || 'Failed to update gateway recommended status';
+        const msg = errorData.error || 'Failed to update gateway recommendation';
         setError(msg);
         Swal.fire({ icon: 'error', title: 'Update failed', text: msg });
       }
     } catch (err) {
-      setError('Failed to update gateway recommended status');
+      setError('Failed to update gateway recommendation');
       Swal.fire({ icon: 'error', title: 'Update failed', text: err.message || String(err) });
     }
   };
 
-  const toggleQRVisibility = (id) => {
-    setShowQR(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
-
   const getTypeInfo = (type) => {
-    // Map backend types to frontend types
-    const typeMap = {
-      'upi': 'upi',
-      'UPI': 'upi',
-      'wire': 'wire',
-      'Bank_Transfer': 'wire',
-      'bank_transfer': 'wire',
-      'crypto': 'crypto',
-      'USDT_TRC20': 'crypto',
-      'USDT_ERC20': 'crypto',
-      'USDT_BEP20': 'crypto',
-      'Bitcoin': 'crypto',
-      'Ethereum': 'crypto',
-      'Other_Crypto': 'crypto',
-      'local': 'local',
-      'Other': 'local',
-      'other': 'local'
-    };
-
-    const mappedType = typeMap[type] || type;
-    return GATEWAY_TYPES.find(t => t.value === mappedType) || GATEWAY_TYPES[0];
+    return GATEWAY_TYPES.find(t => t.value === type) || GATEWAY_TYPES[0];
   };
 
   const getStatusInfo = (isActive) => {
     return isActive
-      ? { label: 'Active', color: 'bg-green-100 text-green-800', icon: CheckCircle }
-      : { label: 'Inactive', color: 'bg-red-100 text-red-800', icon: AlertCircle };
+      ? { icon: CheckCircle, label: 'Active', color: 'text-green-600' }
+      : { icon: AlertCircle, label: 'Inactive', color: 'text-gray-400' };
   };
 
-  // Resolve file URLs coming from backend (which may be relative like /uploads/gateways/xxx)
-  const fileUrl = (u) => {
-    if (!u) return '';
-    if (/^https?:\/\//i.test(u)) return u;
-
-    // Remove /api from BASE to get the server root URL
-    // BASE is like "http://localhost:5000/api"
-    // We need "http://localhost:5000" for static files
-    const serverBase = BASE.replace(/\/api\/?$/, '');
-
-    // Path should already start with /uploads/...
-    const path = String(u).startsWith('/') ? u : `/${u}`;
-    return `${serverBase}${path}`;
+  const fileUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const base = BASE.replace('/api', '');
+    return `${base}${path}`;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
+      <div className="p-8 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading withdrawal gateways...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-3 sm:p-4 md:p-6">
-      <div className="w-full">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Manual Payment Gateways</h1>
-              <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Manage manual payment methods and QR codes</p>
+    <div className="p-4 sm:p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
+            <TrendingDown className="h-7 w-7 sm:h-8 sm:w-8 text-brand-500" />
+            Withdrawal Gateways
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+            Manage payment gateways available for user withdrawals
+          </p>
+        </div>
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-brand-500 text-dark-base px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">Add Withdrawal Gateway</span>
+          <span className="sm:hidden">Add</span>
+        </button>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+          <AlertCircle className="h-5 w-5" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Currently Active Methods Summary */}
+      {!loading && gateways.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Currently Active</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {gateways.filter(g => g.is_active).length}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  of {gateways.length} withdrawal gateways
+                </p>
+              </div>
+              <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
-            <button
-              onClick={() => setShowForm(true)}
-              className="bg-brand-500 text-dark-base px-3 sm:px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
-            >
-              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="hidden sm:inline">Add Manual Gateway</span>
-              <span className="sm:hidden">Add Gateway</span>
-            </button>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Inactive</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {gateways.filter(g => !g.is_active).length}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  withdrawal gateways
+                </p>
+              </div>
+              <AlertCircle className="w-8 h-8 text-gray-400" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Also Enabled for Deposits</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {gateways.filter(g => g.is_deposit_enabled !== false).length}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  withdrawal gateways
+                </p>
+              </div>
+              <CreditCard className="w-8 h-8 text-blue-500" />
+            </div>
           </div>
         </div>
+      )}
 
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
-            <AlertCircle className="h-5 w-5" />
-            {error}
-          </div>
-        )}
-
-        {/* Currently Active Methods Summary */}
-        {!loading && gateways.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Currently Active</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {gateways.filter(g => g.is_active).length}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    of {gateways.length} total gateways
-                  </p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-green-500" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Active for Deposits</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {gateways.filter(g => g.is_active && (g.is_deposit_enabled !== false)).length}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    deposit gateways
-                  </p>
-                </div>
-                <DollarSign className="w-8 h-8 text-blue-500" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Active for Withdrawals</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {gateways.filter(g => g.is_active && g.is_withdrawal_enabled).length}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    withdrawal gateways
-                  </p>
-                </div>
-                <TrendingDown className="w-8 h-8 text-purple-500" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Inactive</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {gateways.filter(g => !g.is_active).length}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    gateways
-                  </p>
-                </div>
-                <AlertCircle className="w-8 h-8 text-gray-400" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Add/Edit Form */}
-        {showForm && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                {editingGateway ? 'Edit Manual Gateway' : 'Add Manual Gateway'}
+      {/* Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+                {editingGateway ? 'Edit Withdrawal Gateway' : 'Add New Withdrawal Gateway'}
               </h2>
               <button
                 onClick={() => {
@@ -495,7 +447,18 @@ export default function PaymentGatewaysManual() {
                     details: "",
                     icon: null,
                     qr_code: null,
-                    is_active: true
+                    is_active: true,
+                    is_deposit_enabled: false,
+                    is_withdrawal_enabled: true,
+                    vpa_address: "",
+                    crypto_address: "",
+                    bank_name: "",
+                    account_name: "",
+                    account_number: "",
+                    ifsc_code: "",
+                    swift_code: "",
+                    account_type: "",
+                    country_code: ""
                   });
                 }}
                 className="text-gray-400 hover:text-gray-600"
@@ -504,59 +467,70 @@ export default function PaymentGatewaysManual() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                    Type *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Gateway Type *</label>
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                     required
                   >
-                    {GATEWAY_TYPES.map((type) => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
-                    ))}
+                    {GATEWAY_TYPES.map((t) => {
+                      const Icon = t.icon;
+                      return (
+                        <option key={t.value} value={t.value}>
+                          {t.label}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                    Name / Label *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Gateway Name *</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                     placeholder="e.g., UPI PAYMENT, USDT TRC20"
                     required
                   />
                 </div>
               </div>
 
-              {/* Method-specific fields */}
-              {(['upi', 'crypto', 'local'].includes(formData.type)) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      {formData.type === 'upi' ? 'UPI VPA Address *' : formData.type === 'crypto' ? 'Crypto Address *' : 'Details *'}
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.type === 'upi' ? formData.vpa_address : formData.type === 'crypto' ? formData.crypto_address : formData.details}
-                      onChange={(e) => setFormData({ ...formData, [formData.type === 'upi' ? 'vpa_address' : formData.type === 'crypto' ? 'crypto_address' : 'details']: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                      placeholder={formData.type === 'upi' ? 'e.g., username@bank' : formData.type === 'crypto' ? 'e.g., USDT TRC20 address' : 'Local depositor details'}
-                      required
-                    />
-                  </div>
+              {/* Type-specific fields */}
+              {(formData.type === 'upi') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">VPA Address *</label>
+                  <input
+                    type="text"
+                    value={formData.vpa_address}
+                    onChange={(e) => setFormData({ ...formData, vpa_address: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    placeholder="username@bank"
+                    required
+                  />
                 </div>
               )}
 
-              {formData.type === 'wire' && (
+              {(formData.type === 'crypto') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Crypto Address *</label>
+                  <input
+                    type="text"
+                    value={formData.crypto_address}
+                    onChange={(e) => setFormData({ ...formData, crypto_address: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    placeholder="Wallet address"
+                    required
+                  />
+                </div>
+              )}
+
+              {(formData.type === 'wire') && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Bank Name *</label>
@@ -683,7 +657,7 @@ export default function PaymentGatewaysManual() {
                     className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                   />
                   <label htmlFor="is_withdrawal_enabled" className="text-sm text-gray-700">
-                    Enable for Withdrawals
+                    Enable for Withdrawals *
                   </label>
                 </div>
               </div>
@@ -701,8 +675,8 @@ export default function PaymentGatewaysManual() {
                       icon: null,
                       qr_code: null,
                       is_active: true,
-                      is_deposit_enabled: true,
-                      is_withdrawal_enabled: false,
+                      is_deposit_enabled: false,
+                      is_withdrawal_enabled: true,
                       vpa_address: "",
                       crypto_address: "",
                       bank_name: "",
@@ -728,20 +702,21 @@ export default function PaymentGatewaysManual() {
               </div>
             </form>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Gateways Table (ProTable) */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">All Manual Gateways</h2>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your manual payment gateway configurations</p>
-          </div>
+      {/* Gateways Table (ProTable) */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Withdrawal Gateways</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Gateways enabled for user withdrawals</p>
+        </div>
 
           {gateways.length === 0 ? (
             <div className="p-8 text-center">
-              <CreditCard className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Manual Gateways Found</h3>
-              <p className="text-gray-500 mb-4">Get started by adding your first manual payment gateway</p>
+              <TrendingDown className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Withdrawal Gateways Found</h3>
+              <p className="text-gray-500 mb-4">Get started by adding your first withdrawal gateway</p>
               <button
                 onClick={() => setShowForm(true)}
                 className="bg-brand-500 text-dark-base px-4 py-2 rounded-lg hover:bg-brand-600 flex items-center gap-2 mx-auto"
@@ -762,6 +737,8 @@ export default function PaymentGatewaysManual() {
                   qr: g.qr_code_url,
                   details: g, // pass full gateway for render
                   status: g.is_active ? 'Active' : 'Inactive',
+                  deposit_enabled: g.is_deposit_enabled !== undefined ? g.is_deposit_enabled : false,
+                  withdrawal_enabled: g.is_withdrawal_enabled !== undefined ? g.is_withdrawal_enabled : true,
                   actions: g,
                 }))}
                 columns={[
@@ -849,12 +826,12 @@ export default function PaymentGatewaysManual() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-1">
                             <Icon className={info.color} size={14} />
-                            <span className={`text-xs font-medium ${info.color.replace('text-', 'text-')}`}>
+                            <span className={`text-xs font-medium ${info.color}`}>
                               {isActive ? 'Active' : 'Inactive'}
                             </span>
                           </div>
                           <div className="text-xs text-gray-500 space-y-0.5">
-                            {g.is_deposit_enabled !== false && (
+                            {g.is_deposit_enabled && (
                               <div className="flex items-center gap-1">
                                 <CheckCircle className="h-3 w-3 text-green-500" />
                                 <span>Deposit</span>
@@ -926,7 +903,7 @@ export default function PaymentGatewaysManual() {
                             </button>
                             <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">Star</span>
                           </div>
-                          {/* Toggle Switch with Label - Moved to end */}
+                          {/* Toggle Switch with Label */}
                           <div className="flex flex-col items-center gap-0.5">
                             <button
                               onClick={() => handleToggleStatus(gateway)}
@@ -938,68 +915,49 @@ export default function PaymentGatewaysManual() {
                               aria-checked={gateway.is_active}
                             >
                               <span
-                                className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-all duration-300 ease-in-out shadow-md ${gateway.is_active ? 'translate-x-3.5' : 'translate-x-0.5'
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out ${gateway.is_active ? 'translate-x-3' : 'translate-x-0.5'
                                   }`}
                               />
                             </button>
-                            <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">
-                              {gateway.is_active ? 'Enable' : 'Disable'}
-                            </span>
+                            <span className="text-[8px] text-gray-600 whitespace-nowrap leading-tight">Toggle</span>
                           </div>
                         </div>
                       );
                     }
-                  },
+                  }
                 ]}
-                filters={{ searchKeys: ['name', 'type', 'country_code', 'vpa_address', 'crypto_address', 'bank_name', 'account_name', 'account_number'] }}
-                pageSize={10}
               />
             </div>
           )}
         </div>
 
-        {/* Image Viewing Modal */}
+        {/* Image View Modal */}
         {viewingImage && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-            onClick={() => setViewingImage(null)}
-          >
-            <div className="bg-white rounded-lg max-w-2xl max-h-[90vh] overflow-auto relative">
+          <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4" onClick={() => setViewingImage(null)}>
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 relative">
               <button
                 onClick={() => setViewingImage(null)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10 bg-white rounded-full p-2 shadow-lg"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
               >
-                <X className="h-5 w-5" />
+                <X className="h-6 w-6" />
               </button>
-              <div className="p-6">
-                <h3 className="text-lg font-semibold mb-4 capitalize">
-                  {viewingImage.type === 'icon' ? 'Gateway Icon' : 'QR Code'}
-                </h3>
-                <div className="flex justify-center">
-                  <img
-                    src={viewingImage.url}
-                    alt={viewingImage.type === 'icon' ? 'Gateway Icon' : 'QR Code'}
-                    className="max-w-full max-h-[70vh] object-contain rounded-lg"
-                    onError={(e) => {
-                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 24 24"%3E%3Cpath fill="%23ccc" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/%3E%3C/svg%3E';
-                    }}
-                  />
-                </div>
-                <div className="mt-4 text-center">
-                  <a
-                    href={viewingImage.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-brand-500 hover:text-brand-600 underline text-sm"
-                  >
-                    Open in new tab
-                  </a>
-                </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {viewingImage.type === 'icon' ? 'Gateway Icon' : 'QR Code'}
+              </h3>
+              <div className="flex justify-center">
+                <img
+                  src={viewingImage.url}
+                  alt={viewingImage.type === 'icon' ? 'Gateway Icon' : 'QR Code'}
+                  className="max-w-full max-h-96 object-contain"
+                  onError={(e) => {
+                    e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23ccc"%3EImage not found%3C/text%3E%3C/svg%3E';
+                  }}
+                />
               </div>
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }
+

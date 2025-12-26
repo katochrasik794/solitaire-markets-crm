@@ -246,6 +246,7 @@ export const ADMIN_MENU = [
         children: [
           { label: "Deposit Gateway", to: "payment-gateways/automatic" },
           { label: "Manual Gateways", to: "payment-gateways/manual" },
+          { label: "Withdrawal Gateway", to: "payment-gateways/withdrawal" },
           { label: "USDT Gateway", to: "usdt-gateways/manual" },
         ],
       },
