@@ -256,6 +256,17 @@ function Dashboard() {
           }
         });
 
+        // Handle 401 Unauthorized
+        if (response.status === 401) {
+          authService.logout();
+          navigate('/login');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
         if (data.success) {
           const all = Array.isArray(data.data) ? data.data : [];

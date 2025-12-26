@@ -81,11 +81,14 @@ export default function AllActions() {
 
       if (response.data.ok) {
         setActions(response.data.actions || []);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total,
-          total_pages: response.data.pagination.total_pages
-        }));
+        if (response.data.pagination) {
+          setPagination(prev => ({
+            ...prev,
+            total: response.data.pagination.total || 0,
+            total_pages: response.data.pagination.total_pages || 0,
+            page: response.data.pagination.page || prev.page
+          }));
+        }
       }
     } catch (error) {
       console.error('Failed to load actions:', error);

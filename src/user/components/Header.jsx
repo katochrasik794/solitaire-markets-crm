@@ -59,6 +59,13 @@ function Header({ onMenuClick, onSidebarToggle, sidebarCollapsed = false }) {
           }
         })
 
+        // Handle 401 Unauthorized - token expired or invalid
+        if (response.status === 401) {
+          setKycStatus('unverified')
+          setKycLoading(false)
+          return
+        }
+
         if (response.ok) {
           const data = await response.json()
           if (data.success && data.data) {
