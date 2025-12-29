@@ -21,7 +21,7 @@ function Verification() {
   const [sumsubApplicantId, setSumsubApplicantId] = useState(null)
   const sumsubInstanceRef = useRef(null)
   const containerRef = useRef(null)
-  
+
   const [formData, setFormData] = useState({
     hasTradingExperience: '',
     employmentStatus: '',
@@ -40,25 +40,53 @@ function Verification() {
           return
         }
 
-          const statusResponse = await fetch(`${API_BASE_URL}/kyc/status`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          })
+        const statusResponse = await fetch(`${API_BASE_URL}/kyc/status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
 
-          if (statusResponse.ok) {
-            const statusData = await statusResponse.json()
-            if (statusData.success && statusData.data) {
-              setKycStatus(statusData.data.status)
-              
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json()
+          if (statusData.success && statusData.data) {
+            setKycStatus(statusData.data.status)
+
             // If already approved, redirect to dashboard
-              if (statusData.data.status === 'approved') {
+            if (statusData.data.status === 'approved') {
               navigate('/user/dashboard')
-                return
-              }
+              return
+            }
 
             // If pending, show pending message
             if (statusData.data.status === 'pending') {
+              // Auto-check latest status from SumSub to fix stale "pending" state
+              try {
+                const refreshResponse = await fetch(`${API_BASE_URL}/kyc/sumsub/status?refresh=true`, {
+                  headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (refreshResponse.ok) {
+                  const refreshData = await refreshResponse.json();
+                  // If now approved, update state and redirect
+                  if (refreshData.success && refreshData.data &&
+                    (refreshData.data.status === 'approved' || refreshData.data.reviewResult === 'GREEN')) {
+                    setKycStatus('approved');
+                    navigate('/user/dashboard');
+                    return;
+                  }
+                  // If rejected, update state
+                  if (refreshData.data.status === 'rejected' || refreshData.data.reviewResult === 'RED') {
+                    setKycStatus('rejected');
+                    // Don't return, let it flow to show rejection UI if we handle it, 
+                    // or just stay here. The current UI shows "Verification Under Review" for pending.
+                    // If rejected, we might want to update kycStatus to 'rejected' so it renders the rejected state (if any)
+                    // The current component renders "Verification Under Review" specific message for 'pending'.
+                    // For 'rejected', it probably falls through to the main form or error message.
+                  }
+                }
+              } catch (e) {
+                console.error('Auto-refresh status failed', e);
+              }
+
               // Check if we have Sumsub applicant ID
               if (statusData.data.sumsub_applicant_id) {
                 setSumsubApplicantId(statusData.data.sumsub_applicant_id)
@@ -85,9 +113,9 @@ function Verification() {
               }
             }
           }
-          }
-        } catch (err) {
-          console.error('Error checking KYC status:', err)
+        }
+      } catch (err) {
+        console.error('Error checking KYC status:', err)
       }
     }
 
@@ -125,7 +153,7 @@ function Verification() {
         }
       }
       throw new Error('Failed to get new access token')
-      } catch (err) {
+    } catch (err) {
       console.error('Error getting new access token:', err)
       throw err
     }
@@ -155,7 +183,7 @@ function Verification() {
 
       let snsWebSdkInstance = snsWebSdk
         .init(
-        accessToken,
+          accessToken,
           // token update callback, must return Promise
           () => getNewAccessToken()
         )
@@ -181,40 +209,40 @@ function Verification() {
         })
         .onMessage((type, payload) => {
           console.log('onMessage', type, payload)
-          
+
           // Handle applicant submitted
           if (type === 'idCheck.onApplicantSubmitted') {
-        setKycStatus('pending')
-        setToast({
-          message: 'Verification submitted successfully! Your documents are under review.',
-          type: 'success'
-        })
-        // Check status after a delay
-        setTimeout(() => {
+            setKycStatus('pending')
+            setToast({
+              message: 'Verification submitted successfully! Your documents are under review.',
+              type: 'success'
+            })
+            // Check status after a delay
+            setTimeout(() => {
               checkVerificationStatus()
-        }, 2000)
+            }, 2000)
           }
 
           // Handle review completed
           if (type === 'idCheck.onReviewCompleted') {
             const reviewResult = payload.reviewResult
             if (reviewResult === 'GREEN') {
-          setKycStatus('approved')
-          setToast({
+              setKycStatus('approved')
+              setToast({
                 message: 'Verification approved! Redirecting to dashboard...',
-            type: 'success'
-          })
+                type: 'success'
+              })
               // Update database and redirect after a short delay
               setTimeout(() => {
                 updateKYCStatus('approved')
                 navigate('/user/dashboard')
               }, 2000)
             } else if (reviewResult === 'RED') {
-          setKycStatus('rejected')
-          setToast({
-            message: `Verification rejected: ${payload.reviewComment || 'Please try again.'}`,
-            type: 'error'
-          })
+              setKycStatus('rejected')
+              setToast({
+                message: `Verification rejected: ${payload.reviewComment || 'Please try again.'}`,
+                type: 'error'
+              })
               updateKYCStatus('rejected')
             }
           }
@@ -247,9 +275,9 @@ function Verification() {
       if (!token) return
 
       const response = await fetch(`${API_BASE_URL}/kyc/sumsub/status?refresh=true`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       })
 
       if (response.ok) {
@@ -314,7 +342,7 @@ function Verification() {
         }
       })
 
-        const data = await response.json()
+      const data = await response.json()
 
       if (response.ok && data.success && data.data) {
         setSumsubAccessToken(data.data.accessToken)
@@ -349,10 +377,10 @@ function Verification() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    
+
     // Validation
-    if (!formData.hasTradingExperience || !formData.employmentStatus || 
-        !formData.annualIncome || !formData.totalNetWorth || !formData.sourceOfWealth) {
+    if (!formData.hasTradingExperience || !formData.employmentStatus ||
+      !formData.annualIncome || !formData.totalNetWorth || !formData.sourceOfWealth) {
       setError('Please fill in all fields')
       return
     }
@@ -367,8 +395,8 @@ function Verification() {
       }
 
       const response = await fetch(`${API_BASE_URL}/kyc/profile`, {
-          method: 'POST',
-          headers: {
+        method: 'POST',
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
@@ -438,9 +466,9 @@ function Verification() {
     )
   }
 
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        {loading && <AuthLoader message="Initializing verification..." />}
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      {loading && <AuthLoader message="Initializing verification..." />}
       {submitting && <AuthLoader message="Submitting profile..." />}
       {toast && (
         <Toast
@@ -449,14 +477,14 @@ function Verification() {
           onClose={() => setToast(null)}
         />
       )}
-      
+
       <div className="max-w-4xl mx-auto">
         <PageHeader
           icon={ShieldCheck}
           title="KYC Verification"
           subtitle="Complete your identity verification to enable withdrawals and access all features."
         />
-        
+
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center gap-4">
@@ -679,18 +707,18 @@ function Verification() {
           <div className="bg-white rounded-lg shadow-lg p-8">
             {/* Logo at the top */}
             <div className="flex justify-center mb-6">
-              <img 
+              <img
                 src={`${import.meta.env.VITE_FRONTEND_URL || 'https://portal.solitairemarkets.com'}/logo.png`}
-                alt="Solitaire Markets" 
-                className="h-16 w-auto" 
-                style={{ background: 'transparent' }} 
+                alt="Solitaire Markets"
+                className="h-16 w-auto"
+                style={{ background: 'transparent' }}
                 onError={(e) => {
                   // Fallback to local logo if external fails
                   e.target.src = '/logo.png';
                 }}
               />
             </div>
-            
+
             <h1 className="text-2xl font-bold text-gray-900 mb-4" style={{ fontFamily: 'Roboto, sans-serif' }}>
               We need to verify your identity.
             </h1>
@@ -699,9 +727,9 @@ function Verification() {
             </p>
 
             {/* Sumsub WebSDK Container */}
-            <div 
+            <div
               ref={containerRef}
-              id="sumsub-websdk-container" 
+              id="sumsub-websdk-container"
               className="min-h-[600px]"
             ></div>
           </div>
