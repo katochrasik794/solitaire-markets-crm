@@ -28,9 +28,9 @@ function TickerImageModal({ imageUrl, title, duration = 5, onClose }) {
   };
 
   // Construct full image URL
-  const fullImageUrl = imageUrl.startsWith('http') 
-    ? imageUrl 
-    : `${API_BASE_URL.replace('/api', '')}${imageUrl}`;
+  const fullImageUrl = imageUrl.startsWith('http')
+    ? imageUrl
+    : `${API_BASE_URL.replace(/\/api\/?$/, '')}${imageUrl}`;
 
   return (
     <div

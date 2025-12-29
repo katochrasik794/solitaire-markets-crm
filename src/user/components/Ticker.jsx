@@ -121,23 +121,39 @@ function Ticker({ ticker, onClose }) {
         <div className="flex items-center h-full relative overflow-hidden">
           {/* Content wrapper for scrolling - duplicate multiple times for seamless loop */}
           <div className="ticker-content flex items-center gap-4 px-4 py-3 whitespace-nowrap">
-            {/* Multiple copies for seamless infinite scroll - ensures continuous movement */}
-            {[...Array(4)].map((_, index) => (
-              <div key={index} className="flex items-center gap-4 flex-shrink-0">
-                {ticker.title && (
-                  <span className="font-semibold text-sm md:text-base text-dark-base">{ticker.title}</span>
-                )}
-                {ticker.message && (
-                  <span className="text-sm md:text-base text-dark-base">{ticker.message}</span>
-                )}
-                {ticker.image_url && (
-                  <ImageIcon className="w-5 h-5 flex-shrink-0 cursor-pointer hover:opacity-80 transition text-dark-base" />
-                )}
-                {ticker.link_url && !ticker.image_url && (
-                  <span className="text-xs underline opacity-90 text-dark-base">Click to view</span>
-                )}
-              </div>
-            ))}
+          {/* Multiple copies for seamless infinite scroll - ensures continuous movement */}
+            {[...Array(4)].map((_, index) => {
+              const fullImageUrl = ticker.image_url 
+                ? (ticker.image_url.startsWith('http') 
+                    ? ticker.image_url 
+                    : `${(import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')}${ticker.image_url}`)
+                : null;
+
+              return (
+                <div key={index} className="flex items-center gap-4 flex-shrink-0">
+                  {ticker.title && (
+                    <span className="font-semibold text-sm md:text-base text-dark-base">{ticker.title}</span>
+                  )}
+                  {ticker.message && (
+                    <span className="text-sm md:text-base text-dark-base">{ticker.message}</span>
+                  )}
+                  {fullImageUrl && (
+                     <img 
+                       src={fullImageUrl} 
+                       alt={ticker.title}
+                       className="h-8 w-auto object-contain cursor-pointer hover:opacity-80 transition"
+                       onClick={handleImageClick}
+                       onError={(e) => {
+                         e.target.style.display = 'none'; // Hide if broken
+                       }}
+                     />
+                  )}
+                  {ticker.link_url && !ticker.image_url && (
+                    <span className="text-xs underline opacity-90 text-dark-base">Click to view</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Close button */}

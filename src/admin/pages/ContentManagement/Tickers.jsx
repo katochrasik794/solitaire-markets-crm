@@ -137,12 +137,12 @@ export default function Tickers() {
       submitData.append('display_duration', formData.display_duration);
       submitData.append('animation_speed', formData.animation_speed);
       submitData.append('priority', formData.priority);
-      
+
       if (formData.image) {
         submitData.append('image', formData.image);
       }
 
-      const url = editingTicker 
+      const url = editingTicker
         ? `${BASE}/tickers/admin/${editingTicker.id}`
         : `${BASE}/tickers/admin`;
       const method = editingTicker ? 'PUT' : 'POST';
@@ -156,10 +156,10 @@ export default function Tickers() {
       const data = await response.json();
       if (!data.success) throw new Error(data.error || 'Failed to save ticker');
 
-      Swal.fire({ 
-        icon: 'success', 
-        title: 'Success', 
-        text: editingTicker ? 'Ticker updated successfully' : 'Ticker created successfully' 
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: editingTicker ? 'Ticker updated successfully' : 'Ticker created successfully'
       });
       setModalOpen(false);
       fetchTickers();
@@ -207,10 +207,10 @@ export default function Tickers() {
       });
       const data = await response.json();
       if (!data.success) throw new Error(data.error || 'Failed to toggle ticker status');
-      Swal.fire({ 
-        icon: 'success', 
-        title: 'Success', 
-        text: data.message || 'Ticker status updated' 
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: data.message || 'Ticker status updated'
       });
       fetchTickers();
     } catch (e) {
@@ -225,9 +225,8 @@ export default function Tickers() {
       key: "position",
       label: "Position",
       render: (v) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${
-          v === 'top' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-        }`}>
+        <span className={`px-2 py-1 rounded text-xs font-medium ${v === 'top' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+          }`}>
           {v === 'top' ? 'Top' : 'Middle'}
         </span>
       ),
@@ -236,9 +235,8 @@ export default function Tickers() {
       key: "is_active",
       label: "Status",
       render: (v) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${
-          v ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-        }`}>
+        <span className={`px-2 py-1 rounded text-xs font-medium ${v ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}>
           {v ? 'Active' : 'Inactive'}
         </span>
       ),
@@ -265,11 +263,10 @@ export default function Tickers() {
           </button>
           <button
             onClick={() => handleToggleActive(row)}
-            className={`p-1.5 rounded transition ${
-              row.is_active 
-                ? 'text-yellow-600 hover:bg-yellow-50' 
+            className={`p-1.5 rounded transition ${row.is_active
+                ? 'text-yellow-600 hover:bg-yellow-50'
                 : 'text-green-600 hover:bg-green-50'
-            }`}
+              }`}
             title={row.is_active ? 'Deactivate' : 'Activate'}
           >
             {row.is_active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
@@ -385,9 +382,13 @@ export default function Tickers() {
             {formData.imagePreview || formData.existingImageUrl ? (
               <div className="relative mb-2">
                 <img
-                  src={formData.imagePreview || `${BASE.replace('/api', '')}${formData.existingImageUrl}`}
+                  src={formData.imagePreview || `${BASE.replace(/\/api\/?$/, '')}${formData.existingImageUrl}`}
                   alt="Preview"
                   className="w-full h-48 object-contain border border-gray-300 rounded-lg"
+                  onError={(e) => {
+                    e.target.src = '/placeholder-image.png'; // Fallback
+                    e.target.style.opacity = '0.5';
+                  }}
                 />
                 <button
                   type="button"
