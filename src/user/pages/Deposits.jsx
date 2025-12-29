@@ -60,15 +60,15 @@ function Deposits() {
     // If it is an absolute URL
     if (url.startsWith('http')) {
       // CRITICAL FIX: If we are on a live site (!isLocalhost) but the image URL 
-      // is pointing to localhost (misconfigured backend), force it to be relative.
-      if (!isLocalhost && url.includes('localhost')) {
-        return url.replace(/^https?:\/\/localhost(:\d+)?/i, '');
+      // is pointing to localhost or 127.0.0.1 (misconfigured backend), force it to be relative.
+      if (!isLocalhost && (url.includes('localhost') || url.includes('127.0.0.1'))) {
+        return url.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i, '');
       }
       return url;
     }
 
     // If BACKEND_URL is explicitly set (and likely correct from env), use it
-    if (BACKEND_URL && !BACKEND_URL.includes('localhost')) {
+    if (BACKEND_URL && !BACKEND_URL.includes('localhost') && !BACKEND_URL.includes('127.0.0.1')) {
       return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
     }
 
@@ -91,7 +91,16 @@ function Deposits() {
       <div className="flex items-center flex-1">
         <div className="w-14 h-14 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden bg-transparent">
           {gateway.icon_url ? (
-            <img src={getFullUrl(gateway.icon_url)} alt={gateway.name} className="w-full h-full object-contain" />
+            <img
+              src={getFullUrl(gateway.icon_url)}
+              alt={gateway.name}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.style.display = 'none'; // Hide broken image
+                e.target.parentNode.innerHTML = '<div class="w-full h-full bg-gray-300 rounded flex items-center justify-center text-xs text-gray-500">Img</div>';
+              }}
+            />
           ) : (
             <div className="w-full h-full bg-gray-300 rounded"></div>
           )}
