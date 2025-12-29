@@ -54,7 +54,21 @@ function Deposits() {
   const getFullUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http')) return url;
-    return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+
+    // If BACKEND_URL is explicitly set (and likely correct from env), use it
+    if (BACKEND_URL && !BACKEND_URL.includes('localhost')) {
+      return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+    }
+
+    // Only fallback to localhost:5000 if we are actually on localhost/dev
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      const localBase = BACKEND_URL || 'http://localhost:5000';
+      return `${localBase}${url.startsWith('/') ? '' : '/'}${url}`;
+    }
+
+    // In production, if no valid BACKEND_URL, assume relative path (same origin/proxy)
+    return url.startsWith('/') ? url : `/${url}`;
   };
 
   const renderGatewayCard = (gateway) => (

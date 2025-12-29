@@ -361,17 +361,25 @@ export default function PaymentGatewaysManual() {
       : { label: 'Inactive', color: 'bg-red-100 text-red-800', icon: AlertCircle };
   };
 
-  // Resolve file URLs coming from backend (which may be relative like /uploads/gateways/xxx)
+  // Resolve file URLs coming from backend
   const fileUrl = (u) => {
     if (!u) return '';
     if (/^https?:\/\//i.test(u)) return u;
 
-    // Remove /api from BASE to get the server root URL
-    // BASE is like "http://localhost:5000/api"
-    // We need "http://localhost:5000" for static files
+    // Remove /api from BASE if present
     const serverBase = BASE.replace(/\/api\/?$/, '');
 
-    // Path should already start with /uploads/...
+    // In production, if serverBase is pointing to localhost but we are NOT on localhost, this is wrong.
+    // So we check window.location.hostname logic similar to Deposits.jsx
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+
+    // If we are in production and serverBase includes localhost, ignore it and use relative path
+    if (!isLocalhost && serverBase.includes('localhost')) {
+      return String(u).startsWith('/') ? u : `/${u}`;
+    }
+
+    // Otherwise use serverBase (which might be localhost if we are local, or a proper URL if env is set)
     const path = String(u).startsWith('/') ? u : `/${u}`;
     return `${serverBase}${path}`;
   };
