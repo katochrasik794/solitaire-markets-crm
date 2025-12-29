@@ -50,6 +50,13 @@ function Deposits() {
   const wireGateways = gateways.filter(g => g.type === 'wire');
   const otherGateways = gateways.filter(g => !g.is_recommended && g.type !== 'crypto' && g.type !== 'wire');
 
+  // Helper to resolve URL
+  const getFullUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
   const renderGatewayCard = (gateway) => (
     <div
       key={gateway.id}
@@ -59,7 +66,7 @@ function Deposits() {
       <div className="flex items-center flex-1">
         <div className="w-14 h-14 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden bg-transparent">
           {gateway.icon_url ? (
-            <img src={gateway.icon_url} alt={gateway.name} className="w-full h-full object-contain" />
+            <img src={getFullUrl(gateway.icon_url)} alt={gateway.name} className="w-full h-full object-contain" />
           ) : (
             <div className="w-full h-full bg-gray-300 rounded"></div>
           )}
@@ -129,7 +136,15 @@ function Deposits() {
                 {/* Static USDT TRC20 Card - Use logo from gateways if available */}
                 {(() => {
                   const usdtGateway = gateways.find(g => g.name?.toLowerCase().includes('usdt') && g.name?.toLowerCase().includes('trc20'));
-                  const logoUrl = usdtGateway?.icon_url || '/tether.svg';
+
+                  // Helper to resolve URL
+                  const getFullUrl = (url) => {
+                    if (!url) return null;
+                    if (url.startsWith('http')) return url;
+                    return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+                  };
+
+                  const logoUrl = getFullUrl(usdtGateway?.icon_url) || '/tether.svg';
                   return (
                     <div
                       onClick={() => navigate('/user/deposits/cregis-usdt-trc20')}

@@ -660,7 +660,7 @@ export default function PaymentGatewaysManual() {
                     Active Gateway
                   </label>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -673,7 +673,7 @@ export default function PaymentGatewaysManual() {
                     Enable for Deposits
                   </label>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -758,8 +758,8 @@ export default function PaymentGatewaysManual() {
                   __index: i + 1,
                   type: g.type,
                   name: g.name,
-                  icon: g.icon_url,
-                  qr: g.qr_code_url,
+                  icon: g.icon_path || g.icon_url, // Handle both path (raw) and url (processed)
+                  qr: g.qr_code_path || g.qr_code_url,
                   details: g, // pass full gateway for render
                   status: g.is_active ? 'Active' : 'Inactive',
                   actions: g,
@@ -917,8 +917,8 @@ export default function PaymentGatewaysManual() {
                             <button
                               onClick={() => handleToggleRecommended(gateway)}
                               className={`p-1.5 w-8 h-8 flex items-center justify-center border rounded transition-all ${gateway.is_recommended
-                                  ? 'text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 border-yellow-200 bg-yellow-50'
-                                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 border-gray-200'
+                                ? 'text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 border-yellow-200 bg-yellow-50'
+                                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 border-gray-200'
                                 }`}
                               title={gateway.is_recommended ? 'Remove from Recommended' : 'Mark as Recommended'}
                             >
@@ -931,8 +931,8 @@ export default function PaymentGatewaysManual() {
                             <button
                               onClick={() => handleToggleStatus(gateway)}
                               className={`relative inline-flex h-5 w-7 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-1 focus:ring-offset-1 shadow-sm ${gateway.is_active
-                                  ? 'bg-gradient-to-r from-green-400 to-green-600 focus:ring-green-400 shadow-green-200'
-                                  : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-300 shadow-gray-200'
+                                ? 'bg-gradient-to-r from-green-400 to-green-600 focus:ring-green-400 shadow-green-200'
+                                : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-300 shadow-gray-200'
                                 }`}
                               role="switch"
                               aria-checked={gateway.is_active}
