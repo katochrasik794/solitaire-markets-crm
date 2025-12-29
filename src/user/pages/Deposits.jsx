@@ -53,7 +53,19 @@ function Deposits() {
   // Helper to resolve URL
   const getFullUrl = (url) => {
     if (!url) return null;
-    if (url.startsWith('http')) return url;
+
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+
+    // If it is an absolute URL
+    if (url.startsWith('http')) {
+      // CRITICAL FIX: If we are on a live site (!isLocalhost) but the image URL 
+      // is pointing to localhost (misconfigured backend), force it to be relative.
+      if (!isLocalhost && url.includes('localhost')) {
+        return url.replace(/^https?:\/\/localhost(:\d+)?/i, '');
+      }
+      return url;
+    }
 
     // If BACKEND_URL is explicitly set (and likely correct from env), use it
     if (BACKEND_URL && !BACKEND_URL.includes('localhost')) {
@@ -61,13 +73,12 @@ function Deposits() {
     }
 
     // Only fallback to localhost:5000 if we are actually on localhost/dev
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    if (isLocalhost) {
       const localBase = BACKEND_URL || 'http://localhost:5000';
       return `${localBase}${url.startsWith('/') ? '' : '/'}${url}`;
     }
 
-    // In production, if no valid BACKEND_URL, assume relative path (same origin/proxy)
+    // In production, if no valid BACKEND_URL, assume relative path (same origin)
     return url.startsWith('/') ? url : `/${url}`;
   };
 
