@@ -46,6 +46,7 @@ export default function PaymentGatewaysManual() {
     icon: null,
     qr_code: null,
     is_active: true,
+    is_recommended: false,
     is_deposit_enabled: true,
     is_withdrawal_enabled: false,
     // UPI / Crypto
@@ -128,6 +129,7 @@ export default function PaymentGatewaysManual() {
       formDataToSend.append('name', formData.name);
       formDataToSend.append('details', formData.details);
       formDataToSend.append('is_active', formData.is_active);
+      formDataToSend.append('is_recommended', formData.is_recommended);
       formDataToSend.append('is_deposit_enabled', formData.is_deposit_enabled);
       formDataToSend.append('is_withdrawal_enabled', formData.is_withdrawal_enabled);
       // method-specific fields
@@ -213,7 +215,8 @@ export default function PaymentGatewaysManual() {
       icon: null,
       qr_code: null,
       is_active: gateway.is_active,
-      is_deposit_enabled: gateway.is_deposit_enabled !== undefined ? gateway.is_deposit_enabled : true,
+      is_recommended: gateway.is_recommended || false,
+      is_deposit_enabled: gateway.is_deposit_enabled !== false,
       is_withdrawal_enabled: gateway.is_withdrawal_enabled !== undefined ? gateway.is_withdrawal_enabled : false,
       vpa_address: gateway.vpa_address || '',
       crypto_address: gateway.crypto_address || '',
