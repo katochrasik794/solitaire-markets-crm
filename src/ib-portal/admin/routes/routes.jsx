@@ -5,7 +5,6 @@ import Dashboard from '../pages/Dashboard'
 import Overview from '../pages/Overview'
 import IBProfile from '../pages/IBProfile'
 import CommissionDistribution from '../pages/CommissionDistribution'
-import PortalSettings from '../pages/PortalSettings'
 import SymbolsPipValues from '../pages/SymbolsPipValues'
 
 // Group Management Pages
@@ -14,7 +13,6 @@ import GroupManagementCommissionDistribution from '../pages/GroupManagement/Comm
 
 // IB Management Pages
 import ClientLinking from '../pages/IBManagement/ClientLinking'
-import MoveUser from '../pages/IBManagement/MoveUser'
 import WithdrawalManagement from '../pages/IBManagement/WithdrawalManagement'
 
 // Export array of route configurations
@@ -23,12 +21,10 @@ const ibAdminRoutes = [
   { path: 'overview', element: <Overview /> },
   { path: 'ib-profile', element: <IBProfile /> },
   { path: 'commission-distribution', element: <CommissionDistribution /> },
-  { path: 'portal-settings', element: <PortalSettings /> },
   { path: 'symbols-pip-values', element: <SymbolsPipValues /> },
   { path: 'group-management/trading-groups', element: <TradingGroups /> },
   { path: 'group-management/commission-distribution', element: <GroupManagementCommissionDistribution /> },
   { path: 'ib-management/client-linking', element: <ClientLinking /> },
-  { path: 'ib-management/move-user', element: <MoveUser /> },
   { path: 'ib-management/withdrawal-management', element: <WithdrawalManagement /> },
   { path: '', element: <Dashboard /> }, // Default route to dashboard
 ]

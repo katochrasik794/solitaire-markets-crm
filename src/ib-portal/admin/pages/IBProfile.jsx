@@ -307,6 +307,47 @@ function IBProfile() {
     setSelectedIB(null);
   };
 
+  // Group IBs by account group for the top section
+  const ibsByGroup = {
+    classic: ibProfilesData.filter(ib => ib.pipRate && ib.pipRate.includes('Classic')).slice(0, 10),
+    ecn: [
+      { id: 1, name: 'Anand bhushan Sharma', email: 'tradevasikhavahub@gmail.com', pipRate: '0.01 pip' },
+      { id: 2, name: 'Candle Story', email: 'ceo.candlestory@gmail.com', pipRate: '0.01 pip' },
+      { id: 3, name: 'India Head', email: 'candlestoryofficial@gmail.com', pipRate: '0.01 pip' },
+      { id: 4, name: 'Pratik Babar', email: 'pratikbabar726@gmail.com', pipRate: '0.01 pip' },
+      { id: 5, name: 'r k', email: 'katochrasik000@gmail.com', pipRate: '3.00 pip' },
+    ],
+    plus: [
+      { id: 1, name: 'Shail Raj', email: 'shailphotography1997@gmail.com', pipRate: '0.50 pip' },
+      { id: 2, name: 'Amitkumar PATIL', email: 'amitkumarpatil1982@gmail.com', pipRate: '1.50 pip' },
+      { id: 3, name: 'Manohar Harad', email: 'manoharharad8@gmail.com', pipRate: '1.20 pip' },
+      { id: 4, name: 'Mohan Patil', email: 'mp8579847@gmail.com', pipRate: '1.00 pip' },
+      { id: 5, name: 'Shivaji Bhimara Desai', email: 'shivajidesai233@gmail.com', pipRate: '0.10 pip' },
+      { id: 6, name: 'Ravindra Bangar', email: 'ravindrabangar75@gmail.com', pipRate: '0.80 pip' },
+      { id: 7, name: 'Viki Bharitkar', email: 'vickybharitkar05@gmail.com', pipRate: '2.00 pip' },
+      { id: 8, name: 'Ramesh Vyapari', email: 'vyaparir30@gmail.com', pipRate: '1.00 pip' },
+      { id: 9, name: 'Vishal Shelar', email: 'shelarvishal403@gmail.com', pipRate: '1.50 pip' },
+      { id: 10, name: 'Akshay Mahajan', email: 'mahajanakshay332@gmail.com', pipRate: '0.50 pip' },
+      { id: 11, name: 'Shankarrao Chaudhari', email: 'chaudharishankarrao1954@gmail.com', pipRate: '1.00 pip' },
+      { id: 12, name: 'Arun Surgude', email: 'arunsurgude@gmail.com', pipRate: '1.70 pip' },
+      { id: 13, name: 'Pawan Kashyap', email: 'pawankashyap1055.pk@gmail.com', pipRate: '2.00 pip' },
+      { id: 14, name: 'Kalpataru Aqua', email: 'smshelar99@yahoo.com', pipRate: '1.50 pip' },
+      { id: 15, name: 'Swapnil Bugad', email: 'gotyabugad123@gmail.com', pipRate: '1.00 pip' },
+      { id: 16, name: 'Ravindra Farde', email: 'ravifarde14@gmail.com', pipRate: '1.20 pip' },
+      { id: 17, name: 'Sanjay Jadhav', email: 'jadhavsanjay3147@gmail.com', pipRate: '1.00 pip' },
+    ],
+    pro: ibProfilesData.filter(ib => ib.pipRate && ib.pipRate.includes('Pro')).slice(0, 10),
+    standard: ibProfilesData.filter(ib => ib.pipRate && ib.pipRate.includes('Standard')).slice(0, 10),
+    startup: ibProfilesData.filter(ib => ib.pipRate && ib.pipRate.includes('Startup')).slice(0, 10),
+  };
+
+  const summaryStats = {
+    activeIBs: { value: '210' },
+    masterIBs: { value: '0' },
+    avgPipRate: { value: '0.81' },
+    totalReferrals: { value: '421' },
+  };
+
   // List View
   if (viewMode === 'list') {
     return (
@@ -315,6 +356,146 @@ function IBProfile() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">IB Profiles</h1>
           <p className="text-gray-600">Manage and view all IB profiles</p>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            title="Active IBs"
+            value={summaryStats.activeIBs.value}
+            icon={Users}
+            iconBg="bg-blue-100"
+            valueColor="text-blue-600"
+          />
+
+          <StatCard
+            title="Master IBs"
+            value={summaryStats.masterIBs.value}
+            icon={UserCheck}
+            iconBg="bg-purple-100"
+            valueColor="text-purple-600"
+          />
+
+          <StatCard
+            title="Avg Pip Rate"
+            value={summaryStats.avgPipRate.value}
+            icon={TrendingUp}
+            iconBg="bg-green-100"
+            valueColor="text-green-600"
+          />
+
+          <StatCard
+            title="Total Referrals"
+            value={summaryStats.totalReferrals.value}
+            icon={Users}
+            iconBg="bg-orange-100"
+            valueColor="text-orange-600"
+          />
+        </div>
+
+        {/* IB Groups Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Classic IBs */}
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Classic IBs</h3>
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+                {ibsByGroup.classic.length}
+              </span>
+            </div>
+            {ibsByGroup.classic.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>No approved IBs in this group.</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {ibsByGroup.classic.map((ib) => (
+                  <div key={ib.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{ib.name}</p>
+                      <p className="text-xs text-gray-600 truncate">{ib.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2 ml-3">
+                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium whitespace-nowrap">
+                        {ib.pipRate}
+                      </span>
+                      <button
+                        className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="Edit"
+                        onClick={() => handleEditPipRates(ib)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+
+          {/* Raw + IBs (ECN) */}
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Raw + IBs</h3>
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+                {ibsByGroup.ecn.length}
+              </span>
+            </div>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {ibsByGroup.ecn.map((ib) => (
+                <div key={ib.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{ib.name}</p>
+                    <p className="text-xs text-gray-600 truncate">{ib.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-3">
+                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium whitespace-nowrap">
+                      {ib.pipRate}
+                    </span>
+                    <button
+                      className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      title="Edit"
+                      onClick={() => handleEditPipRates(ib)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Plus IBs */}
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Plus IBs</h3>
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+                {ibsByGroup.plus.length}
+              </span>
+            </div>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {ibsByGroup.plus.map((ib) => (
+                <div key={ib.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{ib.name}</p>
+                    <p className="text-xs text-gray-600 truncate">{ib.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-3">
+                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium whitespace-nowrap">
+                      {ib.pipRate}
+                    </span>
+                    <button
+                      className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      title="Edit"
+                      onClick={() => handleEditPipRates(ib)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         </div>
 
         {/* Profiles Table */}
