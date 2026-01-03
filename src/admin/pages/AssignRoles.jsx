@@ -708,6 +708,18 @@ export default function AssignRoles() {
 
     try {
       const token = localStorage.getItem('adminToken');
+      
+      // Prepare feature permissions - only include permissions for selected features
+      const permissionsToSave = {};
+      newRole.features.forEach(featurePath => {
+        if (newRoleFeaturePermissions[featurePath]) {
+          permissionsToSave[featurePath] = newRoleFeaturePermissions[featurePath];
+        } else {
+          // Initialize to all false if not set
+          permissionsToSave[featurePath] = { view: false, add: false, edit: false, delete: false };
+        }
+      });
+      
       const response = await fetch(`${BASE}/admin/roles`, {
         method: 'POST',
         headers: {
@@ -962,8 +974,8 @@ export default function AssignRoles() {
                           <td className="px-3 sm:px-6 py-3 text-sm text-gray-600">{r.description || '-'}</td>
                           <td className="px-3 sm:px-6 py-3 text-sm text-gray-600">{features.length} feature{features.length === 1 ? '' : 's'}</td>
                           <td className="px-3 sm:px-6 py-3 text-sm">
-                            <div className="flex items-end gap-6">
-                              {r.name.toLowerCase() !== 'superadmin' && (
+                            <div className="flex items-end gap-4 sm:gap-6 flex-wrap">
+                              {r.name.toLowerCase() !== 'superadmin' && !r.is_system && (
                                 <button
                                   onClick={() => { 
                                     setSelectedRole(r); 
@@ -971,7 +983,7 @@ export default function AssignRoles() {
                                     setEditRole({ name: r.name || '', description: r.description || '', features: (r.permissions?.features) || [] }); 
                                     setEditRoleFeaturePermissions(r.permissions?.feature_permissions || {}); 
                                   }}
-                                  className="flex flex-col items-center text-green-600 hover:text-green-700"
+                                  className="flex flex-col items-center text-green-600 hover:text-green-700 transition-colors"
                                   title="Edit Features"
                                 >
                                   <Settings className="h-4 w-4" />
@@ -981,7 +993,7 @@ export default function AssignRoles() {
 
                               <button
                                 onClick={() => { setSelectedRole(r); setShowRoleViewModal(true); }}
-                                className="flex flex-col items-center text-blue-600 hover:text-blue-700"
+                                className="flex flex-col items-center text-blue-600 hover:text-blue-700 transition-colors"
                                 title="View Role"
                               >
                                 <Eye className="h-4 w-4" />
@@ -997,18 +1009,18 @@ export default function AssignRoles() {
                                     confirmButtonText: 'OK'
                                   });
                                 }}
-                                className="flex flex-col items-center text-orange-600 hover:text-orange-700"
+                                className="flex flex-col items-center text-orange-600 hover:text-orange-700 transition-colors"
                                 title="Change Password"
                               >
                                 <Lock className="h-4 w-4" />
                                 <small className="text-[10px] leading-3 mt-1">Password</small>
                               </button>
 
-                              {/* Delete button - available for all custom roles except superadmin */}
-                              {r.name.toLowerCase() !== 'superadmin' && (
+                              {/* Delete button - available for all custom roles except superadmin and system roles */}
+                              {r.name.toLowerCase() !== 'superadmin' && !r.is_system && (
                                 <button
                                   onClick={() => handleDeleteRole(r)}
-                                  className="flex flex-col items-center text-red-600 hover:text-red-700"
+                                  className="flex flex-col items-center text-red-600 hover:text-red-700 transition-colors"
                                   title="Delete Role"
                                 >
                                   <Trash2 className="h-4 w-4" />
