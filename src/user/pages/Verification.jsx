@@ -207,8 +207,38 @@ function Verification() {
             type: 'error'
           })
         })
-        .onMessage((type, payload) => {
+        .onMessage(async (type, payload) => {
           console.log('onMessage', type, payload)
+
+          // Send callback data to backend to process and store
+          try {
+            const token = authService.getToken()
+            if (token) {
+              const callbackResponse = await fetch(`${API_BASE_URL}/kyc/sumsub/callback`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ type, payload })
+              })
+
+              if (callbackResponse.ok) {
+                const callbackData = await callbackResponse.json()
+                console.log('Callback processed by backend:', callbackData)
+                
+                // Update local status from backend response
+                if (callbackData.status) {
+                  setKycStatus(callbackData.status)
+                }
+              } else {
+                console.error('Failed to process callback:', await callbackResponse.text())
+              }
+            }
+          } catch (err) {
+            console.error('Error sending callback to backend:', err)
+            // Continue with local handling even if backend call fails
+          }
 
           // Handle applicant submitted
           if (type === 'idCheck.onApplicantSubmitted') {
@@ -225,25 +255,30 @@ function Verification() {
 
           // Handle review completed
           if (type === 'idCheck.onReviewCompleted') {
-            const reviewResult = payload.reviewResult
-            if (reviewResult === 'GREEN') {
+            // Extract review result from different payload structures
+            const reviewResult = payload?.reviewResult?.reviewAnswer || 
+                               payload?.reviewResult || 
+                               payload?.reviewAnswer
+            
+            if (reviewResult === 'GREEN' || reviewResult === 'approved') {
               setKycStatus('approved')
               setToast({
                 message: 'Verification approved! Redirecting to dashboard...',
                 type: 'success'
               })
-              // Update database and redirect after a short delay
+              // Redirect after a short delay (backend has already been updated via callback)
               setTimeout(() => {
-                updateKYCStatus('approved')
                 navigate('/user/dashboard')
               }, 2000)
-            } else if (reviewResult === 'RED') {
+            } else if (reviewResult === 'RED' || reviewResult === 'rejected') {
               setKycStatus('rejected')
+              const comment = payload?.reviewResult?.reviewComment || 
+                            payload?.reviewComment || 
+                            'Please try again.'
               setToast({
-                message: `Verification rejected: ${payload.reviewComment || 'Please try again.'}`,
+                message: `Verification rejected: ${comment}`,
                 type: 'error'
               })
-              updateKYCStatus('rejected')
             }
           }
 
