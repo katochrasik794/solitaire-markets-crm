@@ -211,7 +211,7 @@ export const ADMIN_MENU = [
   {
     label: "IB MANAGEMENT",
     items: [
-      { icon: User, label: "IB Requests", to: "ib-requests" },
+      { icon: User, label: "IB Portal", to: "ib/dashboard" },
     ],
   },
   {

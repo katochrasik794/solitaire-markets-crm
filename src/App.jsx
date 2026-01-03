@@ -1,7 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
 import UserLayout from './user/components/UserLayout'
 import { renderUserRoutes } from './user/routes/UserRoutes'
+import { renderIBRoutes } from './ib-portal/user/routes/routes'
+import IBLayout from './ib-portal/user/components/Layout'
+import { renderIBAdminRoutes } from './ib-portal/admin/routes/routes'
+import IBAdminLayout from './ib-portal/admin/components/Layout'
 
 // Admin imports
 import { AuthProvider } from './admin/contexts/AuthContext'
@@ -54,6 +58,15 @@ function App() {
           {renderUserRoutes()}
         </Route>
 
+        {/* IB Portal Routes - Protected with IB Layout */}
+        <Route path="/user/ib" element={
+          <UserProtectedRoute>
+            <IBLayout />
+          </UserProtectedRoute>
+        }>
+          {renderIBRoutes()}
+        </Route>
+
         {/* Admin Routes - Protected */}
         <Route 
           path="/admin" 
@@ -76,6 +89,20 @@ function App() {
             );
           })}
           <Route index element={<AdminIndexRedirect />} />
+        </Route>
+
+        {/* IB Admin Routes - Protected with IB Admin Layout */}
+        <Route 
+          path="/admin/ib" 
+          element={
+            <AuthProvider>
+              <ProtectedRoute>
+                <IBAdminLayout />
+              </ProtectedRoute>
+            </AuthProvider>
+          }
+        >
+          {renderIBAdminRoutes()}
         </Route>
 
         {/* 404 - Catch all unmatched routes */}

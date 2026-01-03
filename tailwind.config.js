@@ -87,6 +87,19 @@ export default {
           base: '#081428',
           DEFAULT: '#081428',
         },
+        ib: {
+          50: '#f7fcc8',
+          100: '#eff9a0',
+          200: '#e7f678',
+          300: '#dff350',
+          400: '#d7f028',
+          500: '#c8f300', // IB Theme Color
+          600: '#a3c600',
+          700: '#7e9a00',
+          800: '#5b6f00',
+          900: '#394600',
+          DEFAULT: '#c8f300',
+        },
         // Preserving existing color just in case, though it might be superseded
         'text-primary': '#4B5156',
       }
